@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { ChevronLeft, Utensils, Coffee, Apple, IceCream, Pizza, Sandwich, Cookie } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 interface CategoryScreenProps {
   category: string;
@@ -12,6 +12,7 @@ interface CategoryScreenProps {
 
 export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: CategoryScreenProps) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const getCategoryTitle = () => {
     switch (category) {
@@ -56,19 +57,50 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
 
   const items = getCategoryItems();
   
-  const toggleItem = (id: string) => {
+  const toggleItem = (id: string, label: string) => {
     if (selectedItems.includes(id)) {
       setSelectedItems(selectedItems.filter(itemId => itemId !== id));
+      toast({
+        title: "Item removido",
+        description: `${label} foi removido da seleção`,
+      });
     } else {
       setSelectedItems([...selectedItems, id]);
+      toast({
+        title: "Item selecionado",
+        description: `${label} foi adicionado à seleção`,
+      });
     }
+  };
+
+  const handleItemClick = (item: any) => {
+    // Reproduzir som do item ao clicar
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(item.label);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 0.8;
+      speechSynthesis.speak(utterance);
+    }
+    
+    toggleItem(item.id, item.label);
   };
 
   const handleAddToPhrase = () => {
     if (selectedItems.length > 0) {
-      // Aqui adicionaríamos os itens selecionados à frase em construção
-      // Esta funcionalidade será implementada com gerenciamento de estado global em uma aplicação real
-      onNavigateToPhrase();
+      const selectedLabels = items
+        .filter(item => selectedItems.includes(item.id))
+        .map(item => item.label);
+      
+      toast({
+        title: "Itens adicionados à frase",
+        description: `${selectedLabels.join(', ')} foram adicionados`,
+        duration: 3000,
+      });
+      
+      // Simular navegação para a tela de frases com os itens selecionados
+      setTimeout(() => {
+        onNavigateToPhrase();
+      }, 1000);
     }
   };
 
@@ -100,13 +132,16 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
             key={item.id}
             className={`p-4 flex flex-col items-center justify-center cursor-pointer transition-all 
               ${selectedItems.includes(item.id) ? 'ring-4 ring-blue-400 bg-blue-50' : 'bg-white'}
-              hover:bg-gray-50`}
-            onClick={() => toggleItem(item.id)}
+              hover:bg-gray-50 hover:shadow-md`}
+            onClick={() => handleItemClick(item)}
           >
             <div className="h-20 w-20 flex items-center justify-center bg-gray-100 rounded-full mb-2">
               <item.icon className="h-10 w-10 text-gray-600" />
             </div>
             <div className="text-center font-semibold">{item.label}</div>
+            {selectedItems.includes(item.id) && (
+              <div className="mt-2 w-2 h-2 bg-blue-500 rounded-full"></div>
+            )}
           </Card>
         ))}
       </div>
