@@ -6,6 +6,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/hooks/useTheme';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { savePhrase, getPhrases, StoredPhrase, PhraseSymbol } from '@/lib/storage';
+import { LetterKeyboard } from '@/components/LetterKeyboard';
+import { WordCategories } from '@/components/WordCategories';
+import { QuickPhraseBar } from '@/components/QuickPhraseBar';
 
 interface PhraseBuilderProps {
   onBack: () => void;
@@ -23,6 +26,8 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     { id: 'quero', text: 'QUERO' },
     { id: 'agua', text: 'ÁGUA' }
   ]);
+  const [showKeyboard, setShowKeyboard] = useState(false);
+  const [customText, setCustomText] = useState('');
   const { toast } = useToast();
   const { currentTheme } = useTheme();
   
@@ -165,24 +170,66 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
       description: `"${text}" foi adicionado à sua frase`,
     });
   };
+  
+  // Funções para o teclado virtual
+  const handleLetterSelect = (letter: string) => {
+    setCustomText(prev => prev + letter);
+  };
+  
+  const handleWordSelect = (word: string) => {
+    handleAddSymbol(word);
+  };
+  
+  const handleBackspace = () => {
+    setCustomText(prev => prev.slice(0, -1));
+  };
+  
+  const handleSubmitCustomText = () => {
+    if (customText.trim()) {
+      handleAddSymbol(customText.trim().toUpperCase());
+      setCustomText('');
+    }
+  };
 
   const suggestions = [
+    // Pronomes e sujeitos
+    'EU', 'VOCÊ', 'ELE', 'ELA', 'NÓS', 'ELES', 'MINHA', 'MEU', 'SEU', 'SUA',
+    
+    // Verbos comuns
+    'QUERO', 'PRECISO', 'SINTO', 'VOU', 'ESTOU', 'TENHO', 'GOSTO', 'POSSO', 'AJUDA', 'DÁ', 'FAZ',
+    
     // Necessidades básicas
-    'BANHEIRO', 'ÁGUA', 'COMIDA', 'DORMIR', 'BANHO', 'SEDE', 'FOME',
-    // Respostas simples
-    'SIM', 'NÃO', 'TALVEZ', 'POR FAVOR', 'OBRIGADO', 'DESCULPA',
+    'BANHEIRO', 'ÁGUA', 'COMIDA', 'DORMIR', 'BANHO', 'SEDE', 'FOME', 'REMÉDIO', 'TROCAR',
+    
+    // Respostas e expressões
+    'SIM', 'NÃO', 'TALVEZ', 'POR FAVOR', 'OBRIGADO', 'DESCULPA', 'OI', 'TCHAU', 'SOCORRO',
+    
     // Sentimentos
-    'FELIZ', 'TRISTE', 'CANSADO', 'DOR', 'BOM', 'RUIM', 'GOSTO', 'NÃO GOSTO',
+    'FELIZ', 'TRISTE', 'CANSADO', 'DOR', 'BOM', 'RUIM', 'MEDO', 'CALOR', 'FRIO', 'NERVOSO',
+    
     // Ações
-    'QUERO', 'PRECISO', 'SINTO', 'VER', 'OUVIR', 'TOCAR', 'IR', 'VENIR',
+    'VER', 'OUVIR', 'TOCAR', 'IR', 'VIR', 'COMER', 'BEBER', 'BRINCAR', 'LER', 'DESENHAR', 'JOGAR',
+    
     // Pessoas
-    'MAMÃE', 'PAPAI', 'VOVÓ', 'VOVÔ', 'IRMÃO', 'IRMÃ', 'AMIGO', 'PROFESSOR',
+    'MAMÃE', 'PAPAI', 'VOVÓ', 'VOVÔ', 'IRMÃO', 'IRMÃ', 'AMIGO', 'PROFESSOR', 'MÉDICO', 'TIO', 'TIA',
+    
     // Lugares
-    'CASA', 'ESCOLA', 'PARQUE', 'MÉDICO', 'LOJA', 'CARRO', 'QUARTO',
+    'CASA', 'ESCOLA', 'PARQUE', 'MÉDICO', 'LOJA', 'CARRO', 'QUARTO', 'COZINHA', 'SALA', 'RUA', 'PRAIA',
+    
     // Tempo
-    'AGORA', 'DEPOIS', 'HOJE', 'AMANHÃ', 'ONTEM', 'RÁPIDO', 'DEVAGAR',
+    'AGORA', 'DEPOIS', 'HOJE', 'AMANHÃ', 'ONTEM', 'RÁPIDO', 'DEVAGAR', 'CEDO', 'TARDE', 'NOITE', 'DIA',
+    
     // Objetos comuns
-    'LIVRO', 'BRINQUEDO', 'TELEFONE', 'MÚSICA', 'FILME', 'JOGO'
+    'LIVRO', 'BRINQUEDO', 'TELEFONE', 'MÚSICA', 'FILME', 'JOGO', 'ROUPA', 'SAPATO', 'BOLA', 'BONECA',
+    
+    // Alimentos
+    'PÃO', 'LEITE', 'SUCO', 'FRUTA', 'BOLACHA', 'CHOCOLATE', 'SORVETE', 'CARNE', 'ARROZ', 'FEIJÃO',
+    
+    // Adjetivos
+    'GRANDE', 'PEQUENO', 'QUENTE', 'FRIO', 'BONITO', 'FEIO', 'NOVO', 'VELHO', 'LIMPO', 'SUJO',
+    
+    // Preposições e conectivos
+    'COM', 'SEM', 'PARA', 'DE', 'EM', 'E', 'OU', 'MAS', 'PORQUE', 'QUANDO'
   ];
 
   return (
@@ -266,25 +313,78 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
         >
           <RefreshCw className="h-8 w-8" />
         </Button>
+        
+        <Button 
+          className="bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-full p-3"
+          onClick={() => setShowKeyboard(!showKeyboard)}
+          title="Teclado"
+        >
+          <Plus className="h-8 w-8" />
+        </Button>
       </div>
+      
+      {/* Barra de frases rápidas */}
+      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+        <h3 className={`text-md font-semibold ${currentTheme.textColor} mb-2`}>Frases rápidas:</h3>
+        <QuickPhraseBar 
+          onUsePhrase={(symbols) => {
+            // Limpar frase atual e adicionar os símbolos da frase rápida
+            setCurrentPhrase(symbols);
+            toast({
+              title: "Frase rápida adicionada",
+              description: symbols.map(s => s.text).join(' '),
+              duration: 2000,
+            });
+          }}
+        />
+      </div>
+      
+      {/* Teclado virtual */}
+      {showKeyboard && (
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg border">
+          <div className="flex mb-2">
+            <input
+              type="text"
+              value={customText}
+              onChange={(e) => setCustomText(e.target.value)}
+              className="flex-1 p-2 border rounded-l-md"
+              placeholder="Digite uma palavra personalizada"
+            />
+            <Button 
+              className="rounded-l-none"
+              onClick={handleSubmitCustomText}
+            >
+              Adicionar
+            </Button>
+          </div>
+          
+          <LetterKeyboard
+            onLetterSelect={handleLetterSelect}
+            onWordSelect={handleWordSelect}
+            onBackspace={handleBackspace}
+            onSubmit={handleSubmitCustomText}
+          />
+        </div>
+      )}
 
-      {/* Sugestões de símbolos expandidas */}
+      {/* Sugestões de símbolos organizadas por categorias */}
       <div>
         <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-3`}>Sugestões:</h2>
-        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-          {suggestions.map((text) => (
-            <div 
-              key={text}
-              className={`${currentTheme.cardBg} rounded-lg p-3 shadow-sm flex flex-col items-center cursor-pointer ${currentTheme.buttonHover} transition-colors`}
-              onClick={() => handleAddSymbol(text)}
-            >
-              <div className="h-12 w-12 bg-gray-100 rounded-lg mb-2 flex items-center justify-center text-lg">
-                {text.charAt(0)}
-              </div>
-              <span className={`text-xs font-bold ${currentTheme.textColor} text-center`}>{text}</span>
-            </div>
-          ))}
-        </div>
+        
+        <WordCategories 
+          onSelectCategory={(category) => {
+            // Esta função será chamada quando uma categoria for selecionada
+            toast({
+              title: `Categoria: ${category}`,
+              description: `Palavras da categoria ${category} carregadas`,
+              duration: 1500,
+            });
+          }}
+          onSelectWord={(word) => {
+            // Esta função será chamada quando uma palavra for selecionada
+            handleAddSymbol(word);
+          }}
+        />
       </div>
 
       {/* Frases salvas */}
