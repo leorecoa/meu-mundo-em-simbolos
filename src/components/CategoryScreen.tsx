@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ChevronLeft, Utensils, Cup, Apple, IceCream, Pizza, Sandwich, Cookie } from 'lucide-react';
+import { ChevronLeft, Utensils, Coffee, Apple, IceCream, Pizza, Sandwich, Cookie } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -37,7 +37,7 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
     // Em uma implementação real, cada categoria teria seus próprios itens
     if (category === 'comida') {
       return [
-        { id: 'agua', label: 'ÁGUA', icon: Cup },
+        { id: 'agua', label: 'ÁGUA', icon: Coffee },
         { id: 'fruta', label: 'FRUTA', icon: Apple },
         { id: 'sorvete', label: 'SORVETE', icon: IceCream },
         { id: 'pizza', label: 'PIZZA', icon: Pizza },
