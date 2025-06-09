@@ -1,4 +1,3 @@
-
 import { ChevronLeft, Sun, Volume, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/hooks/use-theme';
 
 interface SettingsProps {
   onBack: () => void;
@@ -16,6 +16,7 @@ interface SettingsProps {
 export const Settings = ({ onBack }: SettingsProps) => {
   const [selectedTheme, setSelectedTheme] = useState('Padrão');
   const { toast } = useToast();
+  const { currentTheme, setTheme } = useTheme();
 
   const themes = [
     { name: 'Padrão', bgColor: 'bg-blue-50', borderColor: 'border-blue-500', textColor: 'text-blue-800' },
@@ -26,6 +27,7 @@ export const Settings = ({ onBack }: SettingsProps) => {
 
   const handleThemeChange = (themeName: string) => {
     setSelectedTheme(themeName);
+    setTheme(themeName);
     toast({
       title: "Tema alterado",
       description: `Tema ${themeName} foi aplicado`,
@@ -34,20 +36,20 @@ export const Settings = ({ onBack }: SettingsProps) => {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className={`p-4 space-y-6 ${currentTheme.bgColor} min-h-screen`}>
       <div className="flex justify-between items-center mb-4">
         <Button 
           variant="ghost" 
           onClick={onBack} 
-          className="flex items-center gap-1 text-blue-700"
+          className={`flex items-center gap-1 ${currentTheme.textColor}`}
         >
           <ChevronLeft className="h-5 w-5" />
           Voltar
         </Button>
-        <h1 className="text-xl font-bold text-center flex-1 mr-10">CONFIGURAÇÕES</h1>
+        <h1 className={`text-xl font-bold text-center flex-1 mr-10 ${currentTheme.textColor}`}>CONFIGURAÇÕES</h1>
       </div>
 
-      <Card className="p-5 space-y-6 bg-white">
+      <Card className={`p-5 space-y-6 ${currentTheme.cardBg}`}>
         {/* Nota para desenvolvedores */}
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded mb-5">
           <p className="text-sm text-yellow-700">
@@ -58,7 +60,7 @@ export const Settings = ({ onBack }: SettingsProps) => {
 
         {/* Configurações de Interface */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-4 flex items-center gap-2`}>
             <Sun className="h-5 w-5" />
             Aparência
           </h2>
@@ -85,7 +87,7 @@ export const Settings = ({ onBack }: SettingsProps) => {
 
         {/* Configurações de Voz */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-4 flex items-center gap-2`}>
             <Volume className="h-5 w-5" />
             Voz
           </h2>
@@ -130,7 +132,7 @@ export const Settings = ({ onBack }: SettingsProps) => {
 
         {/* Configurações de Tema */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Tema de cores</h2>
+          <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-4`}>Tema de cores</h2>
           <div className="flex flex-wrap gap-3">
             {themes.map((theme) => (
               <button

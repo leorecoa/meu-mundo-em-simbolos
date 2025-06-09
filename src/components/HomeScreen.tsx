@@ -1,9 +1,9 @@
-
 import { Heart, Home, Utensils, Gamepad2, Users, Settings, UserCheck, Pause, Volume2, Play } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/hooks/use-theme';
 
 interface HomeScreenProps {
   onNavigateToCategory: (category: string) => void;
@@ -16,6 +16,7 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
   const [isPaused, setIsPaused] = useState(false);
   const [volumeLevel, setVolumeLevel] = useState(50);
   const { toast } = useToast();
+  const { currentTheme } = useTheme();
 
   const handlePause = () => {
     setIsPaused(!isPaused);
@@ -73,9 +74,9 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
   ];
 
   return (
-    <div className={`p-4 space-y-6 ${isPaused ? 'pointer-events-none opacity-75' : ''}`}>
+    <div className={`p-4 space-y-6 ${currentTheme.bgColor} min-h-screen ${isPaused ? 'pointer-events-none opacity-75' : ''}`}>
       {/* Header com controles de acessibilidade */}
-      <div className="flex justify-between items-center mb-6 bg-white rounded-lg p-3 shadow-sm">
+      <div className={`flex justify-between items-center mb-6 ${currentTheme.cardBg} rounded-lg p-3 shadow-sm`}>
         <div className="flex gap-3">
           <Button 
             variant="outline" 
@@ -124,7 +125,7 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
 
       {/* Botão para ir direto à montagem de frases */}
       <Button 
-        className="w-full py-6 text-xl font-bold rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-800 shadow-md"
+        className={`w-full py-6 text-xl font-bold rounded-xl ${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor} shadow-md`}
         onClick={handlePhraseClick}
       >
         MONTAR FRASE
@@ -167,8 +168,8 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
       </div>
 
       {/* Barra de progresso - Gamificação */}
-      <div className="bg-white rounded-lg p-4 shadow-sm">
-        <div className="text-sm text-gray-600 mb-1">Você ainda não usou palavras hoje!</div>
+      <div className={`${currentTheme.cardBg} rounded-lg p-4 shadow-sm`}>
+        <div className={`text-sm ${currentTheme.textColor} mb-1`}>Você ainda não usou palavras hoje!</div>
         <div className="w-full bg-gray-200 rounded-full h-4">
           <div className="bg-blue-400 h-4 rounded-full" style={{ width: '0%' }}></div>
         </div>

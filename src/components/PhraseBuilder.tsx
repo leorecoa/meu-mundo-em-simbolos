@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { ChevronLeft, X, PlayCircle, Save, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/hooks/useTheme';
 
 interface PhraseBuilderProps {
   onBack: () => void;
@@ -23,6 +23,7 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
   ]);
   const [savedPhrases, setSavedPhrases] = useState<string[]>([]);
   const { toast } = useToast();
+  const { currentTheme } = useTheme();
 
   const handleRemoveSymbol = (index: number) => {
     const newPhrase = [...currentPhrase];
@@ -108,18 +109,37 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     });
   };
 
+  const suggestions = [
+    // Necessidades básicas
+    'BANHEIRO', 'ÁGUA', 'COMIDA', 'DORMIR', 'BANHO', 'SEDE', 'FOME',
+    // Respostas simples
+    'SIM', 'NÃO', 'TALVEZ', 'POR FAVOR', 'OBRIGADO', 'DESCULPA',
+    // Sentimentos
+    'FELIZ', 'TRISTE', 'CANSADO', 'DOR', 'BOM', 'RUIM', 'GOSTO', 'NÃO GOSTO',
+    // Ações
+    'QUERO', 'PRECISO', 'SINTO', 'VER', 'OUVIR', 'TOCAR', 'IR', 'VENIR',
+    // Pessoas
+    'MAMÃE', 'PAPAI', 'VOVÓ', 'VOVÔ', 'IRMÃO', 'IRMÃ', 'AMIGO', 'PROFESSOR',
+    // Lugares
+    'CASA', 'ESCOLA', 'PARQUE', 'MÉDICO', 'LOJA', 'CARRO', 'QUARTO',
+    // Tempo
+    'AGORA', 'DEPOIS', 'HOJE', 'AMANHÃ', 'ONTEM', 'RÁPIDO', 'DEVAGAR',
+    // Objetos comuns
+    'LIVRO', 'BRINQUEDO', 'TELEFONE', 'MÚSICA', 'FILME', 'JOGO'
+  ];
+
   return (
-    <div className="p-4 space-y-6">
+    <div className={`p-4 space-y-6 ${currentTheme.bgColor} min-h-screen`}>
       <div className="flex justify-between items-center mb-4">
         <Button 
           variant="ghost" 
           onClick={onBack} 
-          className="flex items-center gap-1 text-blue-700"
+          className={`flex items-center gap-1 ${currentTheme.textColor}`}
         >
           <ChevronLeft className="h-5 w-5" />
           Voltar
         </Button>
-        <h1 className="text-xl font-bold text-center flex-1 mr-10">MONTAR FRASE</h1>
+        <h1 className={`text-xl font-bold text-center flex-1 mr-10 ${currentTheme.textColor}`}>MONTAR FRASE</h1>
       </div>
 
       {/* Nota para desenvolvedores */}
@@ -131,14 +151,14 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
       </div>
 
       {/* Área da frase atual */}
-      <Card className="bg-white p-4 min-h-[100px] shadow-md">
-        <h2 className="text-lg font-semibold text-gray-700 mb-3">Minha frase:</h2>
+      <Card className={`${currentTheme.cardBg} p-4 min-h-[100px] shadow-md`}>
+        <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-3`}>Minha frase:</h2>
         <div className="flex flex-wrap gap-2">
           {currentPhrase.length > 0 ? (
             currentPhrase.map((symbol, index) => (
               <div 
                 key={`${symbol.id}-${index}`} 
-                className="relative bg-blue-100 rounded-lg p-3 flex flex-col items-center"
+                className={`relative ${currentTheme.buttonBg} rounded-lg p-3 flex flex-col items-center`}
               >
                 <button 
                   className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm hover:bg-gray-50"
@@ -153,7 +173,7 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
                     symbol.text.charAt(0)
                   )}
                 </div>
-                <span className="text-sm font-bold">{symbol.text}</span>
+                <span className={`text-sm font-bold ${currentTheme.textColor}`}>{symbol.text}</span>
               </div>
             ))
           ) : (
@@ -167,7 +187,7 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
       {/* Controles de frase */}
       <div className="flex justify-center gap-4">
         <Button 
-          className="bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-full p-3"
+          className={`${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor} rounded-full p-3`}
           onClick={handlePlayPhrase}
           title="Reproduzir frase"
         >
@@ -191,20 +211,20 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
         </Button>
       </div>
 
-      {/* Sugestões de símbolos frequentes */}
+      {/* Sugestões de símbolos expandidas */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-700 mb-3">Sugestões:</h2>
-        <div className="flex overflow-x-auto gap-3 pb-4">
-          {['BANHEIRO', 'ÁGUA', 'COMIDA', 'DORMIR', 'SIM', 'NÃO'].map((text) => (
+        <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-3`}>Sugestões:</h2>
+        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+          {suggestions.map((text) => (
             <div 
               key={text}
-              className="min-w-[80px] bg-white rounded-lg p-3 shadow-sm flex flex-col items-center cursor-pointer hover:bg-gray-50"
+              className={`${currentTheme.cardBg} rounded-lg p-3 shadow-sm flex flex-col items-center cursor-pointer ${currentTheme.buttonHover} transition-colors`}
               onClick={() => handleAddSymbol(text)}
             >
-              <div className="h-16 w-16 bg-gray-100 rounded-lg mb-2 flex items-center justify-center text-2xl">
+              <div className="h-12 w-12 bg-gray-100 rounded-lg mb-2 flex items-center justify-center text-lg">
                 {text.charAt(0)}
               </div>
-              <span className="text-xs font-bold">{text}</span>
+              <span className={`text-xs font-bold ${currentTheme.textColor} text-center`}>{text}</span>
             </div>
           ))}
         </div>
@@ -213,7 +233,7 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
       {/* Frases salvas */}
       {savedPhrases.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-gray-700 mb-3">Frases salvas:</h2>
+          <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-3`}>Frases salvas:</h2>
           <div className="space-y-2">
             {savedPhrases.map((phrase, index) => (
               <Card key={index} className="p-3 bg-green-50 hover:bg-green-100 cursor-pointer" onClick={() => {
