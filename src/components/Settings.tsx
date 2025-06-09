@@ -1,17 +1,38 @@
 
 import { ChevronLeft, Sun, Volume, ZoomIn } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 interface SettingsProps {
   onBack: () => void;
 }
 
 export const Settings = ({ onBack }: SettingsProps) => {
+  const [selectedTheme, setSelectedTheme] = useState('Padrão');
+  const { toast } = useToast();
+
+  const themes = [
+    { name: 'Padrão', bgColor: 'bg-blue-50', borderColor: 'border-blue-500', textColor: 'text-blue-800' },
+    { name: 'Azul suave', bgColor: 'bg-blue-100', borderColor: 'border-blue-400', textColor: 'text-blue-700' },
+    { name: 'Verde suave', bgColor: 'bg-green-100', borderColor: 'border-green-400', textColor: 'text-green-700' },
+    { name: 'Alto contraste', bgColor: 'bg-gray-900', borderColor: 'border-gray-800', textColor: 'text-white' },
+  ];
+
+  const handleThemeChange = (themeName: string) => {
+    setSelectedTheme(themeName);
+    toast({
+      title: "Tema alterado",
+      description: `Tema ${themeName} foi aplicado`,
+      duration: 2000,
+    });
+  };
+
   return (
     <div className="p-4 space-y-6">
       <div className="flex justify-between items-center mb-4">
@@ -111,14 +132,18 @@ export const Settings = ({ onBack }: SettingsProps) => {
         <div>
           <h2 className="text-lg font-semibold text-gray-700 mb-4">Tema de cores</h2>
           <div className="flex flex-wrap gap-3">
-            {['Padrão', 'Azul suave', 'Verde suave', 'Alto contraste'].map((theme) => (
-              <div 
-                key={theme} 
-                className={`px-4 py-2 rounded-lg cursor-pointer border-2 
-                  ${theme === 'Padrão' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}
+            {themes.map((theme) => (
+              <button
+                key={theme.name}
+                onClick={() => handleThemeChange(theme.name)}
+                className={`px-4 py-2 rounded-lg cursor-pointer border-2 transition-all hover:shadow-md
+                  ${selectedTheme === theme.name 
+                    ? `${theme.borderColor} ${theme.bgColor} ${theme.textColor} font-semibold` 
+                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
               >
-                {theme}
-              </div>
+                {theme.name}
+              </button>
             ))}
           </div>
         </div>

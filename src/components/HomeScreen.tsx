@@ -1,3 +1,4 @@
+
 import { Heart, Home, Utensils, Gamepad2, Users, Settings, UserCheck, Pause, Volume2, Play } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -167,9 +168,9 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
 
       {/* Barra de progresso - Gamificação */}
       <div className="bg-white rounded-lg p-4 shadow-sm">
-        <div className="text-sm text-gray-600 mb-1">Você já usou 10 palavras hoje!</div>
+        <div className="text-sm text-gray-600 mb-1">Você ainda não usou palavras hoje!</div>
         <div className="w-full bg-gray-200 rounded-full h-4">
-          <div className="bg-blue-400 h-4 rounded-full animate-pulse" style={{ width: '40%' }}></div>
+          <div className="bg-blue-400 h-4 rounded-full" style={{ width: '0%' }}></div>
         </div>
       </div>
     </div>
