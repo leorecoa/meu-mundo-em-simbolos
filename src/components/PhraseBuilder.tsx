@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { ChevronLeft, X, PlayCircle, Save, Plus, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, X, PlayCircle, Save, Plus, RefreshCw, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/hooks/useTheme';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { savePhrase, getPhrases, StoredPhrase, PhraseSymbol } from '@/lib/storage';
 
 interface PhraseBuilderProps {
   onBack: () => void;
@@ -21,9 +23,26 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     { id: 'quero', text: 'QUERO' },
     { id: 'agua', text: 'ÁGUA' }
   ]);
-  const [savedPhrases, setSavedPhrases] = useState<string[]>([]);
   const { toast } = useToast();
   const { currentTheme } = useTheme();
+  
+  // Consulta para obter frases salvas usando React Query
+  const { data: savedPhrasesData, refetch: refetchPhrases } = useQuery({
+    queryKey: ['phrases'],
+    queryFn: getPhrases,
+    initialData: []
+  });
+  
+  // Mutação para salvar frases
+  const saveMutation = useMutation({
+    mutationFn: savePhrase,
+    onSuccess: () => {
+      refetchPhrases();
+    }
+  });
+  
+  // Converter dados da consulta para o formato necessário
+  const savedPhrases = savedPhrasesData.map(phrase => phrase.text);
 
   const handleRemoveSymbol = (index: number) => {
     const newPhrase = [...currentPhrase];
@@ -35,6 +54,16 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     });
   };
 
+  // Importar e usar o hook de síntese de voz
+  const [speechLoaded, setSpeechLoaded] = useState(false);
+  
+  // Verificar se a API de síntese de voz está disponível
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      setSpeechLoaded(true);
+    }
+  }, []);
+  
   const handlePlayPhrase = () => {
     if (currentPhrase.length === 0) {
       toast({
@@ -47,12 +76,28 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
 
     const phraseText = currentPhrase.map(symbol => symbol.text).join(' ');
     
-    // Simular text-to-speech
-    if ('speechSynthesis' in window) {
+    // Usar a API de síntese de voz com configurações melhoradas
+    if (speechLoaded) {
+      // Cancelar qualquer fala anterior
+      window.speechSynthesis.cancel();
+      
       const utterance = new SpeechSynthesisUtterance(phraseText);
       utterance.lang = 'pt-BR';
       utterance.rate = 0.8;
-      speechSynthesis.speak(utterance);
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      // Tentar encontrar uma voz em português
+      const voices = window.speechSynthesis.getVoices();
+      const ptVoice = voices.find(voice => 
+        voice.lang.includes('pt') || voice.lang.includes('PT')
+      );
+      
+      if (ptVoice) {
+        utterance.voice = ptVoice;
+      }
+      
+      window.speechSynthesis.speak(utterance);
     }
     
     toast({
@@ -90,7 +135,19 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     }
 
     const phraseText = currentPhrase.map(symbol => symbol.text).join(' ');
-    setSavedPhrases(prev => [...prev, phraseText]);
+    
+    // Criar objeto de frase para salvar
+    const newPhrase: StoredPhrase = {
+      id: `phrase-${Date.now()}`,
+      text: phraseText,
+      symbols: [...currentPhrase],
+      timestamp: Date.now(),
+      isFavorite: false
+    };
+    
+    // Usar mutação para salvar a frase
+    saveMutation.mutate(newPhrase);
+    
     toast({
       title: "Frase salva!",
       description: `"${phraseText}" foi salva nas suas frases`,
@@ -231,19 +288,34 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
       </div>
 
       {/* Frases salvas */}
-      {savedPhrases.length > 0 && (
+      {savedPhrasesData.length > 0 && (
         <div>
           <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-3`}>Frases salvas:</h2>
           <div className="space-y-2">
-            {savedPhrases.map((phrase, index) => (
-              <Card key={index} className="p-3 bg-green-50 hover:bg-green-100 cursor-pointer" onClick={() => {
-                if ('speechSynthesis' in window) {
-                  const utterance = new SpeechSynthesisUtterance(phrase);
-                  utterance.lang = 'pt-BR';
-                  speechSynthesis.speak(utterance);
-                }
-              }}>
-                <p className="text-green-800 font-medium">{phrase}</p>
+            {savedPhrasesData.map((phrase) => (
+              <Card 
+                key={phrase.id} 
+                className="p-3 bg-green-50 hover:bg-green-100 cursor-pointer flex justify-between items-center" 
+                onClick={() => {
+                  if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(phrase.text);
+                    utterance.lang = 'pt-BR';
+                    speechSynthesis.speak(utterance);
+                  }
+                }}
+              >
+                <p className="text-green-800 font-medium">{phrase.text}</p>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={phrase.isFavorite ? "text-red-500" : "text-gray-400"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Implementação do toggle de favorito seria aqui
+                  }}
+                >
+                  <Heart className="h-4 w-4" fill={phrase.isFavorite ? "currentColor" : "none"} />
+                </Button>
               </Card>
             ))}
           </div>
