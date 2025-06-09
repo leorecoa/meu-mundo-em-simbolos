@@ -1,10 +1,10 @@
 
 import { 
   Heart, Coffee, Apple, IceCream, Pizza, Sandwich, Cookie, Milk, Cake, Banana,
-  Gamepad2, Car, Dices, PuzzlePiece, Music, Book, Ball, Bike,
-  Home, Bed, Sofa, Bath, Tv, Lamp, Door, Key,
-  Smile, Frown, Angry, Sleepy, Sick, Tired, Happy, Sad,
-  HandHeart, Users, UserCheck, Phone, Hug, Shield
+  Gamepad2, Car, Dices, Palette, Music, Book, Circle, Bike,
+  Home, Bed, Sofa, Bath, Tv, Lamp, DoorOpen, Key,
+  Smile, Frown, Angry, Moon, Thermometer, Battery, Sun, CloudRain,
+  HandHeart, Users, UserCheck, Phone, Heart as HeartHug, Shield
 } from 'lucide-react';
 
 export interface CategoryItem {
@@ -30,10 +30,10 @@ export const categoryData: CategoryData = {
       { id: 'comida', label: 'COMIDA', icon: Apple },
       { id: 'brincar', label: 'BRINCAR', icon: Gamepad2 },
       { id: 'dormir', label: 'DORMIR', icon: Bed },
-      { id: 'sair', label: 'SAIR', icon: Door },
+      { id: 'sair', label: 'SAIR', icon: DoorOpen },
       { id: 'assistir', label: 'ASSISTIR TV', icon: Tv },
       { id: 'musica', label: 'MÚSICA', icon: Music },
-      { id: 'abraco', label: 'ABRAÇO', icon: Hug },
+      { id: 'abraco', label: 'ABRAÇO', icon: HeartHug },
       { id: 'ajuda', label: 'AJUDA', icon: HandHeart },
       { id: 'banho', label: 'BANHO', icon: Bath },
       { id: 'ler', label: 'LER', icon: Book },
@@ -46,14 +46,14 @@ export const categoryData: CategoryData = {
     title: 'EU SINTO',
     items: [
       { id: 'feliz', label: 'FELIZ', icon: Smile },
-      { id: 'triste', label: 'TRISTE', icon: Sad },
+      { id: 'triste', label: 'TRISTE', icon: CloudRain },
       { id: 'bravo', label: 'BRAVO', icon: Angry },
-      { id: 'cansado', label: 'CANSADO', icon: Tired },
-      { id: 'sono', label: 'SONO', icon: Sleepy },
-      { id: 'doente', label: 'DOENTE', icon: Sick },
+      { id: 'cansado', label: 'CANSADO', icon: Battery },
+      { id: 'sono', label: 'SONO', icon: Moon },
+      { id: 'doente', label: 'DOENTE', icon: Thermometer },
       { id: 'com_fome', label: 'FOME', icon: Apple },
       { id: 'com_sede', label: 'SEDE', icon: Coffee },
-      { id: 'animado', label: 'ANIMADO', icon: Happy },
+      { id: 'animado', label: 'ANIMADO', icon: Sun },
       { id: 'nervoso', label: 'NERVOSO', icon: Frown },
       { id: 'com_medo', label: 'MEDO', icon: Shield },
       { id: 'amor', label: 'AMOR', icon: Heart }
@@ -72,8 +72,8 @@ export const categoryData: CategoryData = {
       { id: 'conversar', label: 'CONVERSAR', icon: Users },
       { id: 'medico', label: 'MÉDICO', icon: UserCheck },
       { id: 'ligar', label: 'LIGAR', icon: Phone },
-      { id: 'sair_preciso', label: 'SAIR', icon: Door },
-      { id: 'silencio', label: 'SILÊNCIO', icon: Sleepy },
+      { id: 'sair_preciso', label: 'SAIR', icon: DoorOpen },
+      { id: 'silencio', label: 'SILÊNCIO', icon: Moon },
       { id: 'luz', label: 'LUZ', icon: Lamp },
       { id: 'chave', label: 'CHAVE', icon: Key }
     ]
@@ -102,17 +102,17 @@ export const categoryData: CategoryData = {
   brincar: {
     title: 'BRINCAR',
     items: [
-      { id: 'bola', label: 'BOLA', icon: Ball },
+      { id: 'bola', label: 'BOLA', icon: Circle },
       { id: 'carrinho', label: 'CARRINHO', icon: Car },
       { id: 'jogo', label: 'JOGO', icon: Gamepad2 },
       { id: 'dados', label: 'DADOS', icon: Dices },
-      { id: 'quebra_cabeca', label: 'QUEBRA-CABEÇA', icon: PuzzlePiece },
+      { id: 'quebra_cabeca', label: 'QUEBRA-CABEÇA', icon: Palette },
       { id: 'musica_brincar', label: 'MÚSICA', icon: Music },
       { id: 'livro_brincar', label: 'LIVRO', icon: Book },
       { id: 'bicicleta_brincar', label: 'BICICLETA', icon: Bike },
       { id: 'boneca', label: 'BONECA', icon: Users },
-      { id: 'parque', label: 'PARQUE', icon: Ball },
-      { id: 'pintar', label: 'PINTAR', icon: PuzzlePiece },
+      { id: 'parque', label: 'PARQUE', icon: Circle },
+      { id: 'pintar', label: 'PINTAR', icon: Palette },
       { id: 'correr', label: 'CORRER', icon: Bike }
     ]
   },
@@ -130,7 +130,7 @@ export const categoryData: CategoryData = {
       { id: 'sofa', label: 'SOFÁ', icon: Sofa },
       { id: 'mesa', label: 'MESA', icon: Sofa },
       { id: 'cadeira', label: 'CADEIRA', icon: Sofa },
-      { id: 'porta', label: 'PORTA', icon: Door },
+      { id: 'porta', label: 'PORTA', icon: DoorOpen },
       { id: 'janela', label: 'JANELA', icon: Home },
       { id: 'luz_casa', label: 'LUZ', icon: Lamp }
     ]
