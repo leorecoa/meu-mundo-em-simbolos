@@ -1,8 +1,10 @@
+
 import { useState } from 'react';
-import { ChevronLeft, Utensils, Coffee, Apple, IceCream, Pizza, Sandwich, Cookie } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { getCategoryData } from '@/data/categoryData';
 
 interface CategoryScreenProps {
   category: string;
@@ -14,48 +16,7 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const getCategoryTitle = () => {
-    switch (category) {
-      case 'comida':
-        return 'COMIDA';
-      case 'brincar':
-        return 'BRINCAR';
-      case 'casa':
-        return 'CASA';
-      case 'quero':
-        return 'EU QUERO';
-      case 'sinto':
-        return 'EU SINTO';
-      case 'preciso':
-        return 'EU PRECISO';
-      default:
-        return category.toUpperCase();
-    }
-  };
-
-  const getCategoryItems = () => {
-    // Este é apenas um exemplo para a categoria 'comida'
-    // Em uma implementação real, cada categoria teria seus próprios itens
-    if (category === 'comida') {
-      return [
-        { id: 'agua', label: 'ÁGUA', icon: Coffee },
-        { id: 'fruta', label: 'FRUTA', icon: Apple },
-        { id: 'sorvete', label: 'SORVETE', icon: IceCream },
-        { id: 'pizza', label: 'PIZZA', icon: Pizza },
-        { id: 'sanduiche', label: 'SANDUÍCHE', icon: Sandwich },
-        { id: 'biscoito', label: 'BISCOITO', icon: Cookie },
-      ];
-    }
-    
-    // Itens genéricos para outras categorias
-    return Array.from({ length: 8 }, (_, i) => ({
-      id: `item-${i}`,
-      label: `ITEM ${i + 1}`,
-      icon: Utensils,
-    }));
-  };
-
-  const items = getCategoryItems();
+  const categoryData = getCategoryData(category);
   
   const toggleItem = (id: string, label: string) => {
     if (selectedItems.includes(id)) {
@@ -87,7 +48,7 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
 
   const handleAddToPhrase = () => {
     if (selectedItems.length > 0) {
-      const selectedLabels = items
+      const selectedLabels = categoryData.items
         .filter(item => selectedItems.includes(item.id))
         .map(item => item.label);
       
@@ -115,19 +76,19 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
           <ChevronLeft className="h-5 w-5" />
           Voltar
         </Button>
-        <h1 className="text-xl font-bold text-center flex-1 mr-10">{getCategoryTitle()}</h1>
+        <h1 className="text-xl font-bold text-center flex-1 mr-10">{categoryData.title}</h1>
       </div>
 
       {/* Nota para desenvolvedores */}
       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4 rounded">
         <p className="text-sm text-yellow-700">
-          <strong>Nota:</strong> Esta tela exibe itens específicos da categoria. Em uma implementação 
-          completa, mostraria símbolos PECS/ARASAAC e permitiria a substituição por fotos personalizadas.
+          <strong>Nota:</strong> Esta tela exibe símbolos específicos da categoria {categoryData.title}. 
+          Cada símbolo pode ser clicado para seleção e reprodução de áudio.
         </p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {items.map((item) => (
+        {categoryData.items.map((item) => (
           <Card
             key={item.id}
             className={`p-4 flex flex-col items-center justify-center cursor-pointer transition-all 
@@ -138,7 +99,7 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
             <div className="h-20 w-20 flex items-center justify-center bg-gray-100 rounded-full mb-2">
               <item.icon className="h-10 w-10 text-gray-600" />
             </div>
-            <div className="text-center font-semibold">{item.label}</div>
+            <div className="text-center font-semibold text-sm">{item.label}</div>
             {selectedItems.includes(item.id) && (
               <div className="mt-2 w-2 h-2 bg-blue-500 rounded-full"></div>
             )}
