@@ -67,20 +67,37 @@ export const AnimatedLogo = ({ size = 120, className = '' }: AnimatedLogoProps) 
             <stop offset="100%" stopColor="#2563EB" />
           </linearGradient>
           
-          {/* Símbolo do infinito */}
+          {/* Símbolo do infinito mais realista */}
           <path 
-            d="M30 30C30 41.046 21.046 50 10 50C4.47715 50 0 45.5228 0 40C0 34.4772 4.47715 30 10 30C15.5228 30 20 34.4772 20 40C20 45.5228 15.5228 50 10 50C21.046 50 30 41.046 30 30ZM70 30C70 18.954 78.954 10 90 10C95.5228 10 100 14.4772 100 20C100 25.5228 95.5228 30 90 30C84.4772 30 80 25.5228 80 20C80 14.4772 84.4772 10 90 10C78.954 10 70 18.954 70 30ZM10 30C21.046 10 78.954 10 90 30C78.954 50 21.046 50 10 30Z" 
+            d="M25 30C25 41.046 16.046 50 5 50C-0.52285 50 -5 45.5228 -5 40C-5 34.4772 -0.52285 30 5 30C10.5228 30 15 34.4772 15 40C15 45.5228 10.5228 50 5 50C16.046 50 25 41.046 25 30ZM75 30C75 18.954 83.954 10 95 10C100.523 10 105 14.4772 105 20C105 25.5228 100.523 30 95 30C89.4772 30 85 25.5228 85 20C85 14.4772 89.4772 10 95 10C83.954 10 75 18.954 75 30ZM5 30C16.046 10 83.954 10 95 30C83.954 50 16.046 50 5 30Z" 
             fill="url(#infinityGradient)"
             filter="url(#shadow)"
           />
           
+          {/* Efeito 3D - sombra interna */}
+          <path 
+            d="M5 32C16.046 14 83.954 14 95 32" 
+            stroke="rgba(0,0,0,0.2)" 
+            strokeWidth="3" 
+            strokeLinecap="round"
+          />
+          
           {/* Destaque para mais profundidade */}
           <path 
-            d="M10 30C21.046 10 78.954 10 90 30" 
+            d="M5 28C16.046 8 83.954 8 95 28" 
             stroke="white" 
             strokeWidth="2" 
             strokeLinecap="round"
-            strokeOpacity="0.6"
+            strokeOpacity="0.7"
+          />
+          
+          {/* Reflexo adicional */}
+          <path 
+            d="M20 25C30 15 70 15 80 25" 
+            stroke="white" 
+            strokeWidth="1.5" 
+            strokeLinecap="round"
+            strokeOpacity="0.4"
           />
         </svg>
       </motion.div>

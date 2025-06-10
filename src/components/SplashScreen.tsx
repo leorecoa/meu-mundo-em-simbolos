@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedLogo } from './AnimatedLogo';
+import { InfinitySymbol } from './InfinitySymbol';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -65,6 +66,28 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
             >
               Tecnologia inclusiva para que todas as vozes sejam compreendidas
             </motion.p>
+            
+            {/* Símbolo do infinito animado na parte inferior */}
+            <motion.div
+              className="absolute bottom-16"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 0.8 }}
+            >
+              <motion.div
+                animate={{ 
+                  rotateY: [0, 180, 360],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ 
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <InfinitySymbol size={60} color="#ffffff" strokeWidth={2.5} />
+              </motion.div>
+            </motion.div>
           </motion.div>
           
           <motion.div

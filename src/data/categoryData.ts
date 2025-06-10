@@ -6,6 +6,7 @@ import {
   Smile, Frown, Angry, Moon, Thermometer, Battery, Sun, CloudRain,
   HandHeart, Users, UserCheck, Phone, Heart as HeartHug, Shield
 } from 'lucide-react';
+import { InfinitySymbol } from '@/components/InfinitySymbol';
 
 export interface CategoryItem {
   id: string;
@@ -56,7 +57,8 @@ export const categoryData: CategoryData = {
       { id: 'animado', label: 'ANIMADO', icon: Sun },
       { id: 'nervoso', label: 'NERVOSO', icon: Frown },
       { id: 'com_medo', label: 'MEDO', icon: Shield },
-      { id: 'amor', label: 'AMOR', icon: Heart }
+      { id: 'amor', label: 'AMOR', icon: Heart },
+      { id: 'infinito', label: 'INFINITO', icon: InfinitySymbol }
     ]
   },
 
@@ -113,6 +115,7 @@ export const categoryData: CategoryData = {
       { id: 'boneca', label: 'BONECA', icon: Users },
       { id: 'parque', label: 'PARQUE', icon: Circle },
       { id: 'pintar', label: 'PINTAR', icon: Palette },
+      { id: 'infinito', label: 'INFINITO', icon: InfinitySymbol },
       { id: 'correr', label: 'CORRER', icon: Bike }
     ]
   },
