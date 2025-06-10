@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo circular com gradiente -->
+  <circle cx="256" cy="256" r="256" fill="url(#paint0_radial)"/>
+  
+  <!-- Símbolo do infinito com profundidade e sombras -->
+  <g filter="url(#shadow)">
+    <path d="M153.6 256C153.6 307.2 112.4 348.4 61.2 348.4C35.2 348.4 14 327.2 14 301.2C14 275.2 35.2 254 61.2 254C87.2 254 108.4 275.2 108.4 301.2C108.4 327.2 87.2 348.4 61.2 348.4C112.4 348.4 153.6 307.2 153.6 256Z" fill="url(#paint1_linear)"/>
+    <path d="M358.4 256C358.4 204.8 399.6 163.6 450.8 163.6C476.8 163.6 498 184.8 498 210.8C498 236.8 476.8 258 450.8 258C424.8 258 403.6 236.8 403.6 210.8C403.6 184.8 424.8 163.6 450.8 163.6C399.6 163.6 358.4 204.8 358.4 256Z" fill="url(#paint2_linear)"/>
+    <path d="M61.2 254C112.4 163.6 399.6 163.6 450.8 254C399.6 348.4 112.4 348.4 61.2 254Z" fill="url(#paint3_linear)"/>
+  </g>
+  
+  <!-- Efeito de brilho -->
+  <path d="M61.2 254C112.4 163.6 399.6 163.6 450.8 254" stroke="white" stroke-width="8" stroke-linecap="round" stroke-opacity="0.6" filter="url(#glow)"/>
+  
+  <!-- Definições de gradientes e filtros -->
+  <defs>
+    <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256 256) rotate(90) scale(256)">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#1E40AF"/>
+    </radialGradient>
+    
+    <linearGradient id="paint1_linear" x1="14" y1="301.2" x2="153.6" y2="301.2" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#60A5FA"/>
+      <stop offset="1" stop-color="#3B82F6"/>
+    </linearGradient>
+    
+    <linearGradient id="paint2_linear" x1="358.4" y1="210.8" x2="498" y2="210.8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#60A5FA"/>
+    </linearGradient>
+    
+    <linearGradient id="paint3_linear" x1="61.2" y1="254" x2="450.8" y2="254" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#60A5FA"/>
+      <stop offset="0.5" stop-color="#93C5FD"/>
+      <stop offset="1" stop-color="#60A5FA"/>
+    </linearGradient>
+    
+    <filter id="shadow" x="4" y="153.6" width="504" height="204.8" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+      <feOffset dy="4"/>
+      <feGaussianBlur stdDeviation="5"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+    
+    <filter id="glow" x="-20" y="173" width="552" height="162" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="10" result="effect1_foregroundBlur"/>
+    </filter>
+  </defs>
+</svg>
