@@ -7,7 +7,6 @@ import { Settings } from '@/components/Settings';
 import { CaregiverMode } from '@/components/CaregiverMode';
 import { SplashScreen } from '@/components/SplashScreen';
 import { TransitionWrapper } from '@/components/TransitionWrapper';
-import { BackgroundSymbols } from '@/components/BackgroundSymbols';
 
 type Screen = 'home' | 'category' | 'phrase' | 'settings' | 'caregiver';
 
@@ -94,7 +93,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
-      {!showSplash && <BackgroundSymbols />}
       <AnimatePresence mode="wait">
         {showSplash && splashShown ? (
           <SplashScreen onComplete={handleSplashComplete} key="splash" />
