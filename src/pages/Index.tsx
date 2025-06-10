@@ -1,67 +1,101 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { HomeScreen } from '@/components/HomeScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { Settings } from '@/components/Settings';
 import { CaregiverMode } from '@/components/CaregiverMode';
+import { SplashScreen } from '@/components/SplashScreen';
+import { TransitionWrapper } from '@/components/TransitionWrapper';
 
 type Screen = 'home' | 'category' | 'phrase' | 'settings' | 'caregiver';
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [showSplash, setShowSplash] = useState(true);
 
   const navigateToCategory = (category: string) => {
     setSelectedCategory(category);
     setCurrentScreen('category');
   };
 
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
+
   const renderCurrentScreen = () => {
     switch (currentScreen) {
       case 'home':
         return (
-          <HomeScreen 
-            onNavigateToCategory={navigateToCategory}
-            onNavigateToPhrase={() => setCurrentScreen('phrase')}
-            onNavigateToSettings={() => setCurrentScreen('settings')}
-            onNavigateToCaregiver={() => setCurrentScreen('caregiver')}
-          />
+          <TransitionWrapper>
+            <HomeScreen 
+              onNavigateToCategory={navigateToCategory}
+              onNavigateToPhrase={() => setCurrentScreen('phrase')}
+              onNavigateToSettings={() => setCurrentScreen('settings')}
+              onNavigateToCaregiver={() => setCurrentScreen('caregiver')}
+            />
+          </TransitionWrapper>
         );
       case 'category':
         return (
-          <CategoryScreen 
-            category={selectedCategory}
-            onBack={() => setCurrentScreen('home')}
-            onNavigateToPhrase={() => setCurrentScreen('phrase')}
-          />
+          <TransitionWrapper>
+            <CategoryScreen 
+              category={selectedCategory}
+              onBack={() => setCurrentScreen('home')}
+              onNavigateToPhrase={() => setCurrentScreen('phrase')}
+            />
+          </TransitionWrapper>
         );
       case 'phrase':
         return (
-          <PhraseBuilder 
-            onBack={() => setCurrentScreen('home')}
-          />
+          <TransitionWrapper>
+            <PhraseBuilder 
+              onBack={() => setCurrentScreen('home')}
+            />
+          </TransitionWrapper>
         );
       case 'settings':
         return (
-          <Settings 
-            onBack={() => setCurrentScreen('home')}
-          />
+          <TransitionWrapper>
+            <Settings 
+              onBack={() => setCurrentScreen('home')}
+            />
+          </TransitionWrapper>
         );
       case 'caregiver':
         return (
-          <CaregiverMode 
-            onBack={() => setCurrentScreen('home')}
-          />
+          <TransitionWrapper>
+            <CaregiverMode 
+              onBack={() => setCurrentScreen('home')}
+            />
+          </TransitionWrapper>
         );
       default:
-        return <HomeScreen onNavigateToCategory={navigateToCategory} onNavigateToPhrase={() => setCurrentScreen('phrase')} onNavigateToSettings={() => setCurrentScreen('settings')} onNavigateToCaregiver={() => setCurrentScreen('caregiver')} />;
+        return (
+          <TransitionWrapper>
+            <HomeScreen 
+              onNavigateToCategory={navigateToCategory} 
+              onNavigateToPhrase={() => setCurrentScreen('phrase')} 
+              onNavigateToSettings={() => setCurrentScreen('settings')} 
+              onNavigateToCaregiver={() => setCurrentScreen('caregiver')} 
+            />
+          </TransitionWrapper>
+        );
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      {renderCurrentScreen()}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
+      <AnimatePresence mode="wait">
+        {showSplash ? (
+          <SplashScreen onComplete={handleSplashComplete} key="splash" />
+        ) : (
+          <div key="content" className="w-full h-full">
+            {renderCurrentScreen()}
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
