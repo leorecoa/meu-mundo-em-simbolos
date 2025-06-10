@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Backspace, ArrowUp, Check } from 'lucide-react';
+import { ArrowUp, Check, Delete } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
 interface LetterKeyboardProps {
@@ -97,7 +97,7 @@ export const LetterKeyboard = ({
             className={`${currentTheme.buttonBg} px-3`}
             onClick={onBackspace}
           >
-            <Backspace className="h-4 w-4" />
+            <Delete className="h-4 w-4" />
           </Button>
           
           <Button
