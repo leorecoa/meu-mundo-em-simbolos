@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { MessageSquare, Heart, Star } from 'lucide-react';
 
 interface AnimatedLogoProps {
   size?: number;
@@ -42,50 +41,25 @@ export const AnimatedLogo = ({ size = 120, className = '' }: AnimatedLogoProps) 
         transition={{ duration: 3, delay: 0.6, repeat: Infinity, ease: "easeInOut" }}
       />
       
-      {/* Ícone central */}
+      {/* Símbolo do infinito */}
       <motion.div 
         className="absolute inset-0 flex items-center justify-center"
         animate={{ rotate: [0, -10, 10, -10, 0] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       >
-        <MessageSquare className="text-blue-600" style={{ width: iconSize, height: iconSize }} />
-      </motion.div>
-      
-      {/* Ícones orbitando */}
-      <motion.div
-        className="absolute"
-        style={{ width: size, height: size }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-      >
-        <motion.div 
-          className="absolute"
-          style={{ 
-            top: size * 0.1, 
-            left: size * 0.1,
-            transform: 'translate(-50%, -50%)'
-          }}
+        <svg 
+          width={iconSize} 
+          height={iconSize * 0.6} 
+          viewBox="0 0 100 60" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          className="text-blue-600"
         >
-          <Heart className="text-red-500" size={size * 0.15} />
-        </motion.div>
-      </motion.div>
-      
-      <motion.div
-        className="absolute"
-        style={{ width: size, height: size }}
-        animate={{ rotate: -360 }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-      >
-        <motion.div 
-          className="absolute"
-          style={{ 
-            bottom: size * 0.1, 
-            right: size * 0.1,
-            transform: 'translate(50%, 50%)'
-          }}
-        >
-          <Star className="text-yellow-400" size={size * 0.15} />
-        </motion.div>
+          <path 
+            d="M30 30C30 41.046 21.046 50 10 50C4.47715 50 0 45.5228 0 40C0 34.4772 4.47715 30 10 30C15.5228 30 20 34.4772 20 40C20 45.5228 15.5228 50 10 50C21.046 50 30 41.046 30 30ZM70 30C70 18.954 78.954 10 90 10C95.5228 10 100 14.4772 100 20C100 25.5228 95.5228 30 90 30C84.4772 30 80 25.5228 80 20C80 14.4772 84.4772 10 90 10C78.954 10 70 18.954 70 30ZM10 30C21.046 10 78.954 10 90 30C78.954 50 21.046 50 10 30Z" 
+            fill="currentColor"
+          />
+        </svg>
       </motion.div>
     </motion.div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { HomeScreen } from '@/components/HomeScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
@@ -14,6 +14,12 @@ const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [showSplash, setShowSplash] = useState(true);
+  const [splashShown, setSplashShown] = useState(false);
+
+  // Verificar se a splash já foi mostrada nesta sessão
+  if (showSplash && !splashShown) {
+    setSplashShown(true);
+  }
 
   const navigateToCategory = (category: string) => {
     setSelectedCategory(category);
@@ -88,7 +94,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
       <AnimatePresence mode="wait">
-        {showSplash ? (
+        {showSplash && splashShown ? (
           <SplashScreen onComplete={handleSplashComplete} key="splash" />
         ) : (
           <div key="content" className="w-full h-full">
