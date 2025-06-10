@@ -85,7 +85,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
                   ease: "easeInOut"
                 }}
               >
-                <InfinitySymbol size={60} color="#ffffff" strokeWidth={2.5} />
+                <InfinitySymbol size={60} color="#ffffff" strokeWidth={3} />
               </motion.div>
             </motion.div>
           </motion.div>

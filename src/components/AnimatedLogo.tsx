@@ -41,7 +41,7 @@ export const AnimatedLogo = ({ size = 120, className = '' }: AnimatedLogoProps) 
         transition={{ duration: 3, delay: 0.6, repeat: Infinity, ease: "easeInOut" }}
       />
       
-      {/* Símbolo do infinito com profundidade */}
+      {/* Símbolo do infinito simples (8 deitado) */}
       <motion.div 
         className="absolute inset-0 flex items-center justify-center"
         animate={{ rotate: [0, -10, 10, -10, 0] }}
@@ -49,55 +49,25 @@ export const AnimatedLogo = ({ size = 120, className = '' }: AnimatedLogoProps) 
       >
         <svg 
           width={iconSize} 
-          height={iconSize * 0.6} 
-          viewBox="0 0 100 60" 
+          height={iconSize * 0.5} 
+          viewBox="0 0 100 50" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
           className="drop-shadow-lg"
         >
-          {/* Sombra para profundidade */}
-          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%" filterUnits="objectBoundingBox">
-            <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#0000004d" />
-          </filter>
-          
-          {/* Gradiente para profundidade */}
+          {/* Gradiente para o símbolo */}
           <linearGradient id="infinityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#60A5FA" />
             <stop offset="50%" stopColor="#3B82F6" />
             <stop offset="100%" stopColor="#2563EB" />
           </linearGradient>
           
-          {/* Símbolo do infinito mais realista */}
+          {/* Símbolo do infinito simples (8 deitado) */}
           <path 
-            d="M25 30C25 41.046 16.046 50 5 50C-0.52285 50 -5 45.5228 -5 40C-5 34.4772 -0.52285 30 5 30C10.5228 30 15 34.4772 15 40C15 45.5228 10.5228 50 5 50C16.046 50 25 41.046 25 30ZM75 30C75 18.954 83.954 10 95 10C100.523 10 105 14.4772 105 20C105 25.5228 100.523 30 95 30C89.4772 30 85 25.5228 85 20C85 14.4772 89.4772 10 95 10C83.954 10 75 18.954 75 30ZM5 30C16.046 10 83.954 10 95 30C83.954 50 16.046 50 5 30Z" 
-            fill="url(#infinityGradient)"
-            filter="url(#shadow)"
-          />
-          
-          {/* Efeito 3D - sombra interna */}
-          <path 
-            d="M5 32C16.046 14 83.954 14 95 32" 
-            stroke="rgba(0,0,0,0.2)" 
-            strokeWidth="3" 
-            strokeLinecap="round"
-          />
-          
-          {/* Destaque para mais profundidade */}
-          <path 
-            d="M5 28C16.046 8 83.954 8 95 28" 
-            stroke="white" 
-            strokeWidth="2" 
-            strokeLinecap="round"
-            strokeOpacity="0.7"
-          />
-          
-          {/* Reflexo adicional */}
-          <path 
-            d="M20 25C30 15 70 15 80 25" 
-            stroke="white" 
-            strokeWidth="1.5" 
-            strokeLinecap="round"
-            strokeOpacity="0.4"
+            d="M25 25C25 36.046 16.046 45 5 45C-0.52285 45 -5 40.5228 -5 35C-5 29.4772 -0.52285 25 5 25C10.5228 25 15 29.4772 15 35C15 40.5228 10.5228 45 5 45C16.046 45 25 36.046 25 25ZM75 25C75 13.954 83.954 5 95 5C100.523 5 105 9.47715 105 15C105 20.5228 100.523 25 95 25C89.4772 25 85 20.5228 85 15C85 9.47715 89.4772 5 95 5C83.954 5 75 13.954 75 25ZM5 25C16.046 5 83.954 5 95 25C83.954 45 16.046 45 5 25Z" 
+            stroke="url(#infinityGradient)"
+            strokeWidth="4"
+            fill="none"
           />
         </svg>
       </motion.div>
