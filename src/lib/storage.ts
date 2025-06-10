@@ -43,7 +43,7 @@ const STORAGE_KEYS = {
 };
 
 // Funções de armazenamento
-export const savePhrase = (phrase: StoredPhrase): void => {
+export const savePhrase = async (phrase: StoredPhrase): Promise<void> => {
   try {
     const phrases = getPhrases();
     phrases.push(phrase);
@@ -53,6 +53,7 @@ export const savePhrase = (phrase: StoredPhrase): void => {
     updateSymbolUsageStats(phrase.symbols);
   } catch (error) {
     console.error('Erro ao salvar frase:', error);
+    throw error;
   }
 };
 
@@ -94,13 +95,14 @@ export const toggleFavoritePhrase = (id: string): boolean => {
 };
 
 // Funções para símbolos personalizados
-export const saveCustomSymbol = (symbol: CategoryItem): void => {
+export const saveCustomSymbol = async (symbol: CategoryItem): Promise<void> => {
   try {
     const symbols = getCustomSymbols();
     symbols.push(symbol);
     localStorage.setItem(STORAGE_KEYS.CUSTOM_SYMBOLS, JSON.stringify(symbols));
   } catch (error) {
     console.error('Erro ao salvar símbolo personalizado:', error);
+    throw error;
   }
 };
 
@@ -114,13 +116,14 @@ export const getCustomSymbols = (): CategoryItem[] => {
   }
 };
 
-export const deleteCustomSymbol = (id: string): void => {
+export const deleteCustomSymbol = async (id: string): Promise<void> => {
   try {
     const symbols = getCustomSymbols();
     const updatedSymbols = symbols.filter(symbol => symbol.id !== id);
     localStorage.setItem(STORAGE_KEYS.CUSTOM_SYMBOLS, JSON.stringify(updatedSymbols));
   } catch (error) {
     console.error('Erro ao excluir símbolo personalizado:', error);
+    throw error;
   }
 };
 

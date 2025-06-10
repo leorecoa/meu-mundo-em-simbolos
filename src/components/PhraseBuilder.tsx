@@ -14,12 +14,6 @@ interface PhraseBuilderProps {
   onBack: () => void;
 }
 
-interface PhraseSymbol {
-  id: string;
-  text: string;
-  iconUrl?: string;
-}
-
 export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
   const [currentPhrase, setCurrentPhrase] = useState<PhraseSymbol[]>([
     { id: 'eu', text: 'EU' },
