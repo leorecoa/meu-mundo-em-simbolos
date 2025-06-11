@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedLogo } from './AnimatedLogo';
-import { InfinitySymbol } from './InfinitySymbol';
+import { NewInfinitySymbol } from './NewInfinitySymbol';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -42,7 +42,8 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
               repeat: Infinity
             }}
           >
-            <AnimatedLogo size={160} />
+            {/* Substituindo o AnimatedLogo pelo novo símbolo do infinito */}
+            <NewInfinitySymbol size={160} />
           </motion.div>
           
           <motion.h1
@@ -81,7 +82,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
                 ease: "easeInOut"
               }}
             >
-              <InfinitySymbol size={60} color="#ffffff" strokeWidth={3} />
+              <NewInfinitySymbol size={60} />
             </motion.div>
           </motion.div>
         </motion.div>
