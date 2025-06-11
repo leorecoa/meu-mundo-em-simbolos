@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +7,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { SplashScreen } from "@/components/SplashScreen";
-import { WebSplash } from "@/components/WebSplash";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -25,27 +24,12 @@ const queryClient = new QueryClient({
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const [showWebSplash, setShowWebSplash] = useState(true);
-  const [isWebApp, setIsWebApp] = useState(false);
-
-  useEffect(() => {
-    // Verificar se está sendo executado como app ou como site
-    const isRunningAsWebsite = window.location.hostname.includes('vercel.app') || 
-                              window.location.hostname === 'meu-mundo-em-simbolos.vercel.app';
-    setIsWebApp(isRunningAsWebsite);
-  }, []);
 
   const handleSplashComplete = () => {
     setShowSplash(false);
   };
 
-  // Se estiver rodando como site, mostrar o WebSplash
-  if (isWebApp && showWebSplash) {
-    return <WebSplash duration={3000} />;
-  }
-  
-  // Se estiver rodando como app, mostrar o SplashScreen normal
-  if (!isWebApp && showSplash) {
+  if (showSplash) {
     return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
