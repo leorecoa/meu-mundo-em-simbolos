@@ -21,20 +21,13 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
     <svg
       width={width}
       height={height}
-      viewBox={`0 0 ${width} ${height}`}
+      viewBox="0 0 100 50"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* Símbolo do infinito simples (8 deitado) */}
       <path
-        d={`
-          M ${width * 0.25} ${height / 2}
-          C ${width * 0.1} ${height * 0.2}, ${width * 0.4} ${height * 0.2}, ${width * 0.5} ${height / 2}
-          C ${width * 0.6} ${height * 0.8}, ${width * 0.9} ${height * 0.8}, ${width * 0.75} ${height / 2}
-          C ${width * 0.9} ${height * 0.2}, ${width * 0.6} ${height * 0.2}, ${width * 0.5} ${height / 2}
-          C ${width * 0.4} ${height * 0.8}, ${width * 0.1} ${height * 0.8}, ${width * 0.25} ${height / 2}
-        `}
+        d="M25 25C25 36.046 16.046 45 5 45C-0.52285 45 -5 40.5228 -5 35C-5 29.4772 -0.52285 25 5 25C10.5228 25 15 29.4772 15 35C15 40.5228 10.5228 45 5 45C16.046 45 25 36.046 25 25ZM75 25C75 13.954 83.954 5 95 5C100.523 5 105 9.47715 105 15C105 20.5228 100.523 25 95 25C89.4772 25 85 20.5228 85 15C85 9.47715 89.4772 5 95 5C83.954 5 75 13.954 75 25ZM5 25C16.046 5 83.954 5 95 25C83.954 45 16.046 45 5 25Z"
         stroke={color}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
