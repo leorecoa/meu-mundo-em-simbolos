@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm install --omit=dev && npm run build",
-  "installCommand": "npm install --omit=dev",
-  "framework": "vite"
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": null
 }
