@@ -1,0 +1,22 @@
+{
+  "short_name": "Meu Mundo",
+  "name": "Meu Mundo em Símbolos",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "splash.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#3B82F6",
+  "background_color": "#7C3AED",
+  "orientation": "portrait",
+  "description": "Tecnologia inclusiva para que todas as vozes sejam compreendidas"
+}

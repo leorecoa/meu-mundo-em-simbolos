@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo com gradiente -->
+  <rect width="512" height="512" fill="url(#paint0_linear)"/>
+  
+  <!-- Círculos concêntricos -->
+  <circle cx="256" cy="256" r="160" fill="#3B82F6" opacity="0.8"/>
+  <circle cx="256" cy="256" r="130" fill="#60A5FA" opacity="0.8"/>
+  <circle cx="256" cy="256" r="100" fill="#93C5FD" opacity="0.8"/>
+  <circle cx="256" cy="256" r="70" fill="white" opacity="0.9"/>
+  
+  <!-- Símbolo do infinito (8 deitado) -->
+  <g filter="url(#shadow)">
+    <path 
+      d="M206 256C206 282 185 303 159 303C146 303 135 292 135 279C135 266 146 255 159 255C172 255 183 266 183 279C183 292 172 303 159 303C185 303 206 282 206 256ZM306 256C306 230 327 209 353 209C366 209 377 220 377 233C377 246 366 257 353 257C340 257 329 246 329 233C329 220 340 209 353 209C327 209 306 230 306 256ZM159 255C185 209 327 209 353 255C327 303 185 303 159 255Z" 
+      stroke="white" 
+      stroke-width="8"
+      fill="none"
+    />
+  </g>
+  
+  <!-- Texto -->
+  <text x="256" y="380" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">Meu Mundo em Símbolos</text>
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="16" fill="white" text-anchor="middle">Tecnologia inclusiva para que todas as vozes sejam compreendidas</text>
+  
+  <!-- Definições de gradientes e filtros -->
+  <defs>
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    
+    <filter id="shadow" x="125" y="199" width="262" height="114" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+      <feOffset dy="4"/>
+      <feGaussianBlur stdDeviation="2"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+  </defs>
+</svg>
