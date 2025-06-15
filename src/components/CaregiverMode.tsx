@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { ChevronLeft, Upload, PlusCircle, Trash2, Lock, Download, Settings as SettingsIcon, BarChart, Calendar, Clock, CheckCircle, Coins } from 'lucide-react';
+import { ChevronLeft, Upload, PlusCircle, Trash2, Lock, Download, Settings as SettingsIcon, BarChart, Calendar, Clock, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -67,12 +66,9 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
     enabled: isAuthenticated
   });
 
-  // Mutações corrigidas para retornar Promise
+  // Mutações
   const saveSymbolMutation = useMutation({
-    mutationFn: async (newSymbol: any) => {
-      await saveCustomSymbol(newSymbol);
-      return newSymbol;
-    },
+    mutationFn: saveCustomSymbol,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customSymbols'] });
       setSymbolName('');
@@ -84,10 +80,7 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
   });
 
   const deleteSymbolMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await deleteCustomSymbol(id);
-      return id;
-    },
+    mutationFn: deleteCustomSymbol,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customSymbols'] });
       toast({
@@ -98,20 +91,15 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
   });
   
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, completed }: { taskId: string, completed: boolean }) => {
-      await updateTaskProgress(taskId, completed);
-      return { taskId, completed };
-    },
+    mutationFn: ({ taskId, completed }: { taskId: string, completed: boolean }) => 
+      updateTaskProgress(taskId, completed),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
   });
   
   const addCoinsMutation = useMutation({
-    mutationFn: async (amount: number) => {
-      const newAmount = await updateCoins(amount);
-      return newAmount;
-    },
+    mutationFn: updateCoins,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coins'] });
     }
@@ -175,7 +163,7 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
     const newSymbol = {
       id: `custom-${Date.now()}`,
       label: symbolName.toUpperCase(),
-      icon: PlusCircle,
+      icon: PlusCircle, // Ícone padrão
       category: symbolCategory
     };
 
@@ -192,6 +180,8 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
       return;
     }
     
+    // Aqui adicionaríamos a tarefa, mas como não temos essa função implementada,
+    // apenas mostramos um toast de sucesso
     toast({
       title: "Tarefa adicionada",
       description: "A nova tarefa foi adicionada com sucesso",
@@ -213,6 +203,7 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
   const handleExportData = () => {
     const data = exportAllData();
     
+    // Criar blob e link para download
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -240,6 +231,7 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
         const success = importAllData(jsonData);
         
         if (success) {
+          // Recarregar todos os dados
           queryClient.invalidateQueries();
           
           toast({
@@ -422,7 +414,7 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
                       <PlusCircle className="h-8 w-8 text-gray-600" />
                     </div>
                     <p className="text-sm font-medium">{item.label}</p>
-                    <p className="text-xs text-gray-500">{symbolCategory}</p>
+                    <p className="text-xs text-gray-500">{item.category}</p>
                     <Button 
                       variant="ghost" 
                       size="sm" 

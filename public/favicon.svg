@@ -1,100 +1,39 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Fundo circular com gradiente -->
   <circle cx="256" cy="256" r="256" fill="url(#paint0_radial)"/>
   
-  <!-- Símbolo do infinito luxuoso 3D -->
-  <g transform="translate(156, 206) scale(1.25)">
-    <defs>
-      <!-- Gradientes para o efeito 3D luxuoso -->
-      <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#1e3a8a" />
-        <stop offset="30%" stopColor="#3b82f6" />
-        <stop offset="70%" stopColor="#60a5fa" />
-        <stop offset="100%" stopColor="#93c5fd" />
-      </linearGradient>
-      
-      <linearGradient id="lightBlueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#0ea5e9" />
-        <stop offset="30%" stopColor="#38bdf8" />
-        <stop offset="70%" stopColor="#7dd3fc" />
-        <stop offset="100%" stopColor="#bae6fd" />
-      </linearGradient>
-      
-      <!-- Sombras e efeitos -->
-      <filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
-        <feOffset dx="1" dy="1" result="offset"/>
-        <feFlood floodColor="#000000" floodOpacity="0.3"/>
-        <feComposite in2="offset" operator="in"/>
-      </filter>
-      
-      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-        <feMerge> 
-          <feMergeNode in="coloredBlur"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-      </filter>
-      
-      <!-- Gradiente radial para brilho -->
-      <radialGradient id="shine" cx="0.3" cy="0.3" r="0.7">
-        <stop offset="0%" stopColor="rgba(255,255,255,0.8)" />
-        <stop offset="50%" stopColor="rgba(255,255,255,0.3)" />
-        <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-      </radialGradient>
-    </defs>
-    
-    <!-- Símbolo do infinito - parte escura (esquerda) -->
-    <path
-      d="M40 50 C40 30, 60 10, 80 10 C100 10, 120 30, 120 50 C120 70, 100 90, 80 90 C60 90, 40 70, 40 50 Z"
-      fill="url(#blueGradient)"
-      filter="url(#glow)"
-    />
-    
-    <!-- Símbolo do infinito - parte clara (direita) -->
-    <path
-      d="M120 50 C120 30, 140 10, 160 10 C180 10, 200 30, 200 50 C200 70, 180 90, 160 90 C140 90, 120 70, 120 50 Z"
-      fill="url(#lightBlueGradient)"
-      filter="url(#glow)"
-    />
-    
-    <!-- Conexão central com gradiente -->
-    <ellipse
-      cx="120"
-      cy="50"
-      rx="10"
-      ry="20"
-      fill="url(#blueGradient)"
-      opacity="0.8"
-    />
-    
-    <!-- Efeitos de brilho -->
-    <ellipse
-      cx="80"
-      cy="35"
-      rx="15"
-      ry="10"
-      fill="url(#shine)"
-      opacity="0.6"
-    />
-    
-    <ellipse
-      cx="160"
-      cy="35"
-      rx="15"
-      ry="10"
-      fill="url(#shine)"
-      opacity="0.6"
+  <!-- Símbolo do infinito simples (8 deitado) -->
+  <g filter="url(#shadow)">
+    <path 
+      d="M153.6 256C153.6 307.2 112.4 348.4 61.2 348.4C35.2 348.4 14 327.2 14 301.2C14 275.2 35.2 254 61.2 254C87.2 254 108.4 275.2 108.4 301.2C108.4 327.2 87.2 348.4 61.2 348.4C112.4 348.4 153.6 307.2 153.6 256ZM358.4 256C358.4 204.8 399.6 163.6 450.8 163.6C476.8 163.6 498 184.8 498 210.8C498 236.8 476.8 258 450.8 258C424.8 258 403.6 236.8 403.6 210.8C403.6 184.8 424.8 163.6 450.8 163.6C399.6 163.6 358.4 204.8 358.4 256ZM61.2 254C112.4 163.6 399.6 163.6 450.8 254C399.6 348.4 112.4 348.4 61.2 254Z" 
+      stroke="url(#paint1_linear)" 
+      stroke-width="12"
+      fill="none"
     />
   </g>
   
-  <!-- Definições de gradientes e filtros originais -->
+  <!-- Definições de gradientes e filtros -->
   <defs>
     <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256 256) rotate(90) scale(256)">
-      <stop offset="0" stopColor="#3B82F6"/>
-      <stop offset="1" stopColor="#1E40AF"/>
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#1E40AF"/>
     </radialGradient>
+    
+    <linearGradient id="paint1_linear" x1="14" y1="256" x2="498" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#60A5FA"/>
+      <stop offset="0.5" stop-color="#93C5FD"/>
+      <stop offset="1" stop-color="#60A5FA"/>
+    </linearGradient>
+    
+    <filter id="shadow" x="4" y="153.6" width="504" height="204.8" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+      <feOffset dy="4"/>
+      <feGaussianBlur stdDeviation="5"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
   </defs>
 </svg>
