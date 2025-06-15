@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { 
   Coins, Star, Gift, Trophy, Calendar, CheckCircle, Clock, Award, 
@@ -169,18 +170,23 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
     }
   ]);
   
-  // Mutações
+  // Mutações corrigidas para retornar Promise
   const updateCoinsMutation = useMutation({
-    mutationFn: updateCoins,
-    onSuccess: (newAmount) => {
+    mutationFn: async (amount: number) => {
+      const newAmount = await updateCoins(amount);
+      return newAmount;
+    },
+    onSuccess: (newAmount: number) => {
       queryClient.setQueryData(['coins'], newAmount);
       if (onCoinsChange) onCoinsChange(newAmount);
     }
   });
   
   const updateTaskMutation = useMutation({
-    mutationFn: ({ taskId, completed }: { taskId: string, completed: boolean }) => 
-      updateTaskProgress(taskId, completed),
+    mutationFn: async ({ taskId, completed }: { taskId: string, completed: boolean }) => {
+      await updateTaskProgress(taskId, completed);
+      return { taskId, completed };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['coins'] });
@@ -188,9 +194,9 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
   });
   
   const purchaseRewardMutation = useMutation({
-    mutationFn: ({ rewardId, cost }: { rewardId: string, cost: number }) => {
-      updateCoins(-cost);
-      addPurchasedReward(rewardId);
+    mutationFn: async ({ rewardId, cost }: { rewardId: string, cost: number }) => {
+      await updateCoins(-cost);
+      await addPurchasedReward(rewardId);
       return rewardId;
     },
     onSuccess: () => {
@@ -343,11 +349,11 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
 
   // Mutação para completar desafios diários
   const completeDailyChallengeMutation = useMutation({
-    mutationFn: (challengeId: string) => {
+    mutationFn: async (challengeId: string) => {
       const challenge = dailyChallenges.find(c => c.id === challengeId);
       if (challenge && !challenge.completed) {
         challenge.completed = true;
-        updateCoins(challenge.reward);
+        await updateCoins(challenge.reward);
         return challengeId;
       }
       return null;
@@ -365,11 +371,11 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
 
   // Mutação para desbloquear conquistas
   const unlockAchievementMutation = useMutation({
-    mutationFn: (achievementId: string) => {
+    mutationFn: async (achievementId: string) => {
       const achievement = achievements.find(a => a.id === achievementId);
       if (achievement && !achievement.unlocked) {
         achievement.unlocked = true;
-        updateCoins(achievement.rewardCoins);
+        await updateCoins(achievement.rewardCoins);
         return achievementId;
       }
       return null;
@@ -769,7 +775,6 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
           </div>
         </TabsContent>
         
-        {/* Conteúdo da aba Conquistas */}
         <TabsContent value="conquistas" className="space-y-4">
           <div className="flex justify-between items-center">
             <h4 className="text-lg font-semibold text-slate-700 flex items-center">
@@ -833,7 +838,6 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
           </div>
         </TabsContent>
         
-        {/* Conteúdo da aba Loja */}
         <TabsContent value="loja" className="space-y-4">
           <div className="flex justify-between items-center">
             <h4 className="text-lg font-semibold text-slate-700 flex items-center">
@@ -960,7 +964,7 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
           {/* Dica para economizar moedas */}
           <Card className="p-3 bg-blue-50 border-blue-200">
             <div className="flex items-start">
-              <Sparkles className="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
+              <Sparkles className="w-5 w-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-slate-700">
                 Complete tarefas diárias e desafios para ganhar mais FiveCoins! Quanto mais dias consecutivos você usar o app, maiores serão os bônus.
               </p>
@@ -971,6 +975,7 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
     </div>
   );
 };
+
 // Frases motivacionais para exibir quando o usuário ganha moedas
 export const motivationalPhrases = [
   "Ótimo trabalho! Continue assim!",
