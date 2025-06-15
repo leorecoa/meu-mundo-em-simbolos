@@ -1,7 +1,6 @@
 
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Luxury3DInfinitySymbol } from './Luxury3DInfinitySymbol';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -42,8 +41,15 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
               repeat: Infinity
             }}
           >
-            {/* Novo símbolo do infinito 3D luxuoso */}
-            <Luxury3DInfinitySymbol size={200} />
+            {/* Imagem do símbolo do infinito 3D azul */}
+            <motion.img
+              src="/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png"
+              alt="Símbolo do Infinito 3D"
+              className="w-48 h-auto drop-shadow-2xl"
+              initial={{ scale: 0.8, opacity: 0, rotateY: -180 }}
+              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+            />
           </motion.div>
           
           <motion.h1
@@ -82,7 +88,11 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
                 ease: "easeInOut"
               }}
             >
-              <Luxury3DInfinitySymbol size={80} />
+              <motion.img
+                src="/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png"
+                alt="Símbolo do Infinito 3D"
+                className="w-20 h-auto drop-shadow-xl"
+              />
             </motion.div>
           </motion.div>
         </motion.div>

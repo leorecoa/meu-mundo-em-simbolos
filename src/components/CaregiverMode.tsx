@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ChevronLeft, Upload, PlusCircle, Trash2, Lock, Download, Settings as SettingsIcon, BarChart, Calendar, Clock, CheckCircle, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,14 @@ import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
+interface CategoryItem {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  description?: string;
+}
+
 interface CaregiverModeProps {
   onBack: () => void;
 }
@@ -33,6 +40,8 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [taskReward, setTaskReward] = useState(10);
+  const [selectedTab, setSelectedTab] = useState('symbols');
+  const [mockCategories, setMockCategories] = useState<CategoryItem[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -311,6 +320,15 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
       </div>
     );
   }
+
+  const mockCategories: CategoryItem[] = [
+    { id: 'food', name: 'Alimentação', icon: '🍽️', color: 'bg-orange-100', description: 'Símbolos relacionados a comida e bebida' },
+    { id: 'activities', name: 'Atividades', icon: '🎮', color: 'bg-blue-100', description: 'Jogos, brincadeiras e atividades' },
+    { id: 'emotions', name: 'Emoções', icon: '😊', color: 'bg-yellow-100', description: 'Expressões e sentimentos' },
+    { id: 'people', name: 'Pessoas', icon: '👨‍👩‍👧‍👦', color: 'bg-green-100', description: 'Família e relacionamentos' },
+    { id: 'places', name: 'Lugares', icon: '🏠', color: 'bg-purple-100', description: 'Locais e ambientes' },
+    { id: 'actions', name: 'Ações', icon: '🏃', color: 'bg-red-100', description: 'Verbos e ações do dia a dia' }
+  ];
 
   return (
     <div className="p-4 space-y-6">
@@ -628,6 +646,40 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
                     </div>
                   ))}
               </div>
+            </div>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="categories" className="space-y-4">
+          <Card className="p-4">
+            <h2 className="text-lg font-semibold mb-4 flex items-center">
+              <SettingsIcon className="h-5 w-5 mr-2 text-gray-600" />
+              Configurações de categorias
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mockCategories.map((category) => (
+                <Card key={category.id} className={`p-4 ${category.color} border-2 border-dashed border-gray-300`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{category.icon}</span>
+                      <h3 className="font-semibold">{category.name}</h3>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <SettingsIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">{category.description}</p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      Editar
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
             </div>
           </Card>
         </TabsContent>
