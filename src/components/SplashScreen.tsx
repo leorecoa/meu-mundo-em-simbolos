@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuxuryInfinitySymbol } from './LuxuryInfinitySymbol';
+import { Luxury3DInfinitySymbol } from './Luxury3DInfinitySymbol';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -42,8 +42,8 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
               repeat: Infinity
             }}
           >
-            {/* Novo símbolo do infinito luxuoso */}
-            <LuxuryInfinitySymbol size={180} />
+            {/* Novo símbolo do infinito 3D luxuoso */}
+            <Luxury3DInfinitySymbol size={200} />
           </motion.div>
           
           <motion.h1
@@ -82,7 +82,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
                 ease: "easeInOut"
               }}
             >
-              <LuxuryInfinitySymbol size={60} />
+              <Luxury3DInfinitySymbol size={80} />
             </motion.div>
           </motion.div>
         </motion.div>
