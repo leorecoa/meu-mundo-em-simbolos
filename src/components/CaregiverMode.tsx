@@ -23,6 +23,7 @@ interface CategoryItem {
   icon: string;
   color: string;
   description?: string;
+  category?: string;
 }
 
 interface CaregiverModeProps {
@@ -41,9 +42,18 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
   const [taskDescription, setTaskDescription] = useState('');
   const [taskReward, setTaskReward] = useState(10);
   const [selectedTab, setSelectedTab] = useState('symbols');
-  const [mockCategories, setMockCategories] = useState<CategoryItem[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Dados das categorias
+  const categoriesData: CategoryItem[] = [
+    { id: 'food', name: 'Alimentação', icon: '🍽️', color: 'bg-orange-100', description: 'Símbolos relacionados a comida e bebida' },
+    { id: 'activities', name: 'Atividades', icon: '🎮', color: 'bg-blue-100', description: 'Jogos, brincadeiras e atividades' },
+    { id: 'emotions', name: 'Emoções', icon: '😊', color: 'bg-yellow-100', description: 'Expressões e sentimentos' },
+    { id: 'people', name: 'Pessoas', icon: '👨‍👩‍👧‍👦', color: 'bg-green-100', description: 'Família e relacionamentos' },
+    { id: 'places', name: 'Lugares', icon: '🏠', color: 'bg-purple-100', description: 'Locais e ambientes' },
+    { id: 'actions', name: 'Ações', icon: '🏃', color: 'bg-red-100', description: 'Verbos e ações do dia a dia' }
+  ];
 
   // Consultas para obter dados
   const { data: customSymbols = [] } = useQuery({
@@ -78,7 +88,9 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
 
   // Mutações
   const saveSymbolMutation = useMutation({
-    mutationFn: saveCustomSymbol,
+    mutationFn: async (symbolData: any) => {
+      return await saveCustomSymbol(symbolData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customSymbols'] });
       setSymbolName('');
@@ -90,7 +102,9 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
   });
 
   const deleteSymbolMutation = useMutation({
-    mutationFn: deleteCustomSymbol,
+    mutationFn: async (symbolId: string) => {
+      return await deleteCustomSymbol(symbolId);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customSymbols'] });
       toast({
@@ -193,8 +207,6 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
       return;
     }
     
-    // Aqui adicionaríamos a tarefa, mas como não temos essa função implementada,
-    // apenas mostramos um toast de sucesso
     toast({
       title: "Tarefa adicionada",
       description: "A nova tarefa foi adicionada com sucesso",
@@ -216,7 +228,6 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
   const handleExportData = () => {
     const data = exportAllData();
     
-    // Criar blob e link para download
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -244,7 +255,6 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
         const success = importAllData(jsonData);
         
         if (success) {
-          // Recarregar todos os dados
           queryClient.invalidateQueries();
           
           toast({
@@ -320,15 +330,6 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
       </div>
     );
   }
-
-  const mockCategories: CategoryItem[] = [
-    { id: 'food', name: 'Alimentação', icon: '🍽️', color: 'bg-orange-100', description: 'Símbolos relacionados a comida e bebida' },
-    { id: 'activities', name: 'Atividades', icon: '🎮', color: 'bg-blue-100', description: 'Jogos, brincadeiras e atividades' },
-    { id: 'emotions', name: 'Emoções', icon: '😊', color: 'bg-yellow-100', description: 'Expressões e sentimentos' },
-    { id: 'people', name: 'Pessoas', icon: '👨‍👩‍👧‍👦', color: 'bg-green-100', description: 'Família e relacionamentos' },
-    { id: 'places', name: 'Lugares', icon: '🏠', color: 'bg-purple-100', description: 'Locais e ambientes' },
-    { id: 'actions', name: 'Ações', icon: '🏃', color: 'bg-red-100', description: 'Verbos e ações do dia a dia' }
-  ];
 
   return (
     <div className="p-4 space-y-6">
@@ -436,7 +437,7 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
                       <PlusCircle className="h-8 w-8 text-gray-600" />
                     </div>
                     <p className="text-sm font-medium">{item.label}</p>
-                    <p className="text-xs text-gray-500">{item.category}</p>
+                    <p className="text-xs text-gray-500">{item.category || 'Geral'}</p>
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -658,7 +659,7 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockCategories.map((category) => (
+              {categoriesData.map((category) => (
                 <Card key={category.id} className={`p-4 ${category.color} border-2 border-dashed border-gray-300`}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
