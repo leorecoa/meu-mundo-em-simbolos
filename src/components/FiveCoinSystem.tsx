@@ -171,7 +171,10 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
   
   // Mutações
   const updateCoinsMutation = useMutation({
-    mutationFn: updateCoins,
+    mutationFn: async (amount: number) => {
+      const result = await updateCoins(amount);
+      return result;
+    },
     onSuccess: (newAmount) => {
       queryClient.setQueryData(['coins'], newAmount);
       if (onCoinsChange) onCoinsChange(newAmount);
@@ -179,8 +182,9 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
   });
   
   const updateTaskMutation = useMutation({
-    mutationFn: ({ taskId, completed }: { taskId: string, completed: boolean }) => 
-      updateTaskProgress(taskId, completed),
+    mutationFn: async ({ taskId, completed }: { taskId: string, completed: boolean }) => {
+      return await updateTaskProgress(taskId, completed);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['coins'] });
@@ -188,9 +192,9 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
   });
   
   const purchaseRewardMutation = useMutation({
-    mutationFn: ({ rewardId, cost }: { rewardId: string, cost: number }) => {
-      updateCoins(-cost);
-      addPurchasedReward(rewardId);
+    mutationFn: async ({ rewardId, cost }: { rewardId: string, cost: number }) => {
+      await updateCoins(-cost);
+      await addPurchasedReward(rewardId);
       return rewardId;
     },
     onSuccess: () => {
@@ -343,11 +347,11 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
 
   // Mutação para completar desafios diários
   const completeDailyChallengeMutation = useMutation({
-    mutationFn: (challengeId: string) => {
+    mutationFn: async (challengeId: string) => {
       const challenge = dailyChallenges.find(c => c.id === challengeId);
       if (challenge && !challenge.completed) {
         challenge.completed = true;
-        updateCoins(challenge.reward);
+        await updateCoins(challenge.reward);
         return challengeId;
       }
       return null;
@@ -365,11 +369,11 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
 
   // Mutação para desbloquear conquistas
   const unlockAchievementMutation = useMutation({
-    mutationFn: (achievementId: string) => {
+    mutationFn: async (achievementId: string) => {
       const achievement = achievements.find(a => a.id === achievementId);
       if (achievement && !achievement.unlocked) {
         achievement.unlocked = true;
-        updateCoins(achievement.rewardCoins);
+        await updateCoins(achievement.rewardCoins);
         return achievementId;
       }
       return null;
@@ -971,6 +975,7 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
     </div>
   );
 };
+
 // Frases motivacionais para exibir quando o usuário ganha moedas
 export const motivationalPhrases = [
   "Ótimo trabalho! Continue assim!",

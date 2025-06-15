@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { ChevronLeft, Upload, PlusCircle, Trash2, Lock, Download, Settings as SettingsIcon, BarChart, Calendar, Clock, CheckCircle } from 'lucide-react';
+import { ChevronLeft, Upload, PlusCircle, Trash2, Lock, Download, Settings as SettingsIcon, BarChart, Calendar, Clock, CheckCircle, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -91,15 +92,18 @@ export const CaregiverMode = ({ onBack }: CaregiverModeProps) => {
   });
   
   const updateTaskMutation = useMutation({
-    mutationFn: ({ taskId, completed }: { taskId: string, completed: boolean }) => 
-      updateTaskProgress(taskId, completed),
+    mutationFn: async ({ taskId, completed }: { taskId: string, completed: boolean }) => {
+      return await updateTaskProgress(taskId, completed);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
   });
   
   const addCoinsMutation = useMutation({
-    mutationFn: updateCoins,
+    mutationFn: async (amount: number) => {
+      return await updateCoins(amount);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coins'] });
     }
