@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
   Coins, Star, Gift, Trophy, Calendar, CheckCircle, Clock, Award, 
   Sparkles, Zap, Target, Medal, Crown, Rocket, Heart, Flame, Book, 
-  Palette, Music, Gamepad2, Camera, Smile
+  Palette, Music, Gamepad2, Camera, Smile, Info, AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -18,9 +18,20 @@ import {
   getDailyGoals,
   addPurchasedReward,
   getPurchasedRewards,
-  updateTimeSpent
+  updateTimeSpent,
+  completeDailyChallenge,
+  unlockAchievement,
+  checkDailyGoals
 } from '@/lib/storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { 
+  getFiveCoinSettings, 
+  vibrateDevice, 
+  confirmAction, 
+  isTaskComplete, 
+  isDailyGoalComplete, 
+  isDailyChallengeComplete 
+} from '@/lib/fiveCoinSettings';
 
 interface FiveCoinSystemProps {
   currentCoins?: number;
@@ -390,6 +401,14 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
   });
 
   const earnCoins = (amount: number, reason: string) => {
+    // Verificar configurações de acessibilidade
+    const settings = getFiveCoinSettings();
+    
+    // Aplicar vibração se ativada
+    if (settings.accessibility.vibration) {
+      vibrateDevice([100, 50, 100]);
+    }
+    
     updateCoinsMutation.mutate(amount);
     setShowAnimation(true);
     
@@ -408,31 +427,62 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
     
     // Verificar conquistas após ganhar moedas
     checkAchievements();
+    
+    // Verificar metas diárias
+    checkDailyGoals('time_spent', 30);
   };
 
   const spendCoins = (amount: number, item: string, rewardId: string) => {
-    if (currentCoins >= amount) {
-      purchaseRewardMutation.mutate({ rewardId, cost: amount });
-      toast({
-        title: 'Recompensa desbloqueada!',
-        description: `Você comprou: ${item}`,
-        duration: 3000,
-      });
-      
-      // Mostrar detalhes da recompensa
-      setSelectedReward(rewardId);
-      setTimeout(() => setSelectedReward(null), 5000);
+    // Verificar configurações de acessibilidade
+    const settings = getFiveCoinSettings();
+    
+    const performPurchase = () => {
+      if (currentCoins >= amount) {
+        // Aplicar vibração se ativada
+        if (settings.accessibility.vibration) {
+          vibrateDevice([100, 100, 100]);
+        }
+        
+        purchaseRewardMutation.mutate({ rewardId, cost: amount });
+        toast({
+          title: 'Recompensa desbloqueada!',
+          description: `Você comprou: ${item}`,
+          duration: 3000,
+        });
+        
+        // Mostrar detalhes da recompensa
+        setSelectedReward(rewardId);
+        setTimeout(() => setSelectedReward(null), 5000);
+      } else {
+        toast({
+          title: 'FiveCoins insuficientes',
+          description: `Você precisa de ${amount - currentCoins} FiveCoins a mais`,
+          variant: 'destructive',
+          duration: 3000,
+        });
+      }
+    };
+    
+    // Usar confirmação dupla se ativada
+    if (settings.accessibility.doubleConfirmation) {
+      confirmAction(
+        performPurchase,
+        `Deseja comprar "${item}" por ${amount} FiveCoins?`
+      );
     } else {
-      toast({
-        title: 'FiveCoins insuficientes',
-        description: `Você precisa de ${amount - currentCoins} FiveCoins a mais`,
-        variant: 'destructive',
-        duration: 3000,
-      });
+      performPurchase();
     }
   };
   
   const completeTask = (taskId: string) => {
+    // Verificar configurações de acessibilidade
+    const settings = getFiveCoinSettings();
+    
+    // Aplicar vibração se ativada
+    if (settings.accessibility.vibration) {
+      vibrateDevice([50, 100, 50]);
+    }
+    
     updateTaskMutation.mutate({ taskId, completed: true });
     toast({
       title: 'Tarefa concluída!',
@@ -442,15 +492,41 @@ export const FiveCoinSystem = ({ currentCoins: propCoins, onCoinsChange }: FiveC
     
     // Verificar se alguma conquista deve ser desbloqueada
     checkAchievements();
+    
+    // Verificar metas diárias
+    checkDailyGoals('tasks_completed', 1);
   };
   
   const completeChallenge = (challengeId: string) => {
-    completeDailyChallengeMutation.mutate(challengeId);
-    toast({
-      title: 'Desafio concluído!',
-      description: 'Você ganhou FiveCoins como recompensa',
-      duration: 3000,
-    });
+    // Verificar configurações de acessibilidade
+    const settings = getFiveCoinSettings();
+    
+    const performCompletion = () => {
+      // Aplicar vibração se ativada
+      if (settings.accessibility.vibration) {
+        vibrateDevice([50, 100, 150, 100]);
+      }
+      
+      completeDailyChallengeMutation.mutate(challengeId);
+      toast({
+        title: 'Desafio concluído!',
+        description: 'Você ganhou FiveCoins como recompensa',
+        duration: 3000,
+      });
+      
+      // Verificar metas diárias
+      checkDailyGoals('challenges_completed', 1);
+    };
+    
+    // Usar confirmação dupla se ativada
+    if (settings.accessibility.doubleConfirmation) {
+      confirmAction(
+        performCompletion,
+        "Deseja marcar este desafio como concluído?"
+      );
+    } else {
+      performCompletion();
+    }
   };
   
   const checkAchievements = () => {
