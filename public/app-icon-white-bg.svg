@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo branco circular -->
+  <circle cx="256" cy="256" r="256" fill="white"/>
+  
+  <!-- Área para a imagem (será substituída pelo CSS) -->
+  <foreignObject x="56" y="56" width="400" height="400">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+      <img src="/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png" style="width: 80%; height: auto;" />
+    </div>
+  </foreignObject>
+</svg>
