@@ -31,11 +31,9 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="flex flex-col items-center"
         >
-          {/* Imagem do símbolo do infinito 3D azul */}
-          <motion.img
-            src="/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png"
-            alt="Símbolo do Infinito 3D"
-            className="w-48 h-auto drop-shadow-2xl mb-8"
+          {/* Imagem do símbolo do infinito 3D azul com fundo branco */}
+          <motion.div
+            className="bg-white rounded-full p-4 mb-8 shadow-lg"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ 
               scale: 1, 
@@ -51,7 +49,13 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
                 ease: "easeInOut"
               }
             }}
-          />
+          >
+            <motion.img
+              src="/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png"
+              alt="Símbolo do Infinito 3D"
+              className="w-40 h-auto"
+            />
+          </motion.div>
           
           <motion.h1
             className="text-3xl font-bold text-white mb-2"
