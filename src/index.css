@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import animations */
+@import './animations.css';
+
 :root {
   --base-font-size: 1rem;
 }
