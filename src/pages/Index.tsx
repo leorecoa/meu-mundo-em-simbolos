@@ -49,7 +49,7 @@ const Index = () => {
         );
       case 'phrase':
         return (
-          <TransitionWrapper>
+          <TransitionWrapper key="phrase-builder">
             <PhraseBuilder 
               onBack={() => setCurrentScreen('home')}
             />

@@ -56,10 +56,13 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
   // Importar e usar o hook de síntese de voz
   const [speechLoaded, setSpeechLoaded] = useState(false);
   
-  // Verificar se a API de síntese de voz está disponível
+  // Verificar se a API de síntese de voz está disponível - otimizado
   useEffect(() => {
+    // Carregar a API de síntese de voz imediatamente
     if ('speechSynthesis' in window) {
       setSpeechLoaded(true);
+      // Pré-carregar vozes para evitar atraso na primeira reprodução
+      window.speechSynthesis.getVoices();
     }
   }, []);
   
@@ -381,12 +384,12 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
         />
       </div>
 
-      {/* Frases salvas */}
+      {/* Frases salvas - renderização otimizada */}
       {savedPhrasesData.length > 0 && (
         <div>
           <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-3`}>Frases salvas:</h2>
           <div className="space-y-2">
-            {savedPhrasesData.map((phrase) => (
+            {savedPhrasesData.slice(0, 5).map((phrase) => (
               <Card 
                 key={phrase.id} 
                 className="p-3 bg-green-50 hover:bg-green-100 cursor-pointer flex justify-between items-center" 
