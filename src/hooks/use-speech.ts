@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getSettings } from '@/lib/storage';
+import { applyLanguageSettings } from '@/lib/applyLanguageSettings';
 
 interface SpeechOptions {
   rate?: number;
@@ -46,34 +47,66 @@ export function useSpeech() {
   const getVoiceFromSettings = () => {
     const settings = getSettings();
     const preferredVoiceType = settings.voiceType;
-    const preferredLang = 'pt-BR';
+    const preferredLang = settings.language || 'pt-BR';
     
     // Filtrar vozes por idioma
-    const langVoices = voices.filter(voice => 
-      voice.lang.includes('pt') || voice.lang.includes('PT')
+    let langVoices = voices.filter(voice => 
+      voice.lang.startsWith(preferredLang.split('-')[0]) || 
+      voice.lang === preferredLang
     );
     
+    // Se não encontrar vozes para o idioma preferido, tente encontrar qualquer voz
     if (langVoices.length === 0) {
-      return null;
+      // Tentar encontrar vozes em inglês como fallback
+      langVoices = voices.filter(voice => 
+        voice.lang.startsWith('en')
+      );
+      
+      // Se ainda não encontrar, use qualquer voz disponível
+      if (langVoices.length === 0) {
+        return voices[0] || null;
+      }
     }
     
     // Tentar encontrar voz que corresponda ao tipo preferido
     if (preferredVoiceType === 'feminina') {
       const femaleVoice = langVoices.find(voice => 
         !voice.name.includes('Male') && 
-        !voice.name.includes('Masculino')
+        !voice.name.includes('Masculino') &&
+        !voice.name.includes('male')
       );
       if (femaleVoice) return femaleVoice;
     } else if (preferredVoiceType === 'masculina') {
       const maleVoice = langVoices.find(voice => 
         voice.name.includes('Male') || 
-        voice.name.includes('Masculino')
+        voice.name.includes('Masculino') ||
+        voice.name.includes('male')
       );
       if (maleVoice) return maleVoice;
     }
     
     // Retornar a primeira voz disponível se não encontrar correspondência
     return langVoices[0];
+  };
+  
+  // Obter lista de idiomas disponíveis
+  const getAvailableLanguages = () => {
+    const languageMap = new Map();
+    
+    voices.forEach(voice => {
+      const langCode = voice.lang;
+      const langName = new Intl.DisplayNames([navigator.language || 'en'], { type: 'language' }).of(langCode.split('-')[0]);
+      
+      if (langName && !languageMap.has(langCode)) {
+        languageMap.set(langCode, {
+          code: langCode,
+          name: langName,
+          localName: voice.lang.includes('-') ? `${langName} (${voice.lang.split('-')[1]})` : langName
+        });
+      }
+    });
+    
+    return Array.from(languageMap.values());
   };
 
   // Função para falar texto
@@ -87,7 +120,7 @@ export function useSpeech() {
     const newUtterance = new SpeechSynthesisUtterance(text);
     
     // Configurar opções
-    newUtterance.lang = options.lang || 'pt-BR';
+    newUtterance.lang = options.lang || settings.language || 'pt-BR';
     newUtterance.rate = options.rate || settings.voiceSpeed / 50; // Converter de 0-100 para aproximadamente 0-2
     newUtterance.pitch = options.pitch || 1;
     newUtterance.volume = options.volume || 1;
@@ -155,6 +188,7 @@ export function useSpeech() {
     isSpeaking,
     isPaused,
     voices,
-    getVoiceFromSettings
+    getVoiceFromSettings,
+    getAvailableLanguages
   };
 }

@@ -10,6 +10,7 @@ export interface AppSettings {
     doubleConfirmation: boolean;
     vibration: boolean;
   };
+  language: string;
 }
 
 // Obter configurações do aplicativo
@@ -28,7 +29,8 @@ export const getAppSettings = (): AppSettings => {
         highContrast: false,
         doubleConfirmation: false,
         vibration: false
-      }
+      },
+      language: 'pt-BR'
     };
   } catch (error) {
     console.error('Erro ao recuperar configurações do aplicativo:', error);
@@ -39,7 +41,8 @@ export const getAppSettings = (): AppSettings => {
         highContrast: false,
         doubleConfirmation: false,
         vibration: false
-      }
+      },
+      language: 'pt-BR'
     };
   }
 };

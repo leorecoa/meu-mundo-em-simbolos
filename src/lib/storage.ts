@@ -35,6 +35,7 @@ export interface UserSettings {
   useAudioFeedback: boolean;
   theme: string;
   largeIcons: boolean;
+  language: string;
 }
 
 export interface TaskProgress {
@@ -207,7 +208,8 @@ export const getSettings = (): UserSettings => {
       iconSize: 50,
       useAudioFeedback: true,
       theme: 'Padrão',
-      largeIcons: false
+      largeIcons: false,
+      language: 'pt-BR'
     };
   } catch (error) {
     console.error('Erro ao recuperar configurações:', error);
@@ -217,7 +219,8 @@ export const getSettings = (): UserSettings => {
       iconSize: 50,
       useAudioFeedback: true,
       theme: 'Padrão',
-      largeIcons: false
+      largeIcons: false,
+      language: 'pt-BR'
     };
   }
 };

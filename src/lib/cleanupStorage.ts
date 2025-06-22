@@ -34,7 +34,8 @@ export const cleanupStorage = () => {
             highContrast: parsedSettings.accessibility?.highContrast || false,
             doubleConfirmation: parsedSettings.accessibility?.doubleConfirmation || false,
             vibration: parsedSettings.accessibility?.vibration || false
-          }
+          },
+          language: 'pt-BR'
         };
         
         localStorage.setItem('app-settings', JSON.stringify(appSettings));

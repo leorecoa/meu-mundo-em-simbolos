@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useEffect } from "react";
 import { cleanupStorage } from "@/lib/cleanupStorage";
+import { getSettings } from "@/lib/storage";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -22,9 +23,19 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Executar limpeza de armazenamento na inicialização
+  // Executar limpeza de armazenamento e inicializar idioma na inicialização
   useEffect(() => {
     cleanupStorage();
+    
+    // Inicializar idioma do documento
+    try {
+      const settings = getSettings();
+      if (settings.language) {
+        document.documentElement.lang = settings.language.split('-')[0];
+      }
+    } catch (error) {
+      console.error('Erro ao definir o idioma do documento:', error);
+    }
   }, []);
   
   return (

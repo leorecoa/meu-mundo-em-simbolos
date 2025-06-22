@@ -31,5 +31,21 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Atualizar o idioma do documento com base nas configurações do usuário
+      document.addEventListener('DOMContentLoaded', function() {
+        try {
+          const appSettings = localStorage.getItem('app-settings');
+          if (appSettings) {
+            const settings = JSON.parse(appSettings);
+            if (settings.language) {
+              document.documentElement.lang = settings.language.split('-')[0];
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao definir o idioma do documento:', error);
+        }
+      });
+    </script>
   </body>
 </html>
