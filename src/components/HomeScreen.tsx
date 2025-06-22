@@ -1,4 +1,4 @@
-import { Heart, Home, Utensils, Gamepad2, Users, Settings, Pause, Volume2, Play } from 'lucide-react';
+import { Heart, Home, Utensils, Gamepad2, Users, Settings, Pause, Volume2, Play, Activity } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,9 +9,10 @@ interface HomeScreenProps {
   onNavigateToCategory: (category: string) => void;
   onNavigateToPhrase: () => void;
   onNavigateToSettings: () => void;
+  onNavigateToMyAT?: () => void;
 }
 
-export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToSettings }: HomeScreenProps) => {
+export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToSettings, onNavigateToMyAT }: HomeScreenProps) => {
   const [isPaused, setIsPaused] = useState(false);
   const [volumeLevel, setVolumeLevel] = useState(50);
   const { toast } = useToast();
@@ -113,6 +114,17 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
           >
             <Settings className="h-5 w-5 text-blue-800" />
           </Button>
+          {onNavigateToMyAT && (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="bg-indigo-50 hover:bg-indigo-100 pointer-events-auto"
+              onClick={() => onNavigateToMyAT()}
+              aria-label="Meu AT"
+            >
+              <Activity className="h-5 w-5 text-indigo-800" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -160,6 +172,17 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
         </div>
       </div>
 
+      {/* Botão para Meu AT */}
+      {onNavigateToMyAT && (
+        <Button 
+          className="w-full py-4 text-lg font-bold rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-800 shadow-md flex items-center justify-center gap-2"
+          onClick={() => onNavigateToMyAT()}
+        >
+          <Activity className="h-6 w-6" />
+          MEU ASSISTENTE TERAPÊUTICO
+        </Button>
+      )}
+      
       {/* Barra de progresso - Gamificação */}
       <div className={`${currentTheme.cardBg} rounded-lg p-4 shadow-sm`}>
         <div className={`text-sm ${currentTheme.textColor} mb-1`}>Você ainda não usou palavras hoje!</div>

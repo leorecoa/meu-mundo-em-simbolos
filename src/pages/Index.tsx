@@ -6,8 +6,9 @@ import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { SimpleSettings } from '@/components/SimpleSettings';
 import { SplashScreen } from '@/components/SplashScreen';
 import { TransitionWrapper } from '@/components/TransitionWrapper';
+import { MyATScreen } from '@/components/MyATScreen';
 
-type Screen = 'home' | 'category' | 'phrase' | 'settings';
+type Screen = 'home' | 'category' | 'phrase' | 'settings' | 'myat';
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -32,6 +33,7 @@ const Index = () => {
               onNavigateToCategory={navigateToCategory}
               onNavigateToPhrase={() => setCurrentScreen('phrase')}
               onNavigateToSettings={() => setCurrentScreen('settings')}
+              onNavigateToMyAT={() => setCurrentScreen('myat')}
             />
           </TransitionWrapper>
         );
@@ -62,6 +64,15 @@ const Index = () => {
             />
           </TransitionWrapper>
         );
+        
+      case 'myat':
+        return (
+          <TransitionWrapper key="myat-screen">
+            <MyATScreen 
+              onBack={() => setCurrentScreen('home')}
+            />
+          </TransitionWrapper>
+        );
 
       default:
         return (
@@ -70,6 +81,7 @@ const Index = () => {
               onNavigateToCategory={navigateToCategory} 
               onNavigateToPhrase={() => setCurrentScreen('phrase')} 
               onNavigateToSettings={() => setCurrentScreen('settings')} 
+              onNavigateToMyAT={() => setCurrentScreen('myat')}
             />
           </TransitionWrapper>
         );
