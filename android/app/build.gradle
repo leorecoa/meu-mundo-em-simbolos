@@ -44,7 +44,27 @@ dependencies {
     implementation project(':capacitor-cordova-android-plugins')
 }
 
+// Adicionar diretório src/main/java ao classpath
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+    }
+}
+
 apply from: 'capacitor.build.gradle'
+
+// Adicionar uma tarefa que pode ser executada diretamente
+task runApp(type: Exec) {
+    description 'Instala e executa o aplicativo no dispositivo conectado'
+    group 'run'
+    
+    dependsOn 'assembleDebug'
+    
+    commandLine 'cmd', '/c', 'adb', 'install', '-r', 
+        "${buildDir}/outputs/apk/debug/app-debug.apk"
+}
 
 try {
     def servicesJSON = file('google-services.json')
