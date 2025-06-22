@@ -10,6 +10,7 @@ import { useSpeech } from '@/hooks/use-speech';
 import { getSettings, saveSettings } from '@/lib/storage';
 import { commonLanguages } from '@/lib/commonLanguages';
 import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 interface SettingsProps {
   onBack: () => void;
@@ -234,6 +235,16 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
     import('@/lib/applyLanguageSettings').then(({ applyLanguageSettings }) => {
       applyLanguageSettings(language);
       
+      // Atualizar configurações globais
+      const settings = getSettings();
+      saveSettings({
+        ...settings,
+        language
+      });
+      
+      // Forçar atualização do documento
+      document.documentElement.lang = language.split('-')[0];
+      
       toast({
         title: "Idioma alterado",
         description: `O idioma da voz foi alterado para ${languages.find(l => l.code === language)?.name || language}.`,
@@ -295,6 +306,30 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
 export const Settings = ({ onBack }: SettingsProps) => {
   const { toast } = useToast();
   const { currentTheme, setTheme } = useTheme();
+  
+  // Garantir que o componente seja inicializado corretamente
+  useEffect(() => {
+    // Verificar se o tema está carregado corretamente
+    if (!currentTheme || !currentTheme.name) {
+      setTheme('Padrão');
+    }
+    
+    // Adicionar listener para mudanças de idioma
+    const handleLanguageChange = (event: Event) => {
+      // Forçar atualização do componente quando o idioma mudar
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail && customEvent.detail.language) {
+        // Atualizar o idioma no documento
+        document.documentElement.lang = customEvent.detail.language.split('-')[0];
+      }
+    };
+    
+    document.addEventListener('languagechange', handleLanguageChange);
+    
+    return () => {
+      document.removeEventListener('languagechange', handleLanguageChange);
+    };
+  }, [setTheme]);
 
   const themes = [
     { name: 'Padrão', preview: 'bg-blue-100' },

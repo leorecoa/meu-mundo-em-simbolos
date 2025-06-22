@@ -58,11 +58,28 @@ const themes: Record<string, Theme> = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [currentTheme, setCurrentTheme] = useState<Theme>(themes['Padrão']);
+  // Carregar tema salvo do localStorage ou usar o padrão
+  const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
+    try {
+      const savedTheme = localStorage.getItem('app-theme');
+      if (savedTheme && themes[savedTheme]) {
+        return themes[savedTheme];
+      }
+    } catch (error) {
+      console.error('Erro ao carregar tema:', error);
+    }
+    return themes['Padrão'];
+  });
 
   const setTheme = (themeName: string) => {
     if (themes[themeName]) {
       setCurrentTheme(themes[themeName]);
+      // Salvar tema no localStorage
+      try {
+        localStorage.setItem('app-theme', themeName);
+      } catch (error) {
+        console.error('Erro ao salvar tema:', error);
+      }
     }
   };
 

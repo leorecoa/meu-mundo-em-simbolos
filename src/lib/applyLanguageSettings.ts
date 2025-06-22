@@ -19,4 +19,11 @@ export const applyLanguageSettings = (language: string): void => {
   
   // Atualizar o atributo lang do documento HTML para melhorar a acessibilidade
   document.documentElement.lang = language.split('-')[0];
+  
+  // Disparar um evento personalizado para notificar componentes sobre a mudança de idioma
+  const languageChangeEvent = new CustomEvent('languagechange', { detail: { language } });
+  document.dispatchEvent(languageChangeEvent);
+  
+  // Armazenar o idioma atual no localStorage para garantir persistência
+  localStorage.setItem('current-language', language);
 };

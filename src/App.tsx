@@ -32,6 +32,11 @@ const App = () => {
       const settings = getSettings();
       if (settings.language) {
         document.documentElement.lang = settings.language.split('-')[0];
+        
+        // Garantir que o idioma seja aplicado em todo o aplicativo
+        import('@/lib/applyLanguageSettings').then(({ applyLanguageSettings }) => {
+          applyLanguageSettings(settings.language);
+        });
       }
     } catch (error) {
       console.error('Erro ao definir o idioma do documento:', error);
