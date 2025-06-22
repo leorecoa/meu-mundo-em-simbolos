@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Meu Mundo em Símbolos',
   webDir: 'dist',
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
+    allowNavigation: ['*']
   },
   plugins: {
     SplashScreen: {
