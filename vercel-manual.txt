@@ -1,0 +1,13 @@
+INSTRUÇÕES PARA DEPLOY MANUAL NO VERCEL
+
+1. Acesse https://vercel.com/ no seu navegador
+2. Faça login na sua conta
+3. Clique em "Add New..." > "Project"
+4. Escolha "Upload" na seção "Import Git Repository"
+5. Arraste e solte a pasta "dist" ou clique para selecionar
+6. Clique em "Deploy"
+
+O Vercel vai processar os arquivos e fornecer uma URL para seu site.
+
+NOTA: Se você já tem um projeto existente no Vercel, pode acessá-lo no dashboard
+e usar a opção "Deploy" para fazer upload da nova versão.
