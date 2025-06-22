@@ -16,6 +16,17 @@ interface ThemeContextType {
   setTheme: (themeName: string) => void;
 }
 
+// Tema padrão para fallback
+const defaultTheme: Theme = {
+  name: 'Padrão',
+  bgColor: 'bg-blue-50',
+  borderColor: 'border-blue-500',
+  textColor: 'text-blue-800',
+  cardBg: 'bg-white',
+  buttonBg: 'bg-blue-100',
+  buttonHover: 'hover:bg-blue-200'
+};
+
 const themes: Record<string, Theme> = {
   'Padrão': {
     name: 'Padrão',
@@ -68,10 +79,23 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error('Erro ao carregar tema:', error);
     }
-    return themes['Padrão'];
+    return defaultTheme;
   });
 
+  // Garantir que o tema seja carregado corretamente na inicialização
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem('app-theme');
+      if (savedTheme && themes[savedTheme] && currentTheme.name !== savedTheme) {
+        setCurrentTheme(themes[savedTheme]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar tema na inicialização:', error);
+    }
+  }, []);
+
   const setTheme = (themeName: string) => {
+    console.log('Alterando tema para:', themeName);
     if (themes[themeName]) {
       setCurrentTheme(themes[themeName]);
       // Salvar tema no localStorage
@@ -80,6 +104,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         console.error('Erro ao salvar tema:', error);
       }
+    } else {
+      console.error('Tema não encontrado:', themeName);
+      // Usar tema padrão se o tema solicitado não existir
+      setCurrentTheme(defaultTheme);
     }
   };
 

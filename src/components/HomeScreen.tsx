@@ -105,7 +105,10 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
             variant="outline" 
             size="icon" 
             className="bg-blue-50 hover:bg-blue-100 pointer-events-auto"
-            onClick={onNavigateToSettings}
+            onClick={() => {
+              console.log('Botão de configurações clicado');
+              onNavigateToSettings();
+            }}
             aria-label="Configurações"
           >
             <Settings className="h-5 w-5 text-blue-800" />

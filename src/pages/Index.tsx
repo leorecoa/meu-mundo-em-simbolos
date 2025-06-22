@@ -3,7 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import { HomeScreen } from '@/components/HomeScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
-import { Settings } from '@/components/Settings';
+import { SettingsWrapper } from '@/components/SettingsWrapper';
 import { SplashScreen } from '@/components/SplashScreen';
 import { TransitionWrapper } from '@/components/TransitionWrapper';
 
@@ -54,9 +54,10 @@ const Index = () => {
           </TransitionWrapper>
         );
       case 'settings':
+        console.log('Renderizando tela de configurações');
         return (
-          <TransitionWrapper>
-            <Settings 
+          <TransitionWrapper key="settings-screen">
+            <SettingsWrapper 
               onBack={() => setCurrentScreen('home')}
             />
           </TransitionWrapper>

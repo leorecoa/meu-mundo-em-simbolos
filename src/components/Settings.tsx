@@ -10,7 +10,6 @@ import { useSpeech } from '@/hooks/use-speech';
 import { getSettings, saveSettings } from '@/lib/storage';
 import { commonLanguages } from '@/lib/commonLanguages';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
 
 interface SettingsProps {
   onBack: () => void;
@@ -22,26 +21,39 @@ const VolumeButtons = ({ currentTheme }: { currentTheme: any }) => {
   const [activeVolume, setActiveVolume] = useState<'alto' | 'médio' | 'baixo'>('médio');
   
   useEffect(() => {
-    const settings = getAppSettings();
-    setActiveVolume(settings.volume);
+    try {
+      const settings = getAppSettings();
+      setActiveVolume(settings.volume);
+    } catch (error) {
+      console.error('Erro ao carregar configurações de volume:', error);
+    }
   }, []);
   
   const handleVolumeChange = (volume: 'alto' | 'médio' | 'baixo') => {
     setActiveVolume(volume);
-    applyVolumeSettings(volume);
-    
-    toast({
-      title: "Volume alterado",
-      description: `O volume foi definido como ${volume}.`,
-      duration: 2000,
-    });
+    try {
+      applyVolumeSettings(volume);
+      
+      toast({
+        title: "Volume alterado",
+        description: `O volume foi definido como ${volume}.`,
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Erro ao aplicar configurações de volume:', error);
+    }
   };
+  
+  // Garantir que o tema tenha valores padrão
+  const buttonBg = currentTheme?.buttonBg || 'bg-blue-100';
+  const buttonHover = currentTheme?.buttonHover || 'hover:bg-blue-200';
+  const textColor = currentTheme?.textColor || 'text-blue-800';
   
   return (
     <>
       <Button 
         variant={activeVolume === 'alto' ? "default" : "outline"} 
-        className={`w-full ${activeVolume === 'alto' ? 'bg-blue-500 text-white' : `${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor}`}`}
+        className={`w-full ${activeVolume === 'alto' ? 'bg-blue-500 text-white' : `${buttonBg} ${buttonHover} ${textColor}`}`}
         onClick={() => handleVolumeChange('alto')}
       >
         <VolumeIcon className="w-4 h-4 mr-2" />
@@ -50,7 +62,7 @@ const VolumeButtons = ({ currentTheme }: { currentTheme: any }) => {
       </Button>
       <Button 
         variant={activeVolume === 'médio' ? "default" : "outline"} 
-        className={`w-full ${activeVolume === 'médio' ? 'bg-blue-500 text-white' : `${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor}`}`}
+        className={`w-full ${activeVolume === 'médio' ? 'bg-blue-500 text-white' : `${buttonBg} ${buttonHover} ${textColor}`}`}
         onClick={() => handleVolumeChange('médio')}
       >
         <Volume1 className="w-4 h-4 mr-2" />
@@ -59,7 +71,7 @@ const VolumeButtons = ({ currentTheme }: { currentTheme: any }) => {
       </Button>
       <Button 
         variant={activeVolume === 'baixo' ? "default" : "outline"} 
-        className={`w-full ${activeVolume === 'baixo' ? 'bg-blue-500 text-white' : `${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor}`}`}
+        className={`w-full ${activeVolume === 'baixo' ? 'bg-blue-500 text-white' : `${buttonBg} ${buttonHover} ${textColor}`}`}
         onClick={() => handleVolumeChange('baixo')}
       >
         <VolumeX className="w-4 h-4 mr-2" />
@@ -76,26 +88,39 @@ const FontSizeButtons = ({ currentTheme }: { currentTheme: any }) => {
   const [activeFontSize, setActiveFontSize] = useState<'grande' | 'médio' | 'pequeno'>('médio');
   
   useEffect(() => {
-    const settings = getAppSettings();
-    setActiveFontSize(settings.fontSize);
+    try {
+      const settings = getAppSettings();
+      setActiveFontSize(settings.fontSize);
+    } catch (error) {
+      console.error('Erro ao carregar configurações de tamanho de fonte:', error);
+    }
   }, []);
   
   const handleFontSizeChange = (fontSize: 'grande' | 'médio' | 'pequeno') => {
     setActiveFontSize(fontSize);
-    applyFontSizeSettings(fontSize);
-    
-    toast({
-      title: "Tamanho da fonte alterado",
-      description: `O tamanho da fonte foi definido como ${fontSize}.`,
-      duration: 2000,
-    });
+    try {
+      applyFontSizeSettings(fontSize);
+      
+      toast({
+        title: "Tamanho da fonte alterado",
+        description: `O tamanho da fonte foi definido como ${fontSize}.`,
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Erro ao aplicar configurações de tamanho de fonte:', error);
+    }
   };
+  
+  // Garantir que o tema tenha valores padrão
+  const buttonBg = currentTheme?.buttonBg || 'bg-blue-100';
+  const buttonHover = currentTheme?.buttonHover || 'hover:bg-blue-200';
+  const textColor = currentTheme?.textColor || 'text-blue-800';
   
   return (
     <>
       <Button 
         variant={activeFontSize === 'grande' ? "default" : "outline"} 
-        className={`w-full ${activeFontSize === 'grande' ? 'bg-blue-500 text-white' : `${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor}`}`}
+        className={`w-full ${activeFontSize === 'grande' ? 'bg-blue-500 text-white' : `${buttonBg} ${buttonHover} ${textColor}`}`}
         onClick={() => handleFontSizeChange('grande')}
       >
         <span className="text-lg">Fonte grande</span>
@@ -103,7 +128,7 @@ const FontSizeButtons = ({ currentTheme }: { currentTheme: any }) => {
       </Button>
       <Button 
         variant={activeFontSize === 'médio' ? "default" : "outline"} 
-        className={`w-full ${activeFontSize === 'médio' ? 'bg-blue-500 text-white' : `${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor}`}`}
+        className={`w-full ${activeFontSize === 'médio' ? 'bg-blue-500 text-white' : `${buttonBg} ${buttonHover} ${textColor}`}`}
         onClick={() => handleFontSizeChange('médio')}
       >
         <span className="text-base">Fonte média</span>
@@ -111,7 +136,7 @@ const FontSizeButtons = ({ currentTheme }: { currentTheme: any }) => {
       </Button>
       <Button 
         variant={activeFontSize === 'pequeno' ? "default" : "outline"} 
-        className={`w-full ${activeFontSize === 'pequeno' ? 'bg-blue-500 text-white' : `${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor}`}`}
+        className={`w-full ${activeFontSize === 'pequeno' ? 'bg-blue-500 text-white' : `${buttonBg} ${buttonHover} ${textColor}`}`}
         onClick={() => handleFontSizeChange('pequeno')}
       >
         <span className="text-sm">Fonte pequena</span>
@@ -131,8 +156,16 @@ const AccessibilityButtons = ({ currentTheme }: { currentTheme: any }) => {
   });
   
   useEffect(() => {
-    const settings = getAppSettings();
-    setAccessibilitySettings(settings.accessibility);
+    try {
+      const settings = getAppSettings();
+      setAccessibilitySettings(settings.accessibility || {
+        highContrast: false,
+        doubleConfirmation: false,
+        vibration: false
+      });
+    } catch (error) {
+      console.error('Erro ao carregar configurações de acessibilidade:', error);
+    }
   }, []);
   
   const handleAccessibilityChange = (setting: 'highContrast' | 'doubleConfirmation' | 'vibration', value: boolean) => {
@@ -141,22 +174,29 @@ const AccessibilityButtons = ({ currentTheme }: { currentTheme: any }) => {
       [setting]: value
     }));
     
-    applyAccessibilitySettings(setting, value);
-    
-    toast({
-      title: "Configuração alterada",
-      description: `${setting === 'highContrast' ? 'Modo de alto contraste' : 
-                    setting === 'doubleConfirmation' ? 'Confirmação dupla' : 
-                    'Vibração ao tocar'} ${value ? 'ativado' : 'desativado'}.`,
-      duration: 2000,
-    });
+    try {
+      applyAccessibilitySettings(setting, value);
+      
+      toast({
+        title: "Configuração alterada",
+        description: `${setting === 'highContrast' ? 'Modo de alto contraste' : 
+                      setting === 'doubleConfirmation' ? 'Confirmação dupla' : 
+                      'Vibração ao tocar'} ${value ? 'ativado' : 'desativado'}.`,
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Erro ao aplicar configurações de acessibilidade:', error);
+    }
   };
+  
+  // Garantir que o tema tenha valores padrão
+  const textColor = currentTheme?.textColor || 'text-blue-800';
   
   return (
     <>
       <div className="flex items-center justify-between p-3 bg-slate-100 rounded-md">
         <div>
-          <p className={`font-medium ${currentTheme.textColor}`}>Modo de alto contraste</p>
+          <p className={`font-medium ${textColor}`}>Modo de alto contraste</p>
           <p className="text-sm text-slate-500">Aumenta o contraste para melhor visibilidade</p>
         </div>
         <Switch 
@@ -167,7 +207,7 @@ const AccessibilityButtons = ({ currentTheme }: { currentTheme: any }) => {
       
       <div className="flex items-center justify-between p-3 bg-slate-100 rounded-md">
         <div>
-          <p className={`font-medium ${currentTheme.textColor}`}>Confirmação dupla para ações</p>
+          <p className={`font-medium ${textColor}`}>Confirmação dupla para ações</p>
           <p className="text-sm text-slate-500">Solicita confirmação antes de ações importantes</p>
         </div>
         <Switch 
@@ -178,7 +218,7 @@ const AccessibilityButtons = ({ currentTheme }: { currentTheme: any }) => {
       
       <div className="flex items-center justify-between p-3 bg-slate-100 rounded-md">
         <div>
-          <p className={`font-medium ${currentTheme.textColor}`}>Vibração ao tocar</p>
+          <p className={`font-medium ${textColor}`}>Vibração ao tocar</p>
           <p className="text-sm text-slate-500">Vibra ao interagir com elementos</p>
         </div>
         <Switch 
@@ -198,60 +238,77 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('pt-BR');
   
   useEffect(() => {
-    // Obter idiomas disponíveis do sistema
-    const systemLanguages = getAvailableLanguages();
-    
-    // Combinar com idiomas comuns
-    const allLanguages = [...commonLanguages];
-    
-    // Adicionar idiomas do sistema que não estão na lista comum
-    systemLanguages.forEach(sysLang => {
-      if (!allLanguages.some(lang => lang.code === sysLang.code)) {
-        allLanguages.push({
-          code: sysLang.code,
-          name: sysLang.name || sysLang.code
-        });
-      }
-    });
-    
-    // Ordenar idiomas: primeiro português, depois os outros em ordem alfabética
-    allLanguages.sort((a, b) => {
-      if (a.code.startsWith('pt')) return -1;
-      if (b.code.startsWith('pt')) return 1;
-      return a.name.localeCompare(b.name);
-    });
-    
-    setLanguages(allLanguages);
-    
-    // Obter idioma atual das configurações
-    const settings = getSettings();
-    setSelectedLanguage(settings.language || 'pt-BR');
+    try {
+      // Obter idiomas disponíveis do sistema
+      const systemLanguages = getAvailableLanguages();
+      
+      // Combinar com idiomas comuns
+      const allLanguages = [...commonLanguages];
+      
+      // Adicionar idiomas do sistema que não estão na lista comum
+      systemLanguages.forEach(sysLang => {
+        if (!allLanguages.some(lang => lang.code === sysLang.code)) {
+          allLanguages.push({
+            code: sysLang.code,
+            name: sysLang.name || sysLang.code
+          });
+        }
+      });
+      
+      // Ordenar idiomas: primeiro português, depois os outros em ordem alfabética
+      allLanguages.sort((a, b) => {
+        if (a.code.startsWith('pt')) return -1;
+        if (b.code.startsWith('pt')) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      
+      setLanguages(allLanguages);
+      
+      // Obter idioma atual das configurações
+      const settings = getSettings();
+      setSelectedLanguage(settings.language || 'pt-BR');
+    } catch (error) {
+      console.error('Erro ao carregar idiomas:', error);
+      // Garantir que pelo menos os idiomas comuns estejam disponíveis
+      setLanguages([...commonLanguages]);
+    }
   }, [getAvailableLanguages]);
   
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
     
-    // Aplicar configurações de idioma
-    import('@/lib/applyLanguageSettings').then(({ applyLanguageSettings }) => {
-      applyLanguageSettings(language);
-      
-      // Atualizar configurações globais
-      const settings = getSettings();
-      saveSettings({
-        ...settings,
-        language
+    try {
+      // Aplicar configurações de idioma
+      import('@/lib/applyLanguageSettings').then(({ applyLanguageSettings }) => {
+        applyLanguageSettings(language);
+        
+        // Atualizar configurações globais
+        const settings = getSettings();
+        saveSettings({
+          ...settings,
+          language
+        });
+        
+        // Forçar atualização do documento
+        document.documentElement.lang = language.split('-')[0];
+        
+        toast({
+          title: "Idioma alterado",
+          description: `O idioma da voz foi alterado para ${languages.find(l => l.code === language)?.name || language}.`,
+          duration: 2000,
+        });
+      }).catch(error => {
+        console.error('Erro ao importar applyLanguageSettings:', error);
       });
-      
-      // Forçar atualização do documento
-      document.documentElement.lang = language.split('-')[0];
-      
-      toast({
-        title: "Idioma alterado",
-        description: `O idioma da voz foi alterado para ${languages.find(l => l.code === language)?.name || language}.`,
-        duration: 2000,
-      });
-    });
+    } catch (error) {
+      console.error('Erro ao alterar idioma:', error);
+    }
   };
+  
+  // Garantir que o tema tenha valores padrão
+  const buttonBg = currentTheme?.buttonBg || 'bg-blue-100';
+  const buttonHover = currentTheme?.buttonHover || 'hover:bg-blue-200';
+  const textColor = currentTheme?.textColor || 'text-blue-800';
   
   return (
     <div className="space-y-3">
@@ -259,21 +316,30 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
         variant="outline" 
         className="w-full mb-3"
         onClick={() => {
-          // Testar a voz selecionada
-          const langName = languages.find(l => l.code === selectedLanguage)?.name || selectedLanguage;
-          const testText = selectedLanguage.startsWith('pt') ? 'Olá, este é um teste de voz.' : 
-                          selectedLanguage.startsWith('en') ? 'Hello, this is a voice test.' :
-                          selectedLanguage.startsWith('es') ? 'Hola, esta es una prueba de voz.' :
-                          selectedLanguage.startsWith('fr') ? 'Bonjour, ceci est un test vocal.' :
-                          'Test 1, 2, 3.';
-          
-          speak(testText, { lang: selectedLanguage });
-          
-          toast({
-            title: "Teste de voz",
-            description: `Testando voz em ${langName}`,
-            duration: 2000,
-          });
+          try {
+            // Testar a voz selecionada
+            const langName = languages.find(l => l.code === selectedLanguage)?.name || selectedLanguage;
+            const testText = selectedLanguage.startsWith('pt') ? 'Olá, este é um teste de voz.' : 
+                            selectedLanguage.startsWith('en') ? 'Hello, this is a voice test.' :
+                            selectedLanguage.startsWith('es') ? 'Hola, esta es una prueba de voz.' :
+                            selectedLanguage.startsWith('fr') ? 'Bonjour, ceci est un test vocal.' :
+                            'Test 1, 2, 3.';
+            
+            speak(testText, { lang: selectedLanguage });
+            
+            toast({
+              title: "Teste de voz",
+              description: `Testando voz em ${langName}`,
+              duration: 2000,
+            });
+          } catch (error) {
+            console.error('Erro ao testar voz:', error);
+            toast({
+              title: "Erro ao testar voz",
+              description: "Não foi possível reproduzir o teste de voz.",
+              duration: 2000,
+            });
+          }
         }}
       >
         Testar voz selecionada
@@ -285,7 +351,7 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
             <Button
               key={language.code}
               variant={selectedLanguage === language.code ? "default" : "outline"}
-              className={`w-full text-left justify-start ${selectedLanguage === language.code ? 'bg-blue-500 text-white' : `${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor}`}`}
+              className={`w-full text-left justify-start ${selectedLanguage === language.code ? 'bg-blue-500 text-white' : `${buttonBg} ${buttonHover} ${textColor}`}`}
               onClick={() => handleLanguageChange(language.code)}
             >
               <Globe className="w-4 h-4 mr-2" />
@@ -307,10 +373,16 @@ export const Settings = ({ onBack }: SettingsProps) => {
   const { toast } = useToast();
   const { currentTheme, setTheme } = useTheme();
   
+  // Estado local para garantir que o componente seja renderizado corretamente
+  const [isReady, setIsReady] = useState(false);
+  
   // Garantir que o componente seja inicializado corretamente
   useEffect(() => {
+    console.log('Settings component mounted', currentTheme);
+    
     // Verificar se o tema está carregado corretamente
     if (!currentTheme || !currentTheme.name) {
+      console.log('Theme not loaded, setting default theme');
       setTheme('Padrão');
     }
     
@@ -326,10 +398,17 @@ export const Settings = ({ onBack }: SettingsProps) => {
     
     document.addEventListener('languagechange', handleLanguageChange);
     
+    // Marcar componente como pronto após um pequeno delay para garantir que tudo seja carregado
+    const timer = setTimeout(() => {
+      setIsReady(true);
+      console.log('Settings component ready');
+    }, 100);
+    
     return () => {
       document.removeEventListener('languagechange', handleLanguageChange);
+      clearTimeout(timer);
     };
-  }, [setTheme]);
+  }, [currentTheme, setTheme]);
 
   const themes = [
     { name: 'Padrão', preview: 'bg-blue-100' },
@@ -338,28 +417,61 @@ export const Settings = ({ onBack }: SettingsProps) => {
     { name: 'Alto contraste', preview: 'bg-gray-800' }
   ];
 
+  // Verificar se o tema está carregado corretamente ou se o componente ainda não está pronto
+  if (!isReady || !currentTheme || !currentTheme.name) {
+    // Tentar reparar as configurações
+    import('@/lib/initApp').then(({ repairSettings }) => {
+      repairSettings();
+      // Forçar atualização do tema
+      setTheme('Padrão');
+      // Marcar componente como pronto
+      setIsReady(true);
+    }).catch(error => {
+      console.error('Erro ao importar initApp:', error);
+    });
+    
+    return (
+      <div className="min-h-screen bg-blue-50 p-4">
+        <div className="flex items-center mb-6">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={onBack}
+            className="bg-blue-100 hover:bg-blue-200 mr-3"
+          >
+            <ArrowLeft className="h-5 w-5 text-blue-800" />
+          </Button>
+          <h1 className="text-2xl font-bold text-blue-800">Configurações</h1>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <p className="text-lg text-blue-800">Carregando configurações...</p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
-    <div className={`min-h-screen ${currentTheme.bgColor} p-4`}>
+    <div className={`min-h-screen ${currentTheme.bgColor || 'bg-blue-50'} p-4`}>
       {/* Header */}
       <div className="flex items-center mb-6">
         <Button 
           variant="outline" 
           size="icon" 
           onClick={onBack}
-          className={`${currentTheme.buttonBg} ${currentTheme.buttonHover} mr-3`}
+          className={`${currentTheme.buttonBg || 'bg-blue-100'} ${currentTheme.buttonHover || 'hover:bg-blue-200'} mr-3`}
         >
-          <ArrowLeft className={`h-5 w-5 ${currentTheme.textColor}`} />
+          <ArrowLeft className={`h-5 w-5 ${currentTheme.textColor || 'text-blue-800'}`} />
         </Button>
-        <h1 className={`text-2xl font-bold ${currentTheme.textColor}`}>Configurações</h1>
+        <h1 className={`text-2xl font-bold ${currentTheme.textColor || 'text-blue-800'}`}>Configurações</h1>
       </div>
 
       <div className="space-y-6 max-w-2xl mx-auto">
 
         {/* Temas de cores */}
-        <Card className={`${currentTheme.cardBg} p-6`}>
+        <Card className={`${currentTheme.cardBg || 'bg-white'} p-6`}>
           <div className="flex items-center mb-4">
-            <Palette className={`h-6 w-6 ${currentTheme.textColor} mr-3`} />
-            <h2 className={`text-xl font-semibold ${currentTheme.textColor}`}>Tema de cores</h2>
+            <Palette className={`h-6 w-6 ${currentTheme.textColor || 'text-blue-800'} mr-3`} />
+            <h2 className={`text-xl font-semibold ${currentTheme.textColor || 'text-blue-800'}`}>Tema de cores</h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {themes.map((theme) => (
@@ -369,7 +481,7 @@ export const Settings = ({ onBack }: SettingsProps) => {
                 className={`h-16 flex flex-col items-center justify-center ${
                   currentTheme.name === theme.name 
                     ? 'bg-blue-500 text-white' 
-                    : `${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor}`
+                    : `${currentTheme.buttonBg || 'bg-blue-100'} ${currentTheme.buttonHover || 'hover:bg-blue-200'} ${currentTheme.textColor || 'text-blue-800'}`
                 }`}
                 onClick={() => setTheme(theme.name)}
               >
@@ -381,10 +493,10 @@ export const Settings = ({ onBack }: SettingsProps) => {
         </Card>
 
         {/* Volume */}
-        <Card className={`${currentTheme.cardBg} p-6`}>
+        <Card className={`${currentTheme.cardBg || 'bg-white'} p-6`}>
           <div className="flex items-center mb-4">
-            <Volume2 className={`h-6 w-6 ${currentTheme.textColor} mr-3`} />
-            <h2 className={`text-xl font-semibold ${currentTheme.textColor}`}>Volume</h2>
+            <Volume2 className={`h-6 w-6 ${currentTheme.textColor || 'text-blue-800'} mr-3`} />
+            <h2 className={`text-xl font-semibold ${currentTheme.textColor || 'text-blue-800'}`}>Volume</h2>
           </div>
           <div className="space-y-3">
             <VolumeButtons currentTheme={currentTheme} />
@@ -392,10 +504,10 @@ export const Settings = ({ onBack }: SettingsProps) => {
         </Card>
 
         {/* Tamanho da fonte */}
-        <Card className={`${currentTheme.cardBg} p-6`}>
+        <Card className={`${currentTheme.cardBg || 'bg-white'} p-6`}>
           <div className="flex items-center mb-4">
-            <Type className={`h-6 w-6 ${currentTheme.textColor} mr-3`} />
-            <h2 className={`text-xl font-semibold ${currentTheme.textColor}`}>Tamanho da fonte</h2>
+            <Type className={`h-6 w-6 ${currentTheme.textColor || 'text-blue-800'} mr-3`} />
+            <h2 className={`text-xl font-semibold ${currentTheme.textColor || 'text-blue-800'}`}>Tamanho da fonte</h2>
           </div>
           <div className="space-y-3">
             <FontSizeButtons currentTheme={currentTheme} />
@@ -403,10 +515,10 @@ export const Settings = ({ onBack }: SettingsProps) => {
         </Card>
 
         {/* Idioma */}
-        <Card className={`${currentTheme.cardBg} p-6`}>
+        <Card className={`${currentTheme.cardBg || 'bg-white'} p-6`}>
           <div className="flex items-center mb-4">
-            <Globe className={`h-6 w-6 ${currentTheme.textColor} mr-3`} />
-            <h2 className={`text-xl font-semibold ${currentTheme.textColor}`}>Idioma da voz</h2>
+            <Globe className={`h-6 w-6 ${currentTheme.textColor || 'text-blue-800'} mr-3`} />
+            <h2 className={`text-xl font-semibold ${currentTheme.textColor || 'text-blue-800'}`}>Idioma da voz</h2>
           </div>
           <div className="space-y-3">
             <LanguageSelector currentTheme={currentTheme} />
@@ -414,10 +526,10 @@ export const Settings = ({ onBack }: SettingsProps) => {
         </Card>
 
         {/* Acessibilidade */}
-        <Card className={`${currentTheme.cardBg} p-6`}>
+        <Card className={`${currentTheme.cardBg || 'bg-white'} p-6`}>
           <div className="flex items-center mb-4">
-            <Accessibility className={`h-6 w-6 ${currentTheme.textColor} mr-3`} />
-            <h2 className={`text-xl font-semibold ${currentTheme.textColor}`}>Acessibilidade</h2>
+            <Accessibility className={`h-6 w-6 ${currentTheme.textColor || 'text-blue-800'} mr-3`} />
+            <h2 className={`text-xl font-semibold ${currentTheme.textColor || 'text-blue-800'}`}>Acessibilidade</h2>
           </div>
           <div className="space-y-3">
             <AccessibilityButtons currentTheme={currentTheme} />

@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { useEffect } from "react";
 import { cleanupStorage } from "@/lib/cleanupStorage";
 import { getSettings } from "@/lib/storage";
+import { initializeApp, repairSettings } from "@/lib/initApp";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -23,23 +24,35 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Executar limpeza de armazenamento e inicializar idioma na inicialização
+  // Executar limpeza de armazenamento e inicializar o aplicativo
   useEffect(() => {
+    console.log('App inicializado');
+    
+    // Limpar armazenamento antigo
     cleanupStorage();
     
-    // Inicializar idioma do documento
     try {
+      // Inicializar o aplicativo
+      initializeApp();
+      
+      // Obter configurações
       const settings = getSettings();
       if (settings.language) {
-        document.documentElement.lang = settings.language.split('-')[0];
+        console.log('Idioma definido:', settings.language);
         
         // Garantir que o idioma seja aplicado em todo o aplicativo
         import('@/lib/applyLanguageSettings').then(({ applyLanguageSettings }) => {
           applyLanguageSettings(settings.language);
+        }).catch(error => {
+          console.error('Erro ao importar applyLanguageSettings:', error);
+          // Tentar reparar as configurações em caso de erro
+          repairSettings();
         });
       }
     } catch (error) {
-      console.error('Erro ao definir o idioma do documento:', error);
+      console.error('Erro na inicialização do aplicativo:', error);
+      // Tentar reparar as configurações em caso de erro
+      repairSettings();
     }
   }, []);
   
