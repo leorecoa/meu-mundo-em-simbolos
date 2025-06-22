@@ -19,8 +19,40 @@ export const SimpleSettings = ({ onBack }: SimpleSettingsProps) => {
     doubleConfirmation: false,
     vibration: false
   });
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('pt-BR');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(getCurrentLanguage());
   const [activeTheme, setActiveTheme] = useState('Padrão');
+  
+  // Carregar configurações ao montar o componente
+  useEffect(() => {
+    // Carregar idioma atual
+    setSelectedLanguage(getCurrentLanguage());
+    
+    // Carregar tema atual
+    const savedTheme = localStorage.getItem('app-theme');
+    if (savedTheme) {
+      setActiveTheme(savedTheme);
+    }
+    
+    // Carregar configurações de volume
+    try {
+      const savedVolume = localStorage.getItem('app-volume');
+      if (savedVolume === 'alto' || savedVolume === 'médio' || savedVolume === 'baixo') {
+        setActiveVolume(savedVolume);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar volume:', error);
+    }
+    
+    // Carregar configurações de tamanho de fonte
+    try {
+      const savedFontSize = localStorage.getItem('app-font-size');
+      if (savedFontSize === 'grande' || savedFontSize === 'médio' || savedFontSize === 'pequeno') {
+        setActiveFontSize(savedFontSize);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar tamanho de fonte:', error);
+    }
+  }, []);
 
   // Temas disponíveis
   const themes = [
@@ -31,16 +63,19 @@ export const SimpleSettings = ({ onBack }: SimpleSettingsProps) => {
   ];
 
   // Idiomas disponíveis
-  const languages = [
-    { code: 'pt-BR', name: 'Português (Brasil)' },
-    { code: 'en-US', name: 'Inglês (EUA)' },
-    { code: 'es-ES', name: 'Espanhol' },
-    { code: 'fr-FR', name: 'Francês' }
-  ];
+  const languages = commonLanguages;
 
   // Funções de manipulação
   const handleVolumeChange = (volume: 'alto' | 'médio' | 'baixo') => {
     setActiveVolume(volume);
+    
+    // Salvar configuração no localStorage
+    try {
+      localStorage.setItem('app-volume', volume);
+    } catch (error) {
+      console.error('Erro ao salvar volume:', error);
+    }
+    
     toast({
       title: "Volume alterado",
       description: `O volume foi definido como ${volume}.`,
@@ -50,6 +85,22 @@ export const SimpleSettings = ({ onBack }: SimpleSettingsProps) => {
 
   const handleFontSizeChange = (fontSize: 'grande' | 'médio' | 'pequeno') => {
     setActiveFontSize(fontSize);
+    
+    // Salvar configuração no localStorage
+    try {
+      localStorage.setItem('app-font-size', fontSize);
+      
+      // Aplicar tamanho da fonte ao documento
+      const fontSizeValues = {
+        'grande': '1.2rem',
+        'médio': '1rem',
+        'pequeno': '0.875rem'
+      };
+      document.documentElement.style.setProperty('--base-font-size', fontSizeValues[fontSize]);
+    } catch (error) {
+      console.error('Erro ao salvar tamanho da fonte:', error);
+    }
+    
     toast({
       title: "Tamanho da fonte alterado",
       description: `O tamanho da fonte foi definido como ${fontSize}.`,
@@ -58,10 +109,28 @@ export const SimpleSettings = ({ onBack }: SimpleSettingsProps) => {
   };
 
   const handleAccessibilityChange = (setting: 'highContrast' | 'doubleConfirmation' | 'vibration', value: boolean) => {
-    setAccessibilitySettings(prev => ({
-      ...prev,
+    const newSettings = {
+      ...accessibilitySettings,
       [setting]: value
-    }));
+    };
+    
+    setAccessibilitySettings(newSettings);
+    
+    // Salvar configuração no localStorage
+    try {
+      localStorage.setItem('app-accessibility', JSON.stringify(newSettings));
+      
+      // Aplicar configurações de acessibilidade
+      if (setting === 'highContrast') {
+        if (value) {
+          document.documentElement.classList.add('high-contrast');
+        } else {
+          document.documentElement.classList.remove('high-contrast');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao salvar configurações de acessibilidade:', error);
+    }
     
     toast({
       title: "Configuração alterada",
@@ -74,6 +143,10 @@ export const SimpleSettings = ({ onBack }: SimpleSettingsProps) => {
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
+    
+    // Aplicar configurações de idioma
+    applyLanguage(language);
+    
     toast({
       title: "Idioma alterado",
       description: `O idioma da voz foi alterado para ${languages.find(l => l.code === language)?.name || language}.`,
@@ -83,6 +156,14 @@ export const SimpleSettings = ({ onBack }: SimpleSettingsProps) => {
 
   const handleThemeChange = (theme: string) => {
     setActiveTheme(theme);
+    
+    // Salvar configuração no localStorage
+    try {
+      localStorage.setItem('app-theme', theme);
+    } catch (error) {
+      console.error('Erro ao salvar tema:', error);
+    }
+    
     toast({
       title: "Tema alterado",
       description: `O tema foi alterado para ${theme}.`,

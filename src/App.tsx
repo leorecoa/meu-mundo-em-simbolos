@@ -6,8 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useEffect } from "react";
 import { cleanupStorage } from "@/lib/cleanupStorage";
-import { getSettings } from "@/lib/storage";
-import { initializeApp, repairSettings } from "@/lib/initApp";
+import { getCurrentLanguage } from "@/lib/simpleLanguage";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -32,27 +31,17 @@ const App = () => {
     cleanupStorage();
     
     try {
-      // Inicializar o aplicativo
-      initializeApp();
+      // Definir idioma do documento
+      const language = getCurrentLanguage();
+      document.documentElement.lang = language.split('-')[0];
+      console.log('Idioma definido:', language);
       
-      // Obter configurações
-      const settings = getSettings();
-      if (settings.language) {
-        console.log('Idioma definido:', settings.language);
-        
-        // Garantir que o idioma seja aplicado em todo o aplicativo
-        import('@/lib/applyLanguageSettings').then(({ applyLanguageSettings }) => {
-          applyLanguageSettings(settings.language);
-        }).catch(error => {
-          console.error('Erro ao importar applyLanguageSettings:', error);
-          // Tentar reparar as configurações em caso de erro
-          repairSettings();
-        });
+      // Verificar se o tema está definido
+      if (!localStorage.getItem('app-theme')) {
+        localStorage.setItem('app-theme', 'Padrão');
       }
     } catch (error) {
       console.error('Erro na inicialização do aplicativo:', error);
-      // Tentar reparar as configurações em caso de erro
-      repairSettings();
     }
   }, []);
   
