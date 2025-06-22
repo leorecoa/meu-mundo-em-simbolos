@@ -1,6 +1,5 @@
 {
-  "buildCommand": "npm install --production=false && npm install tailwindcss-animate --save && npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "installCommand": "npm install"
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

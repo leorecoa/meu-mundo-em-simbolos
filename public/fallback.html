@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Mundo em Símbolos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f9ff;
+      color: #1e40af;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+    button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Meu Mundo em Símbolos</h1>
+  <p>Carregando o aplicativo...</p>
+  <button onclick="window.location.reload()">Recarregar</button>
+  
+  <script>
+    // Verificar se há erros de JavaScript
+    window.onerror = function(message, source, lineno, colno, error) {
+      document.body.innerHTML += '<div style="color: red; margin-top: 20px;">Erro: ' + message + '</div>';
+      return true;
+    };
+    
+    // Tentar carregar o aplicativo principal após 2 segundos
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 2000);
+  </script>
+</body>
+</html>
