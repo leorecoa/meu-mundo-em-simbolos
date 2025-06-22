@@ -16,10 +16,7 @@ const config: CapacitorConfig = {
     }
   },
   android: {
-    buildOptions: {
-      keystorePath: 'android.keystore',
-      keystoreAlias: 'upload',
-    }
+    // Configurações do Android
   }
 };
 

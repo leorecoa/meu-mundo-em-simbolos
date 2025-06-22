@@ -1,4 +1,4 @@
-  NB@echo off
+@echo off
 echo Construindo o aplicativo para produção...
 call npm run build:android
 
