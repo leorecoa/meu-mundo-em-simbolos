@@ -34,15 +34,8 @@ repositories {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
-    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
-
-    implementation project(':capacitor-android')
-    testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
-    implementation project(':capacitor-cordova-android-plugins')
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    testImplementation "junit:junit:4.13.2"
 }
 
 // Adicionar diretório src/main/java ao classpath
@@ -54,7 +47,7 @@ sourceSets {
     }
 }
 
-apply from: 'capacitor.build.gradle'
+
 
 // Adicionar uma tarefa que pode ser executada diretamente
 task runApp(type: Exec) {
