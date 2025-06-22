@@ -1,12 +1,11 @@
 
-import { ArrowLeft, Palette, Volume2, Type, Accessibility, Coins, Check, VolumeX, Volume1, Volume2 as VolumeIcon } from 'lucide-react';
+import { ArrowLeft, Palette, Volume2, Type, Accessibility, Check, VolumeX, Volume1, Volume2 as VolumeIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from '@/hooks/useTheme';
-import { FiveCoinSystem } from '@/components/FiveCoinSystem';
-import { getFiveCoinSettings, saveFiveCoinSettings, applyVolumeSettings, applyFontSizeSettings, applyAccessibilitySettings } from '@/lib/fiveCoinSettings';
+import { getAppSettings, applyVolumeSettings, applyFontSizeSettings, applyAccessibilitySettings } from '@/lib/appSettings';
 import { useToast } from '@/hooks/use-toast';
 
 interface SettingsProps {
@@ -19,7 +18,7 @@ const VolumeButtons = ({ currentTheme }: { currentTheme: any }) => {
   const [activeVolume, setActiveVolume] = useState<'alto' | 'médio' | 'baixo'>('médio');
   
   useEffect(() => {
-    const settings = getFiveCoinSettings();
+    const settings = getAppSettings();
     setActiveVolume(settings.volume);
   }, []);
   
@@ -73,7 +72,7 @@ const FontSizeButtons = ({ currentTheme }: { currentTheme: any }) => {
   const [activeFontSize, setActiveFontSize] = useState<'grande' | 'médio' | 'pequeno'>('médio');
   
   useEffect(() => {
-    const settings = getFiveCoinSettings();
+    const settings = getAppSettings();
     setActiveFontSize(settings.fontSize);
   }, []);
   
@@ -128,7 +127,7 @@ const AccessibilityButtons = ({ currentTheme }: { currentTheme: any }) => {
   });
   
   useEffect(() => {
-    const settings = getFiveCoinSettings();
+    const settings = getAppSettings();
     setAccessibilitySettings(settings.accessibility);
   }, []);
   
@@ -190,15 +189,6 @@ const AccessibilityButtons = ({ currentTheme }: { currentTheme: any }) => {
 export const Settings = ({ onBack }: SettingsProps) => {
   const { toast } = useToast();
   const { currentTheme, setTheme } = useTheme();
-  const [currentCoins, setCurrentCoins] = useState(() => {
-    const saved = localStorage.getItem('fivecoins');
-    return saved ? parseInt(saved) : 0;
-  });
-
-  const handleCoinsChange = (newAmount: number) => {
-    setCurrentCoins(newAmount);
-    localStorage.setItem('fivecoins', newAmount.toString());
-  };
 
   const themes = [
     { name: 'Padrão', preview: 'bg-blue-100' },
@@ -223,17 +213,6 @@ export const Settings = ({ onBack }: SettingsProps) => {
       </div>
 
       <div className="space-y-6 max-w-2xl mx-auto">
-        {/* FiveCoin System */}
-        <Card className={`${currentTheme.cardBg} p-6`}>
-          <div className="flex items-center mb-4">
-            <Coins className={`h-6 w-6 ${currentTheme.textColor} mr-3`} />
-            <h2 className={`text-xl font-semibold ${currentTheme.textColor}`}>Sistema FiveCoin</h2>
-          </div>
-          <FiveCoinSystem 
-            currentCoins={currentCoins}
-            onCoinsChange={handleCoinsChange}
-          />
-        </Card>
 
         {/* Temas de cores */}
         <Card className={`${currentTheme.cardBg} p-6`}>

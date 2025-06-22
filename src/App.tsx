@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { useEffect } from "react";
+import { cleanupStorage } from "@/lib/cleanupStorage";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -20,6 +22,11 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  // Executar limpeza de armazenamento na inicialização
+  useEffect(() => {
+    cleanupStorage();
+  }, []);
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>

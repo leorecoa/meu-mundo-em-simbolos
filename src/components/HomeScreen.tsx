@@ -1,4 +1,4 @@
-import { Heart, Home, Utensils, Gamepad2, Users, Settings, UserCheck, Pause, Volume2, Play } from 'lucide-react';
+import { Heart, Home, Utensils, Gamepad2, Users, Settings, Pause, Volume2, Play } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,10 +9,9 @@ interface HomeScreenProps {
   onNavigateToCategory: (category: string) => void;
   onNavigateToPhrase: () => void;
   onNavigateToSettings: () => void;
-  onNavigateToCaregiver: () => void;
 }
 
-export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToSettings, onNavigateToCaregiver }: HomeScreenProps) => {
+export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToSettings }: HomeScreenProps) => {
   const [isPaused, setIsPaused] = useState(false);
   const [volumeLevel, setVolumeLevel] = useState(50);
   const { toast } = useToast();
@@ -110,15 +109,6 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
             aria-label="Configurações"
           >
             <Settings className="h-5 w-5 text-blue-800" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="bg-blue-50 hover:bg-blue-100 pointer-events-auto"
-            onClick={onNavigateToCaregiver}
-            aria-label="Modo Cuidador"
-          >
-            <UserCheck className="h-5 w-5 text-blue-800" />
           </Button>
         </div>
       </div>

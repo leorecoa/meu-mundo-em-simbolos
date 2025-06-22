@@ -4,11 +4,10 @@ import { HomeScreen } from '@/components/HomeScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { Settings } from '@/components/Settings';
-import { CaregiverMode } from '@/components/CaregiverMode';
 import { SplashScreen } from '@/components/SplashScreen';
 import { TransitionWrapper } from '@/components/TransitionWrapper';
 
-type Screen = 'home' | 'category' | 'phrase' | 'settings' | 'caregiver';
+type Screen = 'home' | 'category' | 'phrase' | 'settings';
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -33,7 +32,6 @@ const Index = () => {
               onNavigateToCategory={navigateToCategory}
               onNavigateToPhrase={() => setCurrentScreen('phrase')}
               onNavigateToSettings={() => setCurrentScreen('settings')}
-              onNavigateToCaregiver={() => setCurrentScreen('caregiver')}
             />
           </TransitionWrapper>
         );
@@ -63,14 +61,7 @@ const Index = () => {
             />
           </TransitionWrapper>
         );
-      case 'caregiver':
-        return (
-          <TransitionWrapper>
-            <CaregiverMode 
-              onBack={() => setCurrentScreen('home')}
-            />
-          </TransitionWrapper>
-        );
+
       default:
         return (
           <TransitionWrapper>
@@ -78,7 +69,6 @@ const Index = () => {
               onNavigateToCategory={navigateToCategory} 
               onNavigateToPhrase={() => setCurrentScreen('phrase')} 
               onNavigateToSettings={() => setCurrentScreen('settings')} 
-              onNavigateToCaregiver={() => setCurrentScreen('caregiver')} 
             />
           </TransitionWrapper>
         );
