@@ -168,7 +168,7 @@ export const SymbolsTab = () => {
                   <PlusCircle className="h-8 w-8 text-gray-600" />
                 </div>
                 <p className="text-sm font-medium">{item.label}</p>
-                <p className="text-xs text-gray-500">{item.category || 'Geral'}</p>
+                <p className="text-xs text-gray-500">Geral</p>
                 <Button 
                   variant="ghost" 
                   size="sm" 

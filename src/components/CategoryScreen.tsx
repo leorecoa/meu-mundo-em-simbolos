@@ -34,7 +34,7 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
     }
   };
 
-  const handleItemClick = (item: any) => {
+  const handleItemClick = (item: { id: string; label: string; icon: any }) => {
     // Reproduzir som do item ao clicar
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(item.label);

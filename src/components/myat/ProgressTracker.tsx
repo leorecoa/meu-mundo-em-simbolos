@@ -426,7 +426,6 @@ export const ProgressTracker = () => {
                             <Progress 
                               value={skill.level * 20} 
                               className="h-2"
-                              indicatorClassName={getLevelColor(skill.level)}
                             />
                           </div>
                           
