@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { seedDatabase } from "@/lib/seedDatabase";
 import { seedGamification } from "@/lib/seedGamification";
+import { getSettings, saveSettings } from "@/lib/storage";
 
 // Criar cliente de consulta
 const queryClient = new QueryClient({
@@ -24,27 +25,30 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Executar limpeza de armazenamento e inicializar o aplicativo
   useEffect(() => {
-    console.log('App inicializado');
-    
-    // Popula o banco de dados com os dados iniciais
-    seedDatabase();
-    seedGamification();
-
-    try {
-      // Definir idioma do documento
-      const language = getCurrentLanguage();
-      document.documentElement.lang = language.split('-')[0];
-      console.log('Idioma definido:', language);
+    const initializeApp = async () => {
+      console.log('App inicializado');
       
-      // Verificar se o tema está definido
-      if (!localStorage.getItem('app-theme')) {
-        localStorage.setItem('app-theme', 'Padrão');
+      // Popula o banco de dados com os dados iniciais
+      await seedDatabase();
+      await seedGamification();
+
+      try {
+        // Define o idioma e o tema a partir do banco de dados
+        const settings = await getSettings();
+        document.documentElement.lang = settings.language.split('-')[0];
+        
+        // Se não houver tema definido, salva o padrão
+        if (!settings.theme) {
+          await saveSettings({ theme: 'Padrão' });
+        }
+
+      } catch (error) {
+        console.error('Erro na inicialização do aplicativo:', error);
       }
-    } catch (error) {
-      console.error('Erro na inicialização do aplicativo:', error);
-    }
+    };
+
+    initializeApp();
   }, []);
   
   return (

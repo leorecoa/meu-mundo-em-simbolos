@@ -12,6 +12,14 @@ export const getCategories = async (): Promise<Category[]> => {
   }
 };
 
+export const addCategory = async (key: string, name: string): Promise<number | undefined> => {
+  try {
+    return await db.categories.add({ key, name });
+  } catch (error) {
+    console.error('Erro ao adicionar categoria:', error);
+  }
+};
+
 export const getCategoryWithSymbolsByKey = async (key: string): Promise<{ category: Category | null; symbols: Symbol[] }> => {
   try {
     const category = await db.categories.get({ key });
@@ -28,6 +36,15 @@ export const getCategoryWithSymbolsByKey = async (key: string): Promise<{ catego
 
 
 // ===== Funções para Símbolos =====
+
+export const getSymbolsByCategory = async (categoryId: number): Promise<Symbol[]> => {
+  try {
+    return await db.symbols.where('categoryId').equals(categoryId).toArray();
+  } catch (error) {
+    console.error('Erro ao buscar símbolos por categoria:', error);
+    return [];
+  }
+};
 
 export const getCustomSymbols = async (): Promise<Symbol[]> => {
   try {

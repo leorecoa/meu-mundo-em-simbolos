@@ -25,7 +25,7 @@ export interface UserSettings {
 }
 
 export interface Coin {
-  id?: number; // Apenas um registro com o total
+  id?: number;
   total: number;
 }
 
@@ -51,6 +51,7 @@ export class MySubClassedDexie extends Dexie {
 
   constructor() {
     super('meuMundoEmSimbolosDB');
+    // A versão mais recente é a 4, as outras são para migração
     this.version(4).stores({
       categories: '++id, &key, name',
       symbols: '++id, name, categoryId, isCustom',
@@ -58,11 +59,15 @@ export class MySubClassedDexie extends Dexie {
       coins: 'id',
       tasks: 'id',
       achievements: 'id',
+    }).upgrade(tx => {
+      // Limpando a tabela de usuários obsoleta, se existir
+      return tx.table('users').clear();
     });
     this.version(3).stores({
       categories: '++id, &key, name',
       symbols: '++id, name, categoryId, isCustom',
       userSettings: 'id',
+      users: '++id, name', // Manter para migração
     });
     this.version(2).stores({
       categories: '++id, &key, name',
