@@ -3,7 +3,7 @@ import { ChevronLeft, X, PlayCircle, Save, Plus, RefreshCw, Heart } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from '@/hooks/use-theme';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { savePhrase, getPhrases, StoredPhrase, PhraseSymbol } from '@/lib/storage';
 import { LetterKeyboard } from '@/components/LetterKeyboard';
