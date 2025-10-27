@@ -5,10 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useEffect } from "react";
-import { cleanupStorage } from "@/lib/cleanupStorage";
 import { getCurrentLanguage } from "@/lib/simpleLanguage";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import { seedDatabase } from "@/lib/seedDatabase";
+import { seedGamification } from "@/lib/seedGamification";
 
 // Criar cliente de consulta
 const queryClient = new QueryClient({
@@ -27,9 +28,10 @@ const App = () => {
   useEffect(() => {
     console.log('App inicializado');
     
-    // Limpar armazenamento antigo
-    cleanupStorage();
-    
+    // Popula o banco de dados com os dados iniciais
+    seedDatabase();
+    seedGamification();
+
     try {
       // Definir idioma do documento
       const language = getCurrentLanguage();
