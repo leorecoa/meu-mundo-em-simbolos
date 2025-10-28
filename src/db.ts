@@ -1,8 +1,9 @@
 import Dexie, { type Table } from 'dexie';
 
+// --- Interfaces Finais ---
 export interface Category { id?: number; key: string; name: string; }
 export interface Symbol { id?: number; name: string; imageUrl: string; categoryId: number; isCustom: boolean; }
-export interface UserSettings { id?: number; voiceType: 'feminina' | 'masculina' | 'infantil'; voiceSpeed: number; largeIcons: boolean; useAudioFeedback: boolean; theme: string; language: string; }
+export interface UserSettings { id?: number; voiceType: string; voiceSpeed: number; largeIcons: boolean; useAudioFeedback: boolean; theme: string; language: string; }
 export interface Phrase { id?: number; text: string; symbols: { id: string; text: string }[]; timestamp: number; isFavorite: boolean; }
 export interface Coin { id?: number; total: number; }
 export interface DailyGoal { id: string; name: string; target: number; current: number; completed: boolean; reward: number; lastUpdated: string; }
@@ -23,7 +24,10 @@ export class MySubClassedDexie extends Dexie {
 
   constructor() {
     super('meuMundoEmSimbolosDB');
-    this.version(7).stores({
+
+    // --- Definição ÚNICA e FINAL do Schema ---
+    // Qualquer alteração futura deve apenas incrementar este número de versão.
+    this.version(1).stores({
       categories: '++id, &key, name',
       symbols: '++id, name, categoryId, isCustom',
       userSettings: 'id',

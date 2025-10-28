@@ -3,44 +3,37 @@ import { categoryData } from '@/data/categoryData';
 
 export async function seedDatabase() {
   try {
-    const dbExists = await Dexie.exists('meuMundoEmSimbolosDB');
-    if (!dbExists) {
-      console.log('Banco de dados não encontrado, criando e populando...');
-    } else {
-      const categoryCount = await db.categories.count();
-      if (categoryCount > 0) {
-        console.log('Banco de dados já populado.');
-        return;
-      }
+    // Verificação robusta: só popula se a tabela de categorias estiver vazia.
+    const categoryCount = await db.categories.count();
+    if (categoryCount > 0) {
+      console.log('Banco de dados principal já populado. Ignorando seed.');
+      return;
     }
+
+    console.log('Populando o banco de dados com categorias e símbolos...');
 
     await db.transaction('rw', db.categories, db.symbols, async () => {
       for (const categoryKey in categoryData) {
         const category = categoryData[categoryKey];
-        
         const categoryId = await db.categories.add({
           key: categoryKey,
           name: category.title,
         });
 
         if (categoryId) {
-          for (const item of category.items) {
-            await db.symbols.add({
-              name: item.label,
-              imageUrl: item.icon,
-              categoryId: categoryId,
-              isCustom: false, // Marcar símbolos padrão
-            });
-          }
+          const symbolsToAdd = category.items.map(item => ({
+            name: item.label,
+            imageUrl: item.icon,
+            categoryId: categoryId,
+            isCustom: false,
+          }));
+          await db.symbols.bulkAdd(symbolsToAdd);
         }
       }
     });
 
-    console.log('Banco de dados populado com sucesso!');
+    console.log('Banco de dados principal populado com sucesso!');
   } catch (error) {
-    console.error('Erro ao popular o banco de dados:', error);
-    // Em caso de erro na versão, pode ser útil limpar o banco
-    // await db.delete();
-    // console.log('Banco de dados limpo após erro.');
+    console.error('Erro ao popular o banco de dados principal:', error);
   }
 }

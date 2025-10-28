@@ -31,8 +31,15 @@ export async function seedGamification() {
     const coinCount = await db.coins.count();
     if (coinCount === 0) {
       console.log('Inicializando moedas...');
-      await db.coins.add({ id: 1, total: 100 }); // Começa com 100 moedas
+      await db.coins.add({ id: 1, total: 100 });
     }
+    
+    const pinCount = await db.security.count();
+    if (pinCount === 0) {
+        console.log('Inicializando PIN padrão...');
+        await db.security.add({ id: 1, pin: '1234' });
+    }
+
   } catch (error) {
     console.error('Erro ao popular dados de gamificação:', error);
   }
