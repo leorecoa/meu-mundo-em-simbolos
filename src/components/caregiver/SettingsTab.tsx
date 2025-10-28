@@ -18,26 +18,23 @@ export const SettingsTab = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadInitialData = async () => {
       setLoading(true);
       const storedSettings = await getSettings();
       setSettings(storedSettings);
-      
-      // Carrega as vozes do sistema
+
       if ('speechSynthesis' in window) {
-        const availableVoices = window.speechSynthesis.getVoices();
-        if (availableVoices.length > 0) {
-          setVoices(availableVoices.filter(v => v.lang.includes('pt')));
-        } else {
-          window.speechSynthesis.onvoiceschanged = () => {
-            const availableVoices = window.speechSynthesis.getVoices();
-            setVoices(availableVoices.filter(v => v.lang.includes('pt')));
-          };
-        }
+        const updateVoices = () => {
+          const availableVoices = window.speechSynthesis.getVoices();
+          // Filtra para vozes em português ou variantes
+          setVoices(availableVoices.filter(v => v.lang.startsWith('pt')));
+        };
+        updateVoices();
+        window.speechSynthesis.onvoiceschanged = updateVoices;
       }
       setLoading(false);
     };
-    loadData();
+    loadInitialData();
   }, []);
 
   const handleSettingChange = async (key: keyof UserSettings, value: any) => {
@@ -47,16 +44,16 @@ export const SettingsTab = () => {
   };
 
   const handleChangePin = async () => {
-    if (newPin.length < 4 || newPin !== confirmPin) {
-      toast({ title: "Erro no PIN", description: "Verifique se o PIN tem 4 dígitos e se os campos coincidem.", variant: 'destructive' });
-      return;
-    }
-    await setPin(newPin);
-    setNewPin(''); setConfirmPin('');
-    toast({ title: "PIN alterado com sucesso!" });
+    // ... (lógica do PIN) ...
   };
 
-  // ... (handleExport, handleImport) ...
+  const handleExport = async () => {
+    // ... (lógica de exportação) ...
+  };
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // ... (lógica de importação) ...
+  };
 
   if (loading) {
     return <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto my-12" />;
@@ -68,11 +65,11 @@ export const SettingsTab = () => {
         <CardHeader><CardTitle>Voz e Acessibilidade</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="voice-select">Voz do Aplicativo</Label>
+            <Label htmlFor="voice-select" className="text-base">Voz do App</Label>
             <select 
               id="voice-select"
-              className="p-2 border rounded-md"
-              value={settings.voiceType || ''} // O valor será o nome da voz
+              className="p-2 border rounded-md bg-white shadow-sm"
+              value={settings.voiceType || ''}
               onChange={(e) => handleSettingChange('voiceType', e.target.value)}
             >
               <option value="" disabled>Selecione uma voz</option>
@@ -83,14 +80,14 @@ export const SettingsTab = () => {
               ))}
             </select>
           </div>
-          <div className="flex items-center justify-between">
+           <div className="flex items-center justify-between">
             <Label htmlFor="large-icons">Ícones grandes</Label>
-            <Switch id="large-icons" checked={settings.largeIcons} onCheckedChange={(v) => handleSettingChange('largeIcons', v)} />
+            <Switch id="large-icons" checked={!!settings.largeIcons} onCheckedChange={(v) => handleSettingChange('largeIcons', v)} />
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+       <Card>
         <CardHeader><CardTitle>Segurança</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           <Input type="password" placeholder="Novo PIN (4 dígitos)" value={newPin} onChange={(e) => setNewPin(e.target.value)} maxLength={4} />
@@ -98,8 +95,17 @@ export const SettingsTab = () => {
           <Button className="w-full" onClick={handleChangePin}>Salvar Novo PIN</Button>
         </CardContent>
       </Card>
-      
-      {/* ... (Backup e Restauração) ... */}
+
+       <Card>
+        <CardHeader><CardTitle>Backup e Restauração</CardTitle></CardHeader>
+        <CardContent className="space-y-2">
+          <Button className="w-full" variant="outline" onClick={handleExport}><Download className="mr-2 h-4 w-4" />Exportar Dados</Button>
+          <input type="file" id="importFile" accept=".json" onChange={handleImport} className="hidden" />
+          <label htmlFor="importFile" className="w-full">
+            <Button as="span" className="w-full" variant="outline"><Upload className="mr-2 h-4 w-4" />Importar Dados</Button>
+          </label>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -1,65 +1,65 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, X, PlayCircle, Save, Plus, RefreshCw, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { useTheme } from '@/hooks/useTheme';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { savePhrase, getPhrases, toggleFavoritePhrase, getSettings } from '@/lib/storage'; // Importa getSettings
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getSettings, savePhrase, getPhrases, toggleFavoritePhrase } from '@/lib/storage';
 import type { Phrase, UserSettings } from '@/db';
-import { LetterKeyboard } from '@/components/LetterKeyboard';
-import { WordCategories } from '@/components/WordCategories';
-import { QuickPhraseBar } from '@/components/QuickPhraseBar';
+// ... (outros imports) ...
 
-// ... (interfaces) ...
-interface PhraseBuilderProps {
-  onBack: () => void;
-}
+// ... (interfaces e hooks) ...
 
-interface CurrentSymbol {
-  id: string;
-  text: string;
-  iconUrl?: string;
-}
+export const PhraseBuilder = ({ onBack }: { onBack: () => void; }) => {
+  // ... (estados e hooks) ...
+  const { data: settings } = useQuery<UserSettings | undefined>({ queryKey: ['settings'], queryFn: getSettings });
 
-export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
-  const [currentPhrase, setCurrentPhrase] = useState<CurrentSymbol[]>([]);
-  const [showKeyboard, setShowKeyboard] = useState(false);
-  const [customText, setCustomText] = useState('');
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { currentTheme } = useTheme();
+  const handlePlayText = (text: string) => {
+    if (!text || !('speechSynthesis' in window)) return;
 
-  // Busca dados do DB com React Query
-  const { data: savedPhrases = [] } = useQuery({ queryKey: ['phrases'], queryFn: getPhrases });
-  const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: getSettings });
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
 
-  const saveMutation = useMutation(/* ... */);
-
-  const handlePlayPhrase = () => {
-    const phraseText = currentPhrase.map(symbol => symbol.text).join(' ');
-    if (!phraseText || !('speechSynthesis' in window)) return;
-
-    const utterance = new SpeechSynthesisUtterance(phraseText);
-    utterance.lang = 'pt-BR';
-
-    // Aplica a voz salva nas configurações
     if (settings?.voiceType) {
       const voices = window.speechSynthesis.getVoices();
       const selectedVoice = voices.find(voice => voice.name === settings.voiceType);
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-      }
+      if (selectedVoice) utterance.voice = selectedVoice;
     }
-    
+    utterance.lang = 'pt-BR';
     window.speechSynthesis.speak(utterance);
   };
-  
-  // ... (outras funções: handleAddSymbol, handleRemoveSymbol, handleSavePhrase, etc.) ...
+
+  const handlePlayCurrentPhrase = () => {
+    const phraseText = currentPhrase.map(symbol => symbol.text).join(' ');
+    handlePlayText(phraseText);
+  };
 
   return (
-    <div className={`p-4 space-y-6 ${currentTheme.bgColor} min-h-screen`}>
-      {/* ... (JSX do componente, incluindo os botões de ação melhorados) ... */}
+    <div /* ... */ >
+      {/* ... (JSX do header e card da frase atual) ... */}
+
+      <div className="grid grid-cols-4 gap-3">
+        <Button onClick={handlePlayCurrentPhrase} /* ... */ >
+          {/* ... */}
+        </Button>
+        {/* ... (outros botões de ação) ... */}
+      </div>
+
+      {/* ... (JSX do teclado e sugestões) ... */}
+
+      {savedPhrases.length > 0 && (
+        <div>
+          {/* ... */}
+          <div className="space-y-2">
+            {savedPhrases.map((phrase) => (
+              <Card 
+                key={phrase.id} 
+                className="p-3 bg-green-50 hover:bg-green-100 cursor-pointer flex justify-between items-center" 
+                onClick={() => handlePlayText(phrase.text)} // <<< LÓGICA DE FALA CORRIGIDA AQUI
+              >
+                <p className="text-green-800 font-medium">{phrase.text}</p>
+                {/* ... (botão de favorito) ... */}
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
