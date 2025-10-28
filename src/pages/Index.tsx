@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { HomeScreen } from '@/components/HomeScreen';
+import { MainCategoriesScreen } from '@/components/MainCategoriesScreen'; // Nova tela principal
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { SimpleSettings } from '@/components/SimpleSettings';
@@ -20,20 +20,15 @@ const Index = () => {
     setCurrentScreen('category');
   };
 
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-  };
-
   const renderCurrentScreen = () => {
     switch (currentScreen) {
       case 'home':
         return (
           <TransitionWrapper>
-            <HomeScreen 
+            {/* Substituído HomeScreen pela nova tela de categorias */}
+            <MainCategoriesScreen 
               onNavigateToCategory={navigateToCategory}
               onNavigateToPhrase={() => setCurrentScreen('phrase')}
-              onNavigateToSettings={() => setCurrentScreen('settings')}
-              onNavigateToMyAT={() => setCurrentScreen('myat')}
             />
           </TransitionWrapper>
         );
@@ -56,7 +51,6 @@ const Index = () => {
           </TransitionWrapper>
         );
       case 'settings':
-        console.log('Renderizando tela de configurações');
         return (
           <TransitionWrapper key="settings-screen">
             <SimpleSettings 
@@ -64,7 +58,6 @@ const Index = () => {
             />
           </TransitionWrapper>
         );
-        
       case 'myat':
         return (
           <TransitionWrapper key="myat-screen">
@@ -73,15 +66,12 @@ const Index = () => {
             />
           </TransitionWrapper>
         );
-
       default:
         return (
           <TransitionWrapper>
-            <HomeScreen 
+            <MainCategoriesScreen 
               onNavigateToCategory={navigateToCategory} 
               onNavigateToPhrase={() => setCurrentScreen('phrase')} 
-              onNavigateToSettings={() => setCurrentScreen('settings')} 
-              onNavigateToMyAT={() => setCurrentScreen('myat')}
             />
           </TransitionWrapper>
         );
@@ -92,7 +82,7 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
       <AnimatePresence mode="wait">
         {showSplash ? (
-          <SplashScreen onComplete={handleSplashComplete} key="splash" />
+          <SplashScreen onComplete={() => setShowSplash(false)} key="splash" />
         ) : (
           <div key="content" className="w-full h-full">
             {renderCurrentScreen()}
