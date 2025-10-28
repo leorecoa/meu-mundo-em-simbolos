@@ -24,6 +24,14 @@ export interface UserSettings {
   language: string;
 }
 
+export interface Phrase {
+  id?: number;
+  text: string;
+  symbols: { id: string; text: string }[];
+  timestamp: number;
+  isFavorite: boolean;
+}
+
 export interface Coin {
   id?: number;
   total: number;
@@ -45,13 +53,23 @@ export class MySubClassedDexie extends Dexie {
   categories!: Table<Category>;
   symbols!: Table<Symbol>;
   userSettings!: Table<UserSettings>;
+  phrases!: Table<Phrase>;
   coins!: Table<Coin>;
   tasks!: Table<Task>;
   achievements!: Table<Achievement>;
 
   constructor() {
     super('meuMundoEmSimbolosDB');
-    // A versão mais recente é a 4, as outras são para migração
+    this.version(5).stores({
+      categories: '++id, &key, name',
+      symbols: '++id, name, categoryId, isCustom',
+      userSettings: 'id',
+      phrases: '++id, timestamp, isFavorite',
+      coins: 'id',
+      tasks: 'id',
+      achievements: 'id',
+    });
+    // Manter versões antigas para migração
     this.version(4).stores({
       categories: '++id, &key, name',
       symbols: '++id, name, categoryId, isCustom',
@@ -59,26 +77,7 @@ export class MySubClassedDexie extends Dexie {
       coins: 'id',
       tasks: 'id',
       achievements: 'id',
-    }).upgrade(tx => {
-      // Limpando a tabela de usuários obsoleta, se existir
-      return tx.table('users').clear();
-    });
-    this.version(3).stores({
-      categories: '++id, &key, name',
-      symbols: '++id, name, categoryId, isCustom',
-      userSettings: 'id',
-      users: '++id, name', // Manter para migração
-    });
-    this.version(2).stores({
-      categories: '++id, &key, name',
-      symbols: '++id, name, categoryId, isCustom',
-      users: '++id, name',
-    });
-    this.version(1).stores({
-      categories: '++id, &key, name',
-      symbols: '++id, name, categoryId',
-      users: '++id, name',
-    });
+    }).upgrade(tx => tx.table('users').clear());
   }
 }
 

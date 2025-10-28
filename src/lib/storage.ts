@@ -1,5 +1,47 @@
 import { db } from '@/db';
-import type { Category, Symbol, UserSettings, Coin, Task, Achievement } from '@/db';
+import type { Category, Symbol, UserSettings, Phrase, Coin, Task, Achievement } from '@/db';
+
+// ... (outras funções mantidas) ...
+
+// ===== Funções para Frases =====
+
+export const getPhrases = async (): Promise<Phrase[]> => {
+  try {
+    // Ordena as frases pelas mais recentes
+    return await db.phrases.orderBy('timestamp').reverse().toArray();
+  } catch (error) {
+    console.error('Erro ao buscar frases:', error);
+    return [];
+  }
+};
+
+export const savePhrase = async (phraseData: Omit<Phrase, 'id'>): Promise<number | undefined> => {
+  try {
+    return await db.phrases.add(phraseData as Phrase);
+  } catch (error) {
+    console.error('Erro ao salvar frase:', error);
+  }
+};
+
+export const deletePhrase = async (id: number): Promise<void> => {
+  try {
+    await db.phrases.delete(id);
+  } catch (error) {
+    console.error('Erro ao deletar frase:', error);
+  }
+};
+
+export const toggleFavoritePhrase = async (id: number): Promise<void> => {
+  try {
+    const phrase = await db.phrases.get(id);
+    if (phrase) {
+      await db.phrases.update(id, { isFavorite: !phrase.isFavorite });
+    }
+  } catch (error) {
+    console.error('Erro ao favoritar frase:', error);
+  }
+};
+
 
 // ===== Funções para Categorias =====
 
