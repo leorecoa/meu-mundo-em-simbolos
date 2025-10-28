@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { MainCategoriesScreen } from '@/components/MainCategoriesScreen'; // Nova tela principal
+import { MainCategoriesScreen } from '@/components/MainCategoriesScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
-import { SimpleSettings } from '@/components/SimpleSettings';
+import { MyATScreen } from '@/components/MyATScreen';
 import { SplashScreen } from '@/components/SplashScreen';
 import { TransitionWrapper } from '@/components/TransitionWrapper';
-import { MyATScreen } from '@/components/MyATScreen';
 
-type Screen = 'home' | 'category' | 'phrase' | 'settings' | 'myat';
+type Screen = 'home' | 'category' | 'phrase' | 'myat';
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -25,10 +24,10 @@ const Index = () => {
       case 'home':
         return (
           <TransitionWrapper>
-            {/* Substituído HomeScreen pela nova tela de categorias */}
             <MainCategoriesScreen 
               onNavigateToCategory={navigateToCategory}
               onNavigateToPhrase={() => setCurrentScreen('phrase')}
+              onNavigateToMyAT={() => setCurrentScreen('myat')} // Adicionada a navegação para o painel
             />
           </TransitionWrapper>
         );
@@ -45,36 +44,17 @@ const Index = () => {
       case 'phrase':
         return (
           <TransitionWrapper key="phrase-builder">
-            <PhraseBuilder 
-              onBack={() => setCurrentScreen('home')}
-            />
-          </TransitionWrapper>
-        );
-      case 'settings':
-        return (
-          <TransitionWrapper key="settings-screen">
-            <SimpleSettings 
-              onBack={() => setCurrentScreen('home')}
-            />
+            <PhraseBuilder onBack={() => setCurrentScreen('home')} />
           </TransitionWrapper>
         );
       case 'myat':
         return (
           <TransitionWrapper key="myat-screen">
-            <MyATScreen 
-              onBack={() => setCurrentScreen('home')}
-            />
+            <MyATScreen onBack={() => setCurrentScreen('home')} />
           </TransitionWrapper>
         );
       default:
-        return (
-          <TransitionWrapper>
-            <MainCategoriesScreen 
-              onNavigateToCategory={navigateToCategory} 
-              onNavigateToPhrase={() => setCurrentScreen('phrase')} 
-            />
-          </TransitionWrapper>
-        );
+        return <div />; // Renderiza vazio por padrão
     }
   };
 
