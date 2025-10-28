@@ -4,7 +4,6 @@ import { MainCategoriesScreen } from '@/components/MainCategoriesScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { MyATScreen } from '@/components/MyATScreen';
-import { SplashScreen } from '@/components/SplashScreen';
 import { TransitionWrapper } from '@/components/TransitionWrapper';
 
 type Screen = 'home' | 'category' | 'phrase' | 'myat';
@@ -12,7 +11,6 @@ type Screen = 'home' | 'category' | 'phrase' | 'myat';
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [showSplash, setShowSplash] = useState(true);
 
   const navigateToCategory = (category: string) => {
     setSelectedCategory(category);
@@ -27,7 +25,7 @@ const Index = () => {
             <MainCategoriesScreen 
               onNavigateToCategory={navigateToCategory}
               onNavigateToPhrase={() => setCurrentScreen('phrase')}
-              onNavigateToMyAT={() => setCurrentScreen('myat')} // Adicionada a navegação para o painel
+              onNavigateToMyAT={() => setCurrentScreen('myat')}
             />
           </TransitionWrapper>
         );
@@ -54,20 +52,14 @@ const Index = () => {
           </TransitionWrapper>
         );
       default:
-        return <div />; // Renderiza vazio por padrão
+        return <div />; 
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
       <AnimatePresence mode="wait">
-        {showSplash ? (
-          <SplashScreen onComplete={() => setShowSplash(false)} key="splash" />
-        ) : (
-          <div key="content" className="w-full h-full">
-            {renderCurrentScreen()}
-          </div>
-        )}
+        {renderCurrentScreen()}
       </AnimatePresence>
     </div>
   );
