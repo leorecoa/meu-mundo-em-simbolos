@@ -1,48 +1,78 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus } from 'lucide-react';
+import React from 'react';
 
 interface MainCategoriesScreenProps {
   onNavigateToCategory: (categoryKey: string) => void;
   onNavigateToPhrase: () => void;
 }
 
+// Mapeia a chave da categoria para um ícone e descrição
+const categoryDetails: { [key: string]: { icon: React.ElementType, description: string } } = {
+  quero: { icon: Heart, description: 'Expresse seus desejos e vontades.' },
+  sinto: { icon: Smile, description: 'Comunique seus sentimentos e emoções.' },
+  preciso: { icon: HandHeart, description: 'Informe suas necessidades imediatas.' },
+};
+
 export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase }: MainCategoriesScreenProps) => {
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ['mainCategories'],
-    queryFn: () => getCategories(), // Busca todas as categorias
+    queryFn: getCategories,
   });
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin h-10 w-10" /></div>;
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin h-12 w-12 text-blue-600" /></div>;
   }
 
-  // Filtra para mostrar apenas as categorias principais, se necessário
-  const mainCategories = categories.filter(c => ['quero', 'sinto', 'preciso'].includes(c.key));
+  const mainCategories = categories.filter(c => categoryDetails[c.key]);
 
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold text-center">Meu Mundo em Símbolos</h1>
-      <div className="grid grid-cols-1 gap-4">
-        {mainCategories.map(category => (
-          <Button 
-            key={category.id}
-            className="w-full h-24 text-xl" 
-            onClick={() => onNavigateToCategory(category.key)}
-          >
-            {category.name}
-          </Button>
-        ))}
+    <div className="p-6 max-w-4xl mx-auto">
+      <header className="text-center mb-10">
+        <h1 className="text-4xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
+        <p className="text-lg text-gray-500 mt-2">Selecione uma categoria para começar a se comunicar.</p>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {mainCategories.map(category => {
+          const details = categoryDetails[category.key];
+          const Icon = details.icon;
+          return (
+            <Card 
+              key={category.id}
+              className="cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out group"
+              onClick={() => onNavigateToCategory(category.key)}
+            >
+              <CardHeader className="items-center text-center">
+                <div className="p-4 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
+                  <Icon className="h-10 w-10 text-blue-600" />
+                </div>
+                <CardTitle className="text-2xl font-semibold mt-4">{category.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-center text-base">{details.description}</CardDescription>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
-      <div className="pt-4">
-        <Button 
-          className="w-full h-20 text-lg" 
-          variant="outline" 
+
+      <div className="mt-12 text-center">
+         <Card 
+          className="cursor-pointer bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out group p-4"
           onClick={onNavigateToPhrase}
         >
-          Montar Frase Livre
-        </Button>
+          <div className="flex items-center justify-center">
+            <MessageSquarePlus className="h-8 w-8 text-green-600 mr-4"/>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Frase Livre</h2>
+              <p className="text-gray-500">Monte suas próprias frases do zero.</p>
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );
