@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus, Settings, Trophy } from 'lucide-react';
 import React from 'react';
+import { InfinitySymbol } from './InfinitySymbol'; // Importando o símbolo do app
 
 interface MainCategoriesScreenProps {
   onNavigateToCategory: (categoryKey: string) => void;
@@ -31,17 +32,19 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <header className="relative text-center mb-10">
-        <div className="absolute top-0 right-0 flex gap-2">
-          <Button variant="ghost" size="icon" onClick={onNavigateToMyAT}>
-            <Trophy className="h-6 w-6 text-gray-600" />
+      <header className="relative flex items-center justify-between py-4 mb-10">
+        <div className="flex items-center gap-3">
+          <InfinitySymbol className="h-10 w-10 text-blue-600" />
+          <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={onNavigateToMyAT} aria-label="Progresso e Recompensas">
+            <Trophy className="h-6 w-6 text-gray-600 hover:text-blue-600 transition-colors" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={onNavigateToMyAT}>
-            <Settings className="h-6 w-6 text-gray-600" />
+          <Button variant="ghost" size="icon" onClick={onNavigateToMyAT} aria-label="Configurações">
+            <Settings className="h-6 w-6 text-gray-600 hover:text-blue-600 transition-colors" />
           </Button>
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
-        <p className="text-lg text-gray-500 mt-2">Selecione uma categoria para começar a se comunicar.</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
