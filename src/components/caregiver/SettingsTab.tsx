@@ -17,23 +17,37 @@ export const SettingsTab = () => {
   const [confirmPin, setConfirmPin] = useState('');
   const { toast } = useToast();
 
+  // Lógica robusta e segura para carregar dados e vozes
   useEffect(() => {
     const loadInitialData = async () => {
-      setLoading(true);
-      const storedSettings = await getSettings();
-      setSettings(storedSettings);
+      try {
+        setLoading(true);
+        const storedSettings = await getSettings();
+        setSettings(storedSettings);
 
-      if ('speechSynthesis' in window) {
-        const updateVoices = () => {
-          const availableVoices = window.speechSynthesis.getVoices();
-          // Filtra para vozes em português ou variantes
-          setVoices(availableVoices.filter(v => v.lang.startsWith('pt')));
-        };
-        updateVoices();
-        window.speechSynthesis.onvoiceschanged = updateVoices;
+        // Abordagem "paciente" para carregar as vozes
+        if ('speechSynthesis' in window) {
+          const updateVoices = () => {
+            const availableVoices = window.speechSynthesis.getVoices();
+            if (availableVoices.length > 0) {
+              setVoices(availableVoices.filter(v => v.lang.startsWith('pt')));
+            }
+          };
+
+          updateVoices(); // Tenta pegar as vozes imediatamente
+          // E registra um "ouvinte" para caso elas demorem a carregar
+          window.speechSynthesis.onvoiceschanged = updateVoices;
+        } else {
+          console.warn('API de Síntese de Voz não suportada neste navegador.');
+        }
+      } catch (error) {
+        console.error("Falha ao carregar dados iniciais:", error);
+        toast({ title: "Erro Crítico", description: "Não foi possível carregar as configurações.", variant: 'destructive' });
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
+    
     loadInitialData();
   }, []);
 
@@ -42,7 +56,7 @@ export const SettingsTab = () => {
     setSettings(prev => ({ ...prev, [key]: value }));
     toast({ title: "Configuração salva" });
   };
-
+  
   const handleChangePin = async () => {
     // ... (lógica do PIN) ...
   };
@@ -54,10 +68,6 @@ export const SettingsTab = () => {
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     // ... (lógica de importação) ...
   };
-
-  if (loading) {
-    return <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto my-12" />;
-  }
 
   return (
     <div className="space-y-4">
@@ -71,41 +81,31 @@ export const SettingsTab = () => {
               className="p-2 border rounded-md bg-white shadow-sm"
               value={settings.voiceType || ''}
               onChange={(e) => handleSettingChange('voiceType', e.target.value)}
+              disabled={voices.length === 0} // Desabilita se nenhuma voz for encontrada
             >
-              <option value="" disabled>Selecione uma voz</option>
-              {voices.map(voice => (
-                <option key={voice.name} value={voice.name}>
-                  {`${voice.name} (${voice.lang})`}
-                </option>
-              ))}
+              {voices.length > 0 ? (
+                <>
+                  <option value="" disabled>Selecione uma voz</option>
+                  {voices.map(voice => (
+                    <option key={voice.name} value={voice.name}>
+                      {`${voice.name} (${voice.lang})`}
+                    </option>
+                  ))}
+                </>
+              ) : (
+                <option>Nenhuma voz encontrada</option>
+              )}
             </select>
           </div>
            <div className="flex items-center justify-between">
             <Label htmlFor="large-icons">Ícones grandes</Label>
             <Switch id="large-icons" checked={!!settings.largeIcons} onCheckedChange={(v) => handleSettingChange('largeIcons', v)} />
           </div>
+           <p className="text-xs text-gray-500 pt-2">A lista de vozes depende das instaladas no seu dispositivo. Para mais opções, busque por como "instalar vozes de texto para fala" no seu sistema.</p>
         </CardContent>
       </Card>
 
-       <Card>
-        <CardHeader><CardTitle>Segurança</CardTitle></CardHeader>
-        <CardContent className="space-y-2">
-          <Input type="password" placeholder="Novo PIN (4 dígitos)" value={newPin} onChange={(e) => setNewPin(e.target.value)} maxLength={4} />
-          <Input type="password" placeholder="Confirmar novo PIN" value={confirmPin} onChange={(e) => setConfirmPin(e.target.value)} maxLength={4} />
-          <Button className="w-full" onClick={handleChangePin}>Salvar Novo PIN</Button>
-        </CardContent>
-      </Card>
-
-       <Card>
-        <CardHeader><CardTitle>Backup e Restauração</CardTitle></CardHeader>
-        <CardContent className="space-y-2">
-          <Button className="w-full" variant="outline" onClick={handleExport}><Download className="mr-2 h-4 w-4" />Exportar Dados</Button>
-          <input type="file" id="importFile" accept=".json" onChange={handleImport} className="hidden" />
-          <label htmlFor="importFile" className="w-full">
-            <Button as="span" className="w-full" variant="outline"><Upload className="mr-2 h-4 w-4" />Importar Dados</Button>
-          </label>
-        </CardContent>
-      </Card>
+       {/* ... (Outras seções: Segurança, Backup) ... */}
     </div>
   );
 };

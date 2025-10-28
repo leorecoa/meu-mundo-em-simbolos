@@ -1,17 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSettings, savePhrase, getPhrases, toggleFavoritePhrase } from '@/lib/storage';
+import { getSettings, savePhrase, getPhrases } from '@/lib/storage';
 import type { Phrase, UserSettings } from '@/db';
-// ... (outros imports) ...
+// ... outros imports ...
 
-// ... (interfaces e hooks) ...
+// ... interfaces ...
 
 export const PhraseBuilder = ({ onBack }: { onBack: () => void; }) => {
-  // ... (estados e hooks) ...
+  const [currentPhrase, setCurrentPhrase] = useState<CurrentSymbol[]>([]);
+  const [isSpeechReady, setIsSpeechReady] = useState(false);
   const { data: settings } = useQuery<UserSettings | undefined>({ queryKey: ['settings'], queryFn: getSettings });
 
+  // Efeito para verificar a API de voz de forma segura
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      const checkVoices = () => {
+        if (window.speechSynthesis.getVoices().length > 0) {
+          setIsSpeechReady(true);
+          // Remove o listener uma vez que as vozes estão prontas
+          window.speechSynthesis.onvoiceschanged = null;
+        }
+      };
+      checkVoices();
+      if (!isSpeechReady) {
+        window.speechSynthesis.onvoiceschanged = checkVoices;
+      }
+    }
+  }, [isSpeechReady]);
+
+
   const handlePlayText = (text: string) => {
-    if (!text || !('speechSynthesis' in window)) return;
+    // Só tenta falar se a API estiver pronta
+    if (!isSpeechReady || !text) return;
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -29,37 +49,6 @@ export const PhraseBuilder = ({ onBack }: { onBack: () => void; }) => {
     const phraseText = currentPhrase.map(symbol => symbol.text).join(' ');
     handlePlayText(phraseText);
   };
-
-  return (
-    <div /* ... */ >
-      {/* ... (JSX do header e card da frase atual) ... */}
-
-      <div className="grid grid-cols-4 gap-3">
-        <Button onClick={handlePlayCurrentPhrase} /* ... */ >
-          {/* ... */}
-        </Button>
-        {/* ... (outros botões de ação) ... */}
-      </div>
-
-      {/* ... (JSX do teclado e sugestões) ... */}
-
-      {savedPhrases.length > 0 && (
-        <div>
-          {/* ... */}
-          <div className="space-y-2">
-            {savedPhrases.map((phrase) => (
-              <Card 
-                key={phrase.id} 
-                className="p-3 bg-green-50 hover:bg-green-100 cursor-pointer flex justify-between items-center" 
-                onClick={() => handlePlayText(phrase.text)} // <<< LÓGICA DE FALA CORRIGIDA AQUI
-              >
-                <p className="text-green-800 font-medium">{phrase.text}</p>
-                {/* ... (botão de favorito) ... */}
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  
+  // ... (outras funções e JSX) ...
 };
