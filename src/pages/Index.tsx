@@ -15,8 +15,17 @@ const Index = () => {
     setCurrentScreen('category');
   };
 
+  const navigateHome = () => setCurrentScreen('home');
+
   switch (currentScreen) {
+    case 'category':
+      return <CategoryScreen category={selectedCategory} onBack={navigateHome} onNavigateToPhrase={() => setCurrentScreen('phrase')} />;
+    case 'phrase':
+      return <PhraseBuilder onBack={navigateHome} />;
+    case 'myat':
+      return <MyATScreen onBack={navigateHome} />;
     case 'home':
+    default: // <<< A CORREÇÃO. SEMPRE TENTE RENDERIZAR A TELA PRINCIPAL.
       return (
         <MainCategoriesScreen 
           onNavigateToCategory={navigateToCategory}
@@ -24,20 +33,6 @@ const Index = () => {
           onNavigateToMyAT={() => setCurrentScreen('myat')}
         />
       );
-    case 'category':
-      return (
-        <CategoryScreen 
-          category={selectedCategory}
-          onBack={() => setCurrentScreen('home')}
-          onNavigateToPhrase={() => setCurrentScreen('phrase')}
-        />
-      );
-    case 'phrase':
-      return <PhraseBuilder onBack={() => setCurrentScreen('home')} />;
-    case 'myat':
-      return <MyATScreen onBack={() => setCurrentScreen('home')} />;
-    default:
-      return <div>Tela não encontrada</div>;
   }
 };
 

@@ -5,8 +5,28 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
 import Index from './pages/Index';
 import ErrorBoundary from './components/ErrorBoundary';
+import { useAppInitializer } from './components/AppInitializer';
+import { SplashScreen } from './components/SplashScreen';
 
 const queryClient = new QueryClient();
+
+const AppContent = () => {
+  const { isInitialized, error } = useAppInitializer();
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+        <p>Erro na inicialização: {error}</p>
+      </div>
+    );
+  }
+
+  if (!isInitialized) {
+    return <SplashScreen onComplete={() => {}} />;
+  }
+
+  return <Index />;
+};
 
 const App = () => {
   return (
@@ -16,7 +36,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <BrowserRouter>
-              <Index />
+              <AppContent />
             </BrowserRouter>
           </TooltipProvider>
         </ThemeProvider>
