@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { seedDatabase } from '@/lib/seedDatabase';
 import { seedGamification } from '@/lib/seedGamification';
+import { getSettings } from '@/lib/storage'; // Importa getSettings
 import { SplashScreen } from './SplashScreen';
 
 interface AppInitializerProps {
@@ -14,14 +15,24 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
   useEffect(() => {
     const initialize = async () => {
       try {
-        console.log('Iniciando o seed do banco de dados...');
+        console.log('Iniciando operações de inicialização...');
+
+        // 1. Popula o banco de dados (se necessário)
         await seedDatabase();
         await seedGamification();
-        console.log('Seed concluído. Aplicativo pronto.');
+
+        // 2. Busca as configurações para definir o idioma
+        const settings = await getSettings();
+        if (settings && settings.language) {
+          document.documentElement.lang = settings.language.split('-')[0];
+        }
+
+        console.log('Inicialização concluída. Aplicativo pronto.');
         setIsInitialized(true);
+
       } catch (err: any) {
         console.error('Falha catastrófica durante a inicialização:', err);
-        setError('Não foi possível iniciar o banco de dados. Tente limpar o cache do navegador ou reinstalar o app.');
+        setError('Não foi possível iniciar o aplicativo. Por favor, tente recarregar.');
       }
     };
 
@@ -38,10 +49,8 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
   }
 
   if (!isInitialized) {
-    // Usamos o SplashScreen como nossa "sala de espera"
     return <SplashScreen onComplete={() => {}} />;
   }
 
-  // Se tudo correu bem, renderiza o aplicativo
   return <>{children}</>;
 };

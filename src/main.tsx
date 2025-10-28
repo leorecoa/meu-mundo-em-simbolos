@@ -1,16 +1,13 @@
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import { getSettings } from './lib/storage'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+import './index.css';
 
-// Inicializar o idioma do documento
-try {
-  const settings = getSettings();
-  if (settings.language) {
-    document.documentElement.lang = settings.language.split('-')[0];
-  }
-} catch (error) {
-  console.error('Erro ao definir o idioma do documento:', error);
-}
+const container = document.getElementById('root');
+const root = createRoot(container!);
 
-createRoot(document.getElementById("root")!).render(<App />);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
