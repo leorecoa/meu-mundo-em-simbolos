@@ -1,53 +1,14 @@
 import Dexie, { type Table } from 'dexie';
 
-export interface Category {
-  id?: number;
-  key: string; 
-  name: string;
-}
-
-export interface Symbol {
-  id?: number;
-  name: string;
-  imageUrl: string; 
-  categoryId: number;
-  isCustom: boolean;
-}
-
-export interface UserSettings {
-  id?: number;
-  voiceType: 'feminina' | 'masculina' | 'infantil';
-  voiceSpeed: number;
-  largeIcons: boolean;
-  useAudioFeedback: boolean;
-  theme: string;
-  language: string;
-}
-
-export interface Phrase {
-  id?: number;
-  text: string;
-  symbols: { id: string; text: string }[];
-  timestamp: number;
-  isFavorite: boolean;
-}
-
-export interface Coin {
-  id?: number;
-  total: number;
-}
-
-export interface Task {
-  id: string;
-  name: string;
-  completed: boolean;
-}
-
-export interface Achievement {
-  id: string;
-  name: string;
-  unlocked: boolean;
-}
+export interface Category { id?: number; key: string; name: string; }
+export interface Symbol { id?: number; name: string; imageUrl: string; categoryId: number; isCustom: boolean; }
+export interface UserSettings { id?: number; voiceType: 'feminina' | 'masculina' | 'infantil'; voiceSpeed: number; largeIcons: boolean; useAudioFeedback: boolean; theme: string; language: string; }
+export interface Phrase { id?: number; text: string; symbols: { id: string; text: string }[]; timestamp: number; isFavorite: boolean; }
+export interface Coin { id?: number; total: number; }
+export interface DailyGoal { id: string; name: string; target: number; current: number; completed: boolean; reward: number; lastUpdated: string; }
+export interface Achievement { id: string; name: string; description: string; unlocked: boolean; reward: number; }
+export interface PurchasedReward { id: string; }
+export interface Security { id?: number; pin: string; }
 
 export class MySubClassedDexie extends Dexie {
   categories!: Table<Category>;
@@ -55,29 +16,24 @@ export class MySubClassedDexie extends Dexie {
   userSettings!: Table<UserSettings>;
   phrases!: Table<Phrase>;
   coins!: Table<Coin>;
-  tasks!: Table<Task>;
+  dailyGoals!: Table<DailyGoal>;
   achievements!: Table<Achievement>;
+  purchasedRewards!: Table<PurchasedReward>;
+  security!: Table<Security>;
 
   constructor() {
     super('meuMundoEmSimbolosDB');
-    this.version(5).stores({
+    this.version(7).stores({
       categories: '++id, &key, name',
       symbols: '++id, name, categoryId, isCustom',
       userSettings: 'id',
       phrases: '++id, timestamp, isFavorite',
       coins: 'id',
-      tasks: 'id',
+      dailyGoals: 'id',
       achievements: 'id',
+      purchasedRewards: 'id',
+      security: 'id',
     });
-    // Manter versões antigas para migração
-    this.version(4).stores({
-      categories: '++id, &key, name',
-      symbols: '++id, name, categoryId, isCustom',
-      userSettings: 'id',
-      coins: 'id',
-      tasks: 'id',
-      achievements: 'id',
-    }).upgrade(tx => tx.table('users').clear());
   }
 }
 

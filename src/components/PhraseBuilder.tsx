@@ -7,34 +7,37 @@ import { useTheme } from '@/hooks/useTheme';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { savePhrase, getPhrases, deletePhrase, toggleFavoritePhrase } from '@/lib/storage';
 import type { Phrase } from '@/db';
+import { LetterKeyboard } from '@/components/LetterKeyboard';
+import { WordCategories } from '@/components/WordCategories';
+import { QuickPhraseBar } from '@/components/QuickPhraseBar';
 
 interface PhraseBuilderProps {
   onBack: () => void;
 }
 
-// A interface para os símbolos na frase atual não precisa vir do DB
 interface CurrentSymbol {
   id: string;
   text: string;
+  iconUrl?: string; // Adicionado para manter consistência com QuickPhraseBar
 }
 
 export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
   const [currentPhrase, setCurrentPhrase] = useState<CurrentSymbol[]>([]);
+  const [showKeyboard, setShowKeyboard] = useState(false);
+  const [customText, setCustomText] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentTheme } = useTheme();
 
-  // Busca as frases salvas do Dexie
   const { data: savedPhrases = [], refetch } = useQuery({ 
     queryKey: ['phrases'], 
     queryFn: getPhrases 
   });
 
-  // Mutação para salvar uma nova frase
   const saveMutation = useMutation({
     mutationFn: (phraseData: Omit<Phrase, 'id'>) => savePhrase(phraseData),
     onSuccess: () => {
-      refetch(); // Atualiza a lista de frases salvas
+      refetch();
       toast({ title: "Frase salva!" });
     },
   });
@@ -64,12 +67,31 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
 
     const phraseToSave = {
       text: currentPhrase.map(symbol => symbol.text).join(' '),
-      symbols: currentPhrase.map(s => ({ id: s.id, text: s.text })), // Simplificado
+      symbols: currentPhrase.map(s => ({ id: s.id, text: s.text })),
       timestamp: Date.now(),
       isFavorite: false,
     };
 
     saveMutation.mutate(phraseToSave);
+  };
+
+  const handleLetterSelect = (letter: string) => {
+    setCustomText(prev => prev + letter);
+  };
+  
+  const handleWordSelect = (word: string) => {
+    handleAddSymbol(word);
+  };
+  
+  const handleBackspace = () => {
+    setCustomText(prev => prev.slice(0, -1));
+  };
+  
+  const handleSubmitCustomText = () => {
+    if (customText.trim()) {
+      handleAddSymbol(customText.trim().toUpperCase());
+      setCustomText('');
+    }
   };
 
   return (
@@ -86,10 +108,7 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
         <div className="flex flex-wrap gap-2">
           {currentPhrase.map((symbol, index) => (
             <div key={`${symbol.id}-${index}`} className={`relative ${currentTheme.buttonBg} rounded-lg p-3 flex flex-col items-center`}>
-              <button 
-                className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm hover:bg-gray-50"
-                onClick={() => handleRemoveSymbol(index)}
-              >
+              <button className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm" onClick={() => handleRemoveSymbol(index)}>
                 <X className="h-3 w-3 text-gray-500" />
               </button>
               <div className="h-16 w-16 bg-gray-200 rounded-lg mb-2 flex items-center justify-center text-3xl">
@@ -102,22 +121,30 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
       </Card>
 
       <div className="flex justify-center gap-4">
-        <Button className={`${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor} rounded-full p-3`} onClick={handlePlayPhrase} title="Reproduzir frase">
-          <PlayCircle className="h-8 w-8" />
-        </Button>
-        <Button className="bg-green-100 hover:bg-green-200 text-green-800 rounded-full p-3" onClick={handleSavePhrase} title="Salvar frase">
-          <Save className="h-8 w-8" />
-        </Button>
-        <Button className="bg-red-50 hover:bg-red-100 text-red-800 rounded-full p-3" onClick={() => setCurrentPhrase([])} title="Limpar frase">
-          <RefreshCw className="h-8 w-8" />
-        </Button>
+        <Button className={`${currentTheme.buttonBg} rounded-full p-3`} onClick={handlePlayPhrase}><PlayCircle className="h-8 w-8" /></Button>
+        <Button className="bg-green-100 text-green-800 rounded-full p-3" onClick={handleSavePhrase}><Save className="h-8 w-8" /></Button>
+        <Button className="bg-red-50 text-red-800 rounded-full p-3" onClick={() => setCurrentPhrase([])}><RefreshCw className="h-8 w-8" /></Button>
+        <Button className="bg-blue-50 text-blue-800 rounded-full p-3" onClick={() => setShowKeyboard(!showKeyboard)}><Plus className="h-8 w-8" /></Button>
       </div>
       
-      {/* Apenas um exemplo de como adicionar símbolos */}
-      <div className="flex gap-2 justify-center">
-        <Button onClick={() => handleAddSymbol('EU')}>EU</Button>
-        <Button onClick={() => handleAddSymbol('QUERO')}>QUERO</Button>
-        <Button onClick={() => handleAddSymbol('ÁGUA')}>ÁGUA</Button>
+      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+        <h3 className={`text-md font-semibold ${currentTheme.textColor} mb-2`}>Frases rápidas:</h3>
+        <QuickPhraseBar onUsePhrase={(symbols) => setCurrentPhrase(symbols)} />
+      </div>
+      
+      {showKeyboard && (
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg border">
+          <div className="flex mb-2">
+            <input type="text" value={customText} onChange={(e) => setCustomText(e.target.value)} className="flex-1 p-2 border rounded-l-md" placeholder="Digite uma palavra" />
+            <Button className="rounded-l-none" onClick={handleSubmitCustomText}>Adicionar</Button>
+          </div>
+          <LetterKeyboard onLetterSelect={handleLetterSelect} onWordSelect={handleWordSelect} onBackspace={handleBackspace} onSubmit={handleSubmitCustomText} />
+        </div>
+      )}
+
+      <div>
+        <h2 className={`text-lg font-semibold ${currentTheme.textColor} mb-3`}>Sugestões:</h2>
+        <WordCategories onSelectWord={handleAddSymbol} />
       </div>
 
       {savedPhrases.length > 0 && (

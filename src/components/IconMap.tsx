@@ -4,52 +4,18 @@ import {
   Gamepad2, Car, Dices, Palette, Music, Book, Circle, Bike,
   Home, Bed, Sofa, Bath, Tv, Lamp, DoorOpen, Key,
   Smile, Frown, Angry, Moon, Thermometer, Battery, Sun, CloudRain,
-  HandHeart, Users, UserCheck, Phone, Shield
+  HandHeart, Users, UserCheck, Phone, Shield, PlusCircle
 } from 'lucide-react';
 import { InfinitySymbol } from '@/components/InfinitySymbol';
 
 // Mapeia o nome do ícone (string) para o componente React
 export const iconMap: { [key: string]: React.ElementType } = {
-  Heart,
-  Coffee,
-  Apple,
-  IceCream,
-  Pizza,
-  Sandwich,
-  Cookie,
-  Milk,
-  Cake,
-  Banana,
-  Gamepad2,
-  Car,
-  Dices,
-  Palette,
-  Music,
-  Book,
-  Circle,
-  Bike,
-  Home,
-  Bed,
-  Sofa,
-  Bath,
-  Tv,
-  Lamp,
-  DoorOpen,
-  Key,
-  Smile,
-  Frown,
-  Angry,
-  Moon,
-  Thermometer,
-  Battery,
-  Sun,
-  CloudRain,
-  HandHeart,
-  Users,
-  UserCheck,
-  Phone,
-  Shield,
-  HeartHug: Heart, // Mapeia HeartHug para o ícone Heart
+  Heart, Coffee, Apple, IceCream, Pizza, Sandwich, Cookie, Milk, Cake, Banana,
+  Gamepad2, Car, Dices, Palette, Music, Book, Circle, Bike,
+  Home, Bed, Sofa, Bath, Tv, Lamp, DoorOpen, Key,
+  Smile, Frown, Angry, Moon, Thermometer, Battery, Sun, CloudRain,
+  HandHeart, Users, UserCheck, Phone, Shield, PlusCircle,
+  HeartHug: Heart, 
   InfinitySymbol,
 };
 
@@ -58,13 +24,17 @@ interface IconProps {
   className?: string;
 }
 
-// Componente que renderiza um ícone dinamicamente a partir do nome
+// Componente que renderiza um ícone dinamicamente a partir do nome ou de um data URL
 export const DynamicIcon: React.FC<IconProps> = ({ name, className }) => {
+  // Verifica se o nome é um data URL (imagem em Base64)
+  if (name && name.startsWith('data:image')) {
+    return <img src={name} alt="Símbolo Personalizado" className={className} />;
+  }
+
   const IconComponent = iconMap[name];
 
   if (!IconComponent) {
-    // Retorna um ícone padrão ou nulo se o nome não for encontrado
-    return <Circle className={className} />; 
+    return <Circle className={className} />; // Ícone padrão
   }
 
   return <IconComponent className={className} />;

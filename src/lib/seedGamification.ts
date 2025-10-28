@@ -1,37 +1,39 @@
 import { db } from '@/db';
 
-const defaultTasks = [
-  { id: 'task_1', name: 'Primeira frase', completed: false },
-  { id: 'task_2', name: 'Explorador de categorias', completed: false },
-  { id: 'task_3', name: 'Comunicador frequente', completed: false },
+const defaultAchievements = [
+  { id: 'achievement_first_phrase', name: 'Primeira Comunicação', description: 'Crie sua primeira frase', unlocked: false, reward: 15 },
+  { id: 'achievement_10_phrases', name: 'Comunicador Iniciante', description: 'Crie 10 frases', unlocked: false, reward: 25 },
+  { id: 'achievement_custom_symbol', name: 'Mundo Personalizado', description: 'Crie seu primeiro símbolo', unlocked: false, reward: 30 },
 ];
 
-const defaultAchievements = [
-  { id: 'achievement_first_phrase', name: 'Primeira Comunicação', unlocked: false },
-  { id: 'achievement_10_phrases', name: 'Comunicador Iniciante', unlocked: false },
-  { id: 'achievement_all_categories', name: 'Explorador Completo', unlocked: false },
+const defaultGoals = [
+  { id: 'goal_phrases', name: 'Crie 3 frases', target: 3, current: 0, completed: false, reward: 10, lastUpdated: '' },
+  { id: 'goal_symbols', name: 'Use 10 símbolos', target: 10, current: 0, completed: false, reward: 15, lastUpdated: '' },
+  { id: 'goal_categories', name: 'Explore 2 categorias', target: 2, current: 0, completed: false, reward: 5, lastUpdated: '' },
 ];
 
 export async function seedGamification() {
   try {
-    const taskCount = await db.tasks.count();
-    if (taskCount === 0) {
-      console.log('Populando tarefas...');
-      await db.tasks.bulkAdd(defaultTasks);
-    }
-
     const achievementCount = await db.achievements.count();
     if (achievementCount === 0) {
       console.log('Populando conquistas...');
       await db.achievements.bulkAdd(defaultAchievements);
     }
 
+    const goalCount = await db.dailyGoals.count();
+    if (goalCount === 0) {
+      console.log('Populando metas diárias...');
+      const today = new Date().toISOString().split('T')[0];
+      const goalsToSeed = defaultGoals.map(g => ({ ...g, lastUpdated: today }));
+      await db.dailyGoals.bulkAdd(goalsToSeed);
+    }
+
     const coinCount = await db.coins.count();
     if (coinCount === 0) {
       console.log('Inicializando moedas...');
-      await db.coins.add({ id: 1, total: 0 });
+      await db.coins.add({ id: 1, total: 100 }); // Começa com 100 moedas
     }
   } catch (error) {
-    console.error('Erro ao popular gamificação:', error);
+    console.error('Erro ao popular dados de gamificação:', error);
   }
 }

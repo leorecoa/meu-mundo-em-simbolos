@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Upload, PlusCircle, Trash2, Loader2 } from 'lucide-react';
+import { Upload, PlusCircle, Trash2, Loader2, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,18 +12,16 @@ import { DynamicIcon } from '@/components/IconMap';
 export const SymbolsTab = () => {
   const [symbolName, setSymbolName] = useState('');
   const [symbolCategory, setSymbolCategory] = useState<number | undefined>();
+  const [symbolImage, setSymbolImage] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Busca as categorias para o seletor
   useEffect(() => {
     const fetchCategories = async () => {
       const cats = await getCategories();
       setCategories(cats);
-      if (cats.length > 0) {
-        setSymbolCategory(cats[0].id); // Define a primeira como padrão
-      }
+      if (cats.length > 0) setSymbolCategory(cats[0].id);
     };
     fetchCategories();
   }, []);
@@ -39,10 +37,8 @@ export const SymbolsTab = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customSymbols'] });
       setSymbolName('');
-      toast({ title: "Símbolo salvo", description: "O novo símbolo foi adicionado." });
-    },
-    onError: () => {
-      toast({ title: "Erro", description: "Não foi possível salvar o símbolo.", variant: "destructive" });
+      setSymbolImage(null);
+      toast({ title: "Símbolo salvo com sucesso!" });
     }
   });
 
@@ -50,27 +46,30 @@ export const SymbolsTab = () => {
     mutationFn: (symbolId: number) => deleteSymbol(symbolId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customSymbols'] });
-      toast({ title: "Símbolo excluído" });
-    },
-    onError: () => {
-      toast({ title: "Erro", description: "Não foi possível excluir o símbolo.", variant: "destructive" });
+      toast({ title: "Símbolo excluído." });
     }
   });
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSymbolImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddSymbol = () => {
     if (!symbolName.trim() || symbolCategory === undefined) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Nome e categoria do símbolo são necessários.",
-        variant: "destructive",
-      });
+      toast({ title: "Nome e categoria são obrigatórios", variant: 'destructive' });
       return;
     }
 
-    // Por enquanto, a imagem é um ícone padrão
     addSymbolMutation.mutate({ 
       name: symbolName.toUpperCase(), 
-      imageUrl: 'PlusCircle', // Usar um ícone padrão ou implementar upload
+      imageUrl: symbolImage || 'PlusCircle', // Usa a imagem ou um ícone padrão
       categoryId: symbolCategory 
     });
   };
@@ -78,77 +77,40 @@ export const SymbolsTab = () => {
   return (
     <div className="space-y-4">
       <Card className="p-4">
-        <h2 className="text-lg font-semibold mb-4">Adicionar Símbolo Personalizado</h2>
-        
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1">
-            <label className="block mb-1 text-sm font-medium">Nome do símbolo</label>
-            <Input 
-              placeholder="Ex: Minha Bola Azul" 
-              value={symbolName}
-              onChange={(e) => setSymbolName(e.target.value)}
-            />
-          </div>
-          
-          <div className="flex-1">
-            <label className="block mb-1 text-sm font-medium">Categoria</label>
-            <select 
-              className="w-full p-2 border rounded-md"
-              value={symbolCategory}
-              onChange={(e) => setSymbolCategory(Number(e.target.value))}
-            >
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
+        <h2 className="text-lg font-semibold mb-4">Adicionar Símbolo</h2>
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
+          <Input placeholder="Nome do símbolo" value={symbolName} onChange={(e) => setSymbolName(e.target.value)} />
+          <select className="w-full p-2 border rounded-md" value={symbolCategory} onChange={(e) => setSymbolCategory(Number(e.target.value))}>
+            {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)} 
+          </select>
         </div>
-        
-        <div className="flex flex-col md:flex-row gap-6 mb-6">
-          <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6">
-            <Upload className="h-10 w-10 text-gray-400 mb-2" />
-            <p className="text-sm text-gray-500 mb-2">Carregar imagem</p>
-            <Button variant="outline" size="sm">Escolher arquivo</Button>
-            <p className="text-xs text-gray-400 mt-2">Funcionalidade em desenvolvimento</p>
-          </div>
-        </div>
-        
-        <Button 
-          className="w-full bg-green-600 hover:bg-green-700"
-          onClick={handleAddSymbol}
-          disabled={addSymbolMutation.isPending}
-        >
-          <PlusCircle className="h-4 w-4 mr-2" /> 
-          {addSymbolMutation.isPending ? 'Salvando...' : 'Salvar Símbolo'}
+        <Card className="flex flex-col items-center justify-center border-2 border-dashed p-6 mb-6">
+          {symbolImage ? (
+            <img src={symbolImage} alt="Preview" className="h-24 w-24 object-cover rounded-lg mb-4" />
+          ) : (
+            <ImageIcon className="h-16 w-16 text-gray-300 mb-2" />
+          )}
+          <input type="file" id="imageUpload" accept="image/*" onChange={handleImageUpload} className="hidden" />
+          <label htmlFor="imageUpload" className="cursor-pointer">
+            <Button as="span" variant="outline">Escolher Imagem</Button>
+          </label>
+        </Card>
+        <Button className="w-full" onClick={handleAddSymbol} disabled={addSymbolMutation.isPending}>
+          {addSymbolMutation.isPending ? <Loader2 className="animate-spin"/> : <PlusCircle className="mr-2"/>} Salvar Símbolo
         </Button>
       </Card>
       
       <Card className="p-4">
         <h2 className="text-lg font-semibold mb-4">Meus Símbolos</h2>
-        {isLoading ? (
-          <div className="flex justify-center items-center py-4">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          </div>
-        ) : customSymbols.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">Nenhum símbolo personalizado criado.</p>
-        ) : (
+        {isLoading ? <Loader2 className="animate-spin mx-auto" /> : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {customSymbols.map((item) => (
-              <div key={item.id} className="border rounded-lg p-2 flex flex-col items-center">
-                <div className="h-16 w-16 bg-gray-100 rounded mb-2 flex items-center justify-center">
-                  <DynamicIcon name={item.imageUrl} className="h-8 w-8 text-gray-600" />
+              <div key={item.id} className="border rounded-lg p-2 flex flex-col items-center text-center">
+                <div className="h-20 w-20 bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
+                  <DynamicIcon name={item.imageUrl} className="h-16 w-16 text-gray-600 object-cover" />
                 </div>
-                <p className="text-sm font-medium">{item.name}</p>
-                <p className="text-xs text-gray-500">
-                  {categories.find(c => c.id === item.categoryId)?.name || 'Geral'}
-                </p>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-red-600 hover:text-red-700 mt-1"
-                  onClick={() => item.id && deleteSymbolMutation.mutate(item.id)}
-                  disabled={deleteSymbolMutation.isPending}
-                >
+                <p className="text-sm font-medium break-all">{item.name}</p>
+                <Button variant="ghost" size="sm" className="text-red-500 mt-1" onClick={() => item.id && deleteSymbolMutation.mutate(item.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
