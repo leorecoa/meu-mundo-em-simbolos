@@ -1,47 +1,10 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@/hooks/useTheme';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { Toaster } from '@/components/ui/toaster';
-import Index from './pages/Index';
-import ErrorBoundary from './components/ErrorBoundary';
-import { useAppInitializer } from './components/AppInitializer';
-import { SplashScreen } from './components/SplashScreen';
-
-const queryClient = new QueryClient();
-
-const AppContent = () => {
-  const { isInitialized, error } = useAppInitializer();
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen text-red-500">
-        <p>Erro na inicialização: {error}</p>
-      </div>
-    );
-  }
-
-  if (!isInitialized) {
-    return <SplashScreen onComplete={() => {}} />;
-  }
-
-  return <Index />;
-};
-
 const App = () => {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <TooltipProvider>
-            <Toaster />
-            <BrowserRouter>
-              <AppContent />
-            </BrowserRouter>
-          </TooltipProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Olá, Vercel!</h1>
+      <p>Se você está vendo isso, o deploy básico funcionou.</p>
+      <p>O próximo passo é reintroduzir as camadas do aplicativo, uma por uma, para encontrar o ponto de falha.</p>
+    </div>
   );
 };
 
