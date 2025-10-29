@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus, Settings, Trophy } from 'lucide-react';
+import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus, Trophy } from 'lucide-react';
 import React from 'react';
 import { InfinitySymbol } from './InfinitySymbol';
 
@@ -13,9 +13,9 @@ interface MainCategoriesScreenProps {
 }
 
 const categoryDetails: { [key: string]: { icon: React.ElementType, description: string } } = {
-  quero: { icon: Heart, description: 'Expresse seus desejos e vontades.' },
-  sinto: { icon: Smile, description: 'Comunique seus sentimentos e emoções.' },
-  preciso: { icon: HandHeart, description: 'Informe suas necessidades imediatas.' },
+  quero: { icon: Heart, description: 'Expresse seus desejos.' },
+  sinto: { icon: Smile, description: 'Comunique suas emoções.' },
+  preciso: { icon: HandHeart, description: 'Informe suas necessidades.' },
 };
 
 export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToMyAT }: MainCategoriesScreenProps) => {
@@ -28,14 +28,12 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
     return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin h-12 w-12 text-blue-600" /></div>;
   }
 
-  const mainCategories = categories.filter(c => categoryDetails[c.key]);
-
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <header className="relative flex items-center justify-between py-4 mb-10">
         <div className="flex items-center gap-3">
           <InfinitySymbol className="h-10 w-10 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Meu Mundo em Símbolos</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={onNavigateToMyAT} aria-label="Painel do Usuário">
@@ -45,11 +43,13 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {mainCategories.map(category => {
-           const details = categoryDetails[category.key];
-           if (!details) return null;
-           const Icon = details.icon;
-           return (
+        {categories.map(category => {
+          const details = categoryDetails[category.key];
+          // **LÓGICA À PROVA DE FALHAS:** Se a categoria do DB não tiver detalhes aqui, ela não será renderizada.
+          if (!details) return null;
+
+          const Icon = details.icon;
+          return (
             <div key={category.id} role="button" tabIndex={0} onClick={() => onNavigateToCategory(category.key)} onKeyDown={(e) => e.key === 'Enter' && onNavigateToCategory(category.key)} className="h-full">
               <Card className="h-full cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                 <CardHeader className="items-center text-center pointer-events-none">
@@ -61,12 +61,12 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
                 </CardContent>
               </Card>
             </div>
-           );
+          );
         })}
       </div>
 
       <div className="mt-12 text-center">
-        <div role="button" tabIndex={0} onClick={onNavigateToPhrase} onKeyDown={(e) => e.key === 'Enter' && onNavigateToPhrase} >
+        <div role="button" tabIndex={0} onClick={onNavigateToPhrase} onKeyDown={(e) => e.key === 'Enter' && onNavigateToPhrase}>
           <Card className="cursor-pointer bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4">
             <div className="flex items-center justify-center pointer-events-none">
               <MessageSquarePlus className="h-8 w-8 text-green-600 mr-4"/>
