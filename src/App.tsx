@@ -14,11 +14,7 @@ const AppContent = () => {
   const { isInitialized, error } = useAppInitializer();
 
   if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen text-red-500">
-        <p>Erro na inicialização: {error}</p>
-      </div>
-    );
+    return <div className="h-screen flex items-center justify-center">Error: {error}</div>;
   }
 
   if (!isInitialized) {

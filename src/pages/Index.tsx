@@ -1,37 +1,43 @@
-import { AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import { MainCategoriesScreen } from '@/components/MainCategoriesScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { MyATScreen } from '@/components/MyATScreen';
-import { TransitionWrapper } from '@/components/TransitionWrapper';
-import { NavigationProvider, useNavigation } from '@/contexts/NavigationContext';
 
-const AppScreens = () => {
-  const { currentScreen, selectedCategory, goBack, navigateTo } = useNavigation();
-
-  switch (currentScreen) {
-    case 'category':
-      return <TransitionWrapper><CategoryScreen category={selectedCategory} onBack={goBack} onNavigateToPhrase={() => navigateTo('phrase')} /></TransitionWrapper>;
-    case 'phrase':
-      return <TransitionWrapper><PhraseBuilder onBack={goBack} /></TransitionWrapper>;
-    case 'myat':
-      return <TransitionWrapper><MyATScreen onBack={goBack} /></TransitionWrapper>;
-    case 'home':
-    default:
-      return <TransitionWrapper><MainCategoriesScreen /></TransitionWrapper>;
-  }
-};
+type Screen = 'home' | 'category' | 'phrase' | 'myat';
 
 const Index = () => {
-  return (
-    <NavigationProvider>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
-        <AnimatePresence mode="wait">
-          <AppScreens />
-        </AnimatePresence>
-      </div>
-    </NavigationProvider>
-  );
+  const [currentScreen, setCurrentScreen] = useState<Screen>('home');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  const navigateToCategory = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentScreen('category');
+  };
+
+  const navigateHome = () => setCurrentScreen('home');
+
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'category':
+        return <CategoryScreen category={selectedCategory} onBack={navigateHome} onNavigateToPhrase={() => setCurrentScreen('phrase')} />;
+      case 'phrase':
+        return <PhraseBuilder onBack={navigateHome} />;
+      case 'myat':
+        return <MyATScreen onBack={navigateHome} />;
+      case 'home':
+      default:
+        return (
+          <MainCategoriesScreen 
+            onNavigateToCategory={navigateToCategory}
+            onNavigateToPhrase={() => setCurrentScreen('phrase')}
+            onNavigateToMyAT={() => setCurrentScreen('myat')}
+          />
+        );
+    }
+  }
+
+  return renderScreen();
 };
 
 export default Index;
