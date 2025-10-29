@@ -5,57 +5,78 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus, Settings, Trophy } from 'lucide-react';
 import React from 'react';
 import { InfinitySymbol } from './InfinitySymbol';
-import { useNavigation } from '@/contexts/NavigationContext'; // Importa o hook de navegação
 
-// ... (const categoryDetails)
+interface MainCategoriesScreenProps {
+  onNavigateToCategory: (categoryKey: string) => void;
+  onNavigateToPhrase: () => void;
+  onNavigateToMyAT: () => void;
+}
 
-export const MainCategoriesScreen = () => {
-  const { navigateTo } = useNavigation(); // Usa o hook para obter a função de navegação
+const categoryDetails: { [key: string]: { icon: React.ElementType, description: string } } = {
+  quero: { icon: Heart, description: 'Expresse seus desejos e vontades.' },
+  sinto: { icon: Smile, description: 'Comunique seus sentimentos e emoções.' },
+  preciso: { icon: HandHeart, description: 'Informe suas necessidades imediatas.' },
+};
+
+export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToMyAT }: MainCategoriesScreenProps) => {
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ['mainCategories'],
     queryFn: getCategories,
   });
 
-  // ... (loading state)
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin h-12 w-12 text-blue-600" /></div>;
+  }
 
   const mainCategories = categories.filter(c => categoryDetails[c.key]);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <header className="relative flex items-center justify-between py-4 mb-10">
-        {/* ... (cabeçalho com logo) */}
+        <div className="flex items-center gap-3">
+          <InfinitySymbol className="h-10 w-10 text-blue-600" />
+          <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
+        </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigateTo('myat')} aria-label="Painel do Usuário">
+          <Button variant="ghost" size="icon" onClick={onNavigateToMyAT} aria-label="Painel do Usuário">
             <Trophy className="h-6 w-6 text-gray-600 hover:text-blue-600" />
           </Button>
         </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {categories.map(category => {
-          const details = categoryDetails[category.key];
-          if (!details) return null;
-
-          const Icon = details.icon;
-          return (
-            <Card 
-              key={category.id} 
-              className="cursor-pointer hover:shadow-xl ..." 
-              onClick={() => navigateTo('category', category.key)} // Usa a função do context
-            >
-             {/* ... (Conteúdo do Card) */}
-            </Card>
-          );
+        {mainCategories.map(category => {
+           const details = categoryDetails[category.key];
+           if (!details) return null;
+           const Icon = details.icon;
+           return (
+            <div key={category.id} role="button" tabIndex={0} onClick={() => onNavigateToCategory(category.key)} onKeyDown={(e) => e.key === 'Enter' && onNavigateToCategory(category.key)} className="h-full">
+              <Card className="h-full cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <CardHeader className="items-center text-center pointer-events-none">
+                  <div className="p-4 bg-blue-100 rounded-full"><Icon className="h-10 w-10 text-blue-600" /></div>
+                  <CardTitle className="text-2xl font-semibold mt-4">{category.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="pointer-events-none">
+                  <CardDescription className="text-center text-base">{details.description}</CardDescription>
+                </CardContent>
+              </Card>
+            </div>
+           );
         })}
       </div>
 
       <div className="mt-12 text-center">
-        <Card 
-          className="cursor-pointer ..." 
-          onClick={() => navigateTo('phrase')} // Usa a função do context
-        >
-          {/* ... (Conteúdo do Card "Frase Livre") */}
-        </Card>
+        <div role="button" tabIndex={0} onClick={onNavigateToPhrase} onKeyDown={(e) => e.key === 'Enter' && onNavigateToPhrase} >
+          <Card className="cursor-pointer bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4">
+            <div className="flex items-center justify-center pointer-events-none">
+              <MessageSquarePlus className="h-8 w-8 text-green-600 mr-4"/>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800">Frase Livre</h2>
+                <p className="text-gray-500">Monte suas próprias frases do zero.</p>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );
