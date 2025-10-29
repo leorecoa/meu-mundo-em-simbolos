@@ -1,39 +1,37 @@
-import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { MainCategoriesScreen } from '@/components/MainCategoriesScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { MyATScreen } from '@/components/MyATScreen';
+import { TransitionWrapper } from '@/components/TransitionWrapper';
+import { NavigationProvider, useNavigation } from '@/contexts/NavigationContext';
 
-type Screen = 'home' | 'category' | 'phrase' | 'myat';
-
-const Index = () => {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('home');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-
-  const navigateToCategory = (category: string) => {
-    setSelectedCategory(category);
-    setCurrentScreen('category');
-  };
-
-  const navigateHome = () => setCurrentScreen('home');
+const AppScreens = () => {
+  const { currentScreen, selectedCategory, goBack, navigateTo } = useNavigation();
 
   switch (currentScreen) {
     case 'category':
-      return <CategoryScreen category={selectedCategory} onBack={navigateHome} onNavigateToPhrase={() => setCurrentScreen('phrase')} />;
+      return <TransitionWrapper><CategoryScreen category={selectedCategory} onBack={goBack} onNavigateToPhrase={() => navigateTo('phrase')} /></TransitionWrapper>;
     case 'phrase':
-      return <PhraseBuilder onBack={navigateHome} />;
+      return <TransitionWrapper><PhraseBuilder onBack={goBack} /></TransitionWrapper>;
     case 'myat':
-      return <MyATScreen onBack={navigateHome} />;
+      return <TransitionWrapper><MyATScreen onBack={goBack} /></TransitionWrapper>;
     case 'home':
-    default: // <<< A CORREÇÃO. SEMPRE TENTE RENDERIZAR A TELA PRINCIPAL.
-      return (
-        <MainCategoriesScreen 
-          onNavigateToCategory={navigateToCategory}
-          onNavigateToPhrase={() => setCurrentScreen('phrase')}
-          onNavigateToMyAT={() => setCurrentScreen('myat')}
-        />
-      );
+    default:
+      return <TransitionWrapper><MainCategoriesScreen /></TransitionWrapper>;
   }
+};
+
+const Index = () => {
+  return (
+    <NavigationProvider>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
+        <AnimatePresence mode="wait">
+          <AppScreens />
+        </AnimatePresence>
+      </div>
+    </NavigationProvider>
+  );
 };
 
 export default Index;
