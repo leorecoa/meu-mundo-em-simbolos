@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from '@/components/ui/toaster'; // A peça que faltava
 import Index from './pages/Index';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAppInitializer } from './components/AppInitializer';
@@ -30,7 +30,8 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <TooltipProvider>
-            <Toaster />
+            {/* O Toaster precisa estar dentro dos providers, mas fora do conteúdo principal */}
+            <Toaster /> 
             <BrowserRouter>
               <AppContent />
             </BrowserRouter>
