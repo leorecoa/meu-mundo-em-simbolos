@@ -28,8 +28,6 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
     return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin h-12 w-12 text-blue-600" /></div>;
   }
 
-  const mainCategories = categories.filter(c => categoryDetails[c.key]);
-
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <header className="relative flex items-center justify-between py-4 mb-10">
@@ -38,32 +36,28 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
           <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={onNavigateToMyAT} aria-label="Progresso e Recompensas">
-            <Trophy className="h-6 w-6 text-gray-600 hover:text-blue-600 transition-colors" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={onNavigateToMyAT} aria-label="Configurações">
-            <Settings className="h-6 w-6 text-gray-600 hover:text-blue-600 transition-colors" />
+          <Button variant="ghost" size="icon" onClick={onNavigateToMyAT} aria-label="Painel do Usuário">
+            <Trophy className="h-6 w-6 text-gray-600 hover:text-blue-600" />
           </Button>
         </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {mainCategories.map(category => {
+        {categories.map(category => {
           const details = categoryDetails[category.key];
+          // **CÓDIGO À PROVA de FALHAS:** Se não encontrar detalhes, simplesmente pula este card.
+          if (!details) return null;
+
           const Icon = details.icon;
           return (
             <Card 
               key={category.id} 
               className="cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300" 
               onClick={() => onNavigateToCategory(category.key)}
-              onKeyDown={(e) => e.key === 'Enter' && onNavigateToCategory(category.key)}
-              tabIndex={0}
-              role="button"
+              tabIndex={0} role="button"
             >
               <CardHeader className="items-center text-center pointer-events-none">
-                <div className="p-4 bg-blue-100 rounded-full">
-                  <Icon className="h-10 w-10 text-blue-600" />
-                </div>
+                <div className="p-4 bg-blue-100 rounded-full"><Icon className="h-10 w-10 text-blue-600" /></div>
                 <CardTitle className="text-2xl font-semibold mt-4">{category.name}</CardTitle>
               </CardHeader>
               <CardContent className="pointer-events-none">
@@ -75,12 +69,11 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
       </div>
 
       <div className="mt-12 text-center">
+        {/* **A CORREÇÃO FINAL:** O onClick está no Card, e o conteúdo interno não interfere com o clique. */}
         <Card 
           className="cursor-pointer bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4" 
           onClick={onNavigateToPhrase} 
-          onKeyDown={(e) => e.key === 'Enter' && onNavigateToPhrase()}
-          tabIndex={0}
-          role="button"
+          tabIndex={0} role="button"
         >
           <div className="flex items-center justify-center pointer-events-none">
             <MessageSquarePlus className="h-8 w-8 text-green-600 mr-4"/>
