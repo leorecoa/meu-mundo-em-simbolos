@@ -7,8 +7,9 @@ interface KeyboardProps {
   onAddCustomSymbol: (text: string) => void;
 }
 
-// --- Layouts de Teclado Definidos (sem alteração) ---
-type KeyboardMode = 'alpha' | 'numeric';
+// --- Layouts de Teclado Definidos ---
+type KeyboardMode = 'alpha' | 'symbols';
+type SymbolMode = 'numeric' | 'accents'; // Sub-modo para o teclado de símbolos
 
 const alphaLower = [
   ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -16,15 +17,22 @@ const alphaLower = [
   ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
 ];
 const alphaUpper = alphaLower.map(row => row.map(key => key.toUpperCase()));
-const numeric = [
+
+// Layouts para o modo de símbolos
+const numericLayout = [
   ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
   ['-', '/', ':', ';', '(', ')', '$', '&', '@', '"'],
   ['.', ',', '?', '!', "'"],
 ];
 
-// --- Subcomponente de Tecla com Classes Responsivas ---
+const accentLayout = [
+  ['á', 'é', 'í', 'ó', 'ú', 'à', 'è', 'ì', 'ò', 'ù'],
+  ['â', 'ê', 'î', 'ô', 'û', 'ã', 'õ', 'ñ', 'ü', 'ç'],
+  ['Á', 'É', 'Í', 'Ó', 'Ú'],
+];
+
+// --- Subcomponente de Tecla Reutilizável ---
 const Key = ({ children, onClick, className = '' }: { children: React.ReactNode; onClick: () => void; className?: string }) => (
-  // Ajustes de altura (h-10 sm:h-12) e fonte (text-md sm:text-lg)
   <Button onClick={onClick} variant="outline" className={`h-10 sm:h-12 text-md sm:text-lg font-bold text-slate-700 shadow-sm transition-all duration-150 active:bg-slate-200 ${className}`}>
     {children}
   </Button>
@@ -35,6 +43,7 @@ export const Keyboard = ({ onAddCustomSymbol }: KeyboardProps) => {
   const [inputValue, setInputValue] = useState('');
   const [isShifted, setIsShifted] = useState(false);
   const [keyboardMode, setKeyboardMode] = useState<KeyboardMode>('alpha');
+  const [symbolMode, setSymbolMode] = useState<SymbolMode>('numeric'); // Estado para o sub-modo
 
   const handleKeyPress = useCallback((key: string) => {
     setInputValue(prev => prev + key);
@@ -64,14 +73,23 @@ export const Keyboard = ({ onAddCustomSymbol }: KeyboardProps) => {
   }, []);
 
   const toggleKeyboardMode = useCallback(() => {
-    setKeyboardMode(prev => (prev === 'alpha' ? 'numeric' : 'alpha'));
+    setKeyboardMode(prev => (prev === 'alpha' ? 'symbols' : 'alpha'));
     setIsShifted(false);
   }, []);
   
+  const toggleSymbolMode = useCallback(() => {
+    setSymbolMode(prev => (prev === 'numeric' ? 'accents' : 'numeric'));
+  }, []);
+
   const renderKeys = () => {
-    const layout = keyboardMode === 'alpha' ? (isShifted ? alphaUpper : alphaLower) : numeric;
+    let layout;
+    if (keyboardMode === 'alpha') {
+      layout = isShifted ? alphaUpper : alphaLower;
+    } else {
+      layout = symbolMode === 'numeric' ? numericLayout : accentLayout;
+    }
+
     return layout.map((row, rowIndex) => (
-      // Ajuste de espaçamento (gap-1 sm:gap-1.5)
       <div key={rowIndex} className="flex justify-center gap-1 sm:gap-1.5">
         {row.map(key => (
           <Key key={key} onClick={() => handleKeyPress(key)} className="flex-1 uppercase">{key}</Key>
@@ -81,10 +99,8 @@ export const Keyboard = ({ onAddCustomSymbol }: KeyboardProps) => {
   };
 
   return (
-    // Ajuste de padding (p-2 sm:p-4)
-    <Card className="shadow-lg bg-white select-none">
+    <Card className="shadow-xl bg-white/60 backdrop-blur-sm border-white/20 select-none">
       <CardContent className="p-2 sm:p-4">
-        {/* Display Aprimorado com ajuste de altura e fonte */}
         <div className="flex items-center gap-2 mb-3">
           <div className="relative flex-grow">
             <input 
@@ -92,7 +108,6 @@ export const Keyboard = ({ onAddCustomSymbol }: KeyboardProps) => {
               readOnly 
               value={inputValue}
               placeholder="Digite aqui..."
-              // Ajustes de altura (h-10 sm:h-12) e fonte (text-md sm:text-lg)
               className="w-full h-10 sm:h-12 text-md sm:text-lg font-medium bg-slate-100 rounded-lg px-3 shadow-inner text-slate-800 placeholder:text-slate-400 focus:outline-none"
             />
             {inputValue && (
@@ -106,16 +121,23 @@ export const Keyboard = ({ onAddCustomSymbol }: KeyboardProps) => {
           </Button>
         </div>
 
-        {/* Teclado Virtual Dinâmico com ajuste de espaçamento */}
         <div className="flex flex-col gap-1 sm:gap-1.5">
           {renderKeys()}
+          {/* Controles do teclado */}
           <div className="flex justify-center gap-1 sm:gap-1.5">
             {keyboardMode === 'alpha' ? (
-              <Key onClick={toggleShift} className={`flex-[1.5] ${isShifted ? 'bg-blue-500 text-white' : ''}`}>
-                <ArrowUp className="h-5 sm:h-6 w-5 sm:w-6" />
-              </Key>
-            ) : <div className="flex-[1.5]"></div> /* Espaçador */}
-            <Key onClick={toggleKeyboardMode} className="flex-1 text-xs sm:text-sm">{keyboardMode === 'alpha' ? '?123' : 'ABC'}</Key>
+              <>
+                <Key onClick={toggleShift} className={`flex-[1.5] ${isShifted ? 'bg-blue-500 text-white' : ''}`}>
+                  <ArrowUp className="h-5 sm:h-6 w-5 sm:w-6 mx-auto" />
+                </Key>
+                <Key onClick={toggleKeyboardMode} className="flex-1">{"?123"}</Key>
+              </>
+            ) : (
+              <>
+                <Key onClick={toggleKeyboardMode} className="flex-[1.5]">{"ABC"}</Key>
+                <Key onClick={toggleSymbolMode} className="flex-1">{symbolMode === 'numeric' ? 'áéí' : '#+='}</Key>
+              </>
+            )}
             <Key onClick={handleSpace} className="flex-[4]"><span className="font-normal text-sm">Espaço</span></Key>
             <Key onClick={handleBackspace} className="flex-1"><Delete className="h-5 sm:h-6 w-5 sm:w-6 mx-auto" /></Key>
           </div>
