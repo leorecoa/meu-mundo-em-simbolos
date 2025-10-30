@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { PlayCircle, Trash2, X, Sparkles, Volume2, ChevronLeft } from 'lucide-react';
+import { PlayCircle, Trash2, X, Sparkles, Volume2, ChevronLeft, Keyboard as KeyboardIcon, Grid3x3 } from 'lucide-react';
+import { Keyboard } from './Keyboard'; // Importando o novo componente de teclado
 
 // A interface foi movida para fora do componente para melhor escopo.
 interface Symbol {
@@ -108,12 +109,14 @@ const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: Symbol) => void
   </Card>
 );
 
-
 // --- Componente Principal Refatorado ---
+type InputMode = 'symbols' | 'keyboard';
+
 export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
   const [currentPhrase, setCurrentPhrase] = useState<Symbol[]>([]);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceName, setSelectedVoiceName] = useState<string>('');
+  const [inputMode, setInputMode] = useState<InputMode>('symbols'); // Novo estado para o modo de entrada
   const { toast } = useToast();
 
   // Carregamento seguro das vozes
@@ -127,30 +130,34 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
         if (preferredVoice && availableVoices.some(v => v.name === preferredVoice)) {
           setSelectedVoiceName(preferredVoice);
         } else if (availableVoices.length > 0) {
-          // Define a primeira voz como padrão se nenhuma preferência for encontrada
           const defaultVoice = availableVoices[0].name;
           setSelectedVoiceName(defaultVoice);
           localStorage.setItem('selectedVoice', defaultVoice);
         }
       };
       
-      loadVoices(); // Carga inicial
-      window.speechSynthesis.onvoiceschanged = loadVoices; // Carga quando a lista muda
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
 
-      return () => { // Cleanup
+      return () => {
         window.speechSynthesis.onvoiceschanged = null;
       };
     }
-  }, []); // O array de dependência vazio está correto aqui.
+  }, []);
 
-  // Funções de manipulação foram memoizadas com useCallback.
   const handleVoiceChange = useCallback((voiceName: string) => {
     setSelectedVoiceName(voiceName);
     localStorage.setItem('selectedVoice', voiceName);
   }, []);
 
-  const addSymbol = useCallback((symbol: Symbol) => {
-    setCurrentPhrase(prev => [...prev, symbol]);
+  // Função addSymbol atualizada para lidar com texto do teclado
+  const addSymbol = useCallback((symbolOrText: Symbol | string) => {
+    if (typeof symbolOrText === 'string') {
+      const newSymbol: Symbol = { id: `custom-${Date.now()}`, text: symbolOrText };
+      setCurrentPhrase(prev => [...prev, newSymbol]);
+    } else {
+      setCurrentPhrase(prev => [...prev, symbolOrText]);
+    }
   }, []);
 
   const removeLastSymbol = useCallback(() => {
@@ -167,7 +174,7 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
       return;
     }
     const phraseText = currentPhrase.map(s => s.text).join(' ');
-    window.speechSynthesis.cancel(); // Cancela falas anteriores
+    window.speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(phraseText);
     const voiceToUse = voices.find(v => v.name === selectedVoiceName);
@@ -181,6 +188,10 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     window.speechSynthesis.speak(utterance);
   }, [currentPhrase, voices, selectedVoiceName, toast]);
 
+  const toggleInputMode = () => {
+    setInputMode(prevMode => prevMode === 'symbols' ? 'keyboard' : 'symbols');
+  };
+
   return (
     <div className="p-4 md:p-6 bg-slate-50 min-h-screen font-sans">
       <header className="flex items-center justify-between mb-4">
@@ -189,7 +200,7 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
           Voltar
         </Button>
         <h1 className="text-xl font-bold">Formador de Frases</h1>
-        <div className="w-24"></div> {/* Espaçador para centralizar o título */}
+        <div className="w-24"></div>
       </header>
 
       <main>
@@ -207,7 +218,32 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
           onVoiceChange={handleVoiceChange}
         />
 
-        <SymbolGrid onSymbolClick={addSymbol} />
+        {/* Seletor de Modo de Entrada */}
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex rounded-md shadow-sm">
+            <Button 
+              onClick={toggleInputMode} 
+              className={`px-4 py-2 text-sm font-semibold rounded-l-md ${inputMode === 'symbols' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}
+            >
+              <Grid3x3 className="mr-2 h-5 w-5" />
+              Símbolos
+            </Button>
+            <Button 
+              onClick={toggleInputMode} 
+              className={`px-4 py-2 text-sm font-semibold rounded-r-md ${inputMode === 'keyboard' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}
+            >
+              <KeyboardIcon className="mr-2 h-5 w-5" />
+              Teclado
+            </Button>
+          </div>
+        </div>
+
+        {/* Renderização Condicional */}
+        {inputMode === 'symbols' ? (
+          <SymbolGrid onSymbolClick={addSymbol} />
+        ) : (
+          <Keyboard onAddCustomSymbol={addSymbol} />
+        )}
       </main>
     </div>
   );
