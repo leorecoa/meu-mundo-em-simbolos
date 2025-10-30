@@ -1,4 +1,4 @@
-// --- Imports e Tipos ---
+"""// --- Imports e Tipos ---
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -119,7 +119,7 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
   const [inputMode, setInputMode] = useState<InputMode>('symbols'); // Novo estado para o modo de entrada
   const { toast } = useToast();
 
-  // Carregamento seguro das vozes
+  // Carregamento e seleção inteligente de vozes
   useEffect(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       const loadVoices = () => {
@@ -130,9 +130,19 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
         if (preferredVoice && availableVoices.some(v => v.name === preferredVoice)) {
           setSelectedVoiceName(preferredVoice);
         } else if (availableVoices.length > 0) {
-          const defaultVoice = availableVoices[0].name;
-          setSelectedVoiceName(defaultVoice);
-          localStorage.setItem('selectedVoice', defaultVoice);
+          // Lógica aprimorada para selecionar a melhor voz padrão
+          const googleVoice = availableVoices.find(v => v.name.includes('Google'));
+          const microsoftVoice = availableVoices.find(v => v.name.includes('Microsoft'));
+          
+          let bestDefaultVoice = availableVoices[0]; // Fallback para a primeira da lista
+          if (googleVoice) {
+            bestDefaultVoice = googleVoice;
+          } else if (microsoftVoice) {
+            bestDefaultVoice = microsoftVoice;
+          }
+
+          setSelectedVoiceName(bestDefaultVoice.name);
+          localStorage.setItem('selectedVoice', bestDefaultVoice.name);
         }
       };
       
@@ -183,8 +193,11 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
       utterance.voice = voiceToUse;
     }
     
+    // Ajustes finos para uma voz mais natural
     utterance.lang = 'pt-BR';
-    utterance.rate = 0.9;
+    utterance.rate = 0.95; // Levemente mais rápido para soar menos arrastado.
+    utterance.pitch = 1.0; // Tom de voz neutro.
+    
     window.speechSynthesis.speak(utterance);
   }, [currentPhrase, voices, selectedVoiceName, toast]);
 
@@ -248,3 +261,4 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     </div>
   );
 };
+""
