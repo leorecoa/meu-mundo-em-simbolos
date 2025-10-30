@@ -1,23 +1,20 @@
-"""// --- Imports e Tipos ---
+// --- Imports e Tipos ---
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { PlayCircle, Trash2, X, Sparkles, Volume2, ChevronLeft, Keyboard as KeyboardIcon, Grid3x3 } from 'lucide-react';
-import { Keyboard } from './Keyboard'; // Importando o novo componente de teclado
+import { Keyboard } from './Keyboard';
 
-// A interface foi movida para fora do componente para melhor escopo.
 interface Symbol {
   id: string;
   text: string;
 }
 
-// A props interface também foi movida para fora.
 interface PhraseBuilderProps {
   onBack: () => void;
 }
 
-// A lista de símbolos de exemplo foi movida para fora para evitar recriação a cada render.
 const exampleSymbols: Symbol[] = [
     { id: 'eu', text: 'Eu' }, { id: 'quero', text: 'quero' }, { id: 'gosto', text: 'gosto' },
     { id: 'comer', text: 'comer' }, { id: 'beber', text: 'beber' }, { id: 'brincar', text: 'brincar' },
@@ -26,9 +23,6 @@ const exampleSymbols: Symbol[] = [
     { id: 'obrigado', text: 'obrigado' }, { id: 'agua', text: 'água' }, { id: 'bola', text: 'bola' },
 ];
 
-// --- Subcomponentes ---
-
-// Subcomponente para exibir a frase atual
 const PhraseDisplay = ({ phrase }: { phrase: Symbol[] }) => (
   <Card className="mb-4 min-h-[160px] shadow-lg bg-white flex items-center justify-center p-4">
     <CardContent className="w-full">
@@ -52,7 +46,6 @@ const PhraseDisplay = ({ phrase }: { phrase: Symbol[] }) => (
   </Card>
 );
 
-// Subcomponente para os botões de ação (Falar, Apagar, Limpar)
 const ActionButtons = ({ onSpeak, onRemoveLast, onClear }: { onSpeak: () => void; onRemoveLast: () => void; onClear: () => void; }) => (
   <div className="grid grid-cols-4 gap-3 mb-6">
     <Button onClick={onSpeak} className="h-24 bg-green-500 hover:bg-green-600 text-white shadow-xl col-span-2 flex-col gap-1">
@@ -70,7 +63,6 @@ const ActionButtons = ({ onSpeak, onRemoveLast, onClear }: { onSpeak: () => void
   </div>
 );
 
-// Subcomponente para o seletor de voz
 const VoiceSelector = ({ voices, selectedVoice, onVoiceChange }: { voices: SpeechSynthesisVoice[]; selectedVoice: string; onVoiceChange: (voiceName: string) => void; }) => (
   <div className="mb-6">
     <label htmlFor="voice-selector" className="flex items-center gap-2 text-slate-600 font-medium mb-2">
@@ -94,7 +86,6 @@ const VoiceSelector = ({ voices, selectedVoice, onVoiceChange }: { voices: Speec
   </div>
 );
 
-// Subcomponente para a grade de símbolos
 const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: Symbol) => void }) => (
   <Card className="shadow-lg bg-white">
     <CardContent className="p-4">
@@ -109,17 +100,15 @@ const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: Symbol) => void
   </Card>
 );
 
-// --- Componente Principal Refatorado ---
 type InputMode = 'symbols' | 'keyboard';
 
 export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
   const [currentPhrase, setCurrentPhrase] = useState<Symbol[]>([]);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceName, setSelectedVoiceName] = useState<string>('');
-  const [inputMode, setInputMode] = useState<InputMode>('symbols'); // Novo estado para o modo de entrada
+  const [inputMode, setInputMode] = useState<InputMode>('symbols');
   const { toast } = useToast();
 
-  // Carregamento e seleção inteligente de vozes
   useEffect(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       const loadVoices = () => {
@@ -130,11 +119,10 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
         if (preferredVoice && availableVoices.some(v => v.name === preferredVoice)) {
           setSelectedVoiceName(preferredVoice);
         } else if (availableVoices.length > 0) {
-          // Lógica aprimorada para selecionar a melhor voz padrão
           const googleVoice = availableVoices.find(v => v.name.includes('Google'));
           const microsoftVoice = availableVoices.find(v => v.name.includes('Microsoft'));
           
-          let bestDefaultVoice = availableVoices[0]; // Fallback para a primeira da lista
+          let bestDefaultVoice = availableVoices[0];
           if (googleVoice) {
             bestDefaultVoice = googleVoice;
           } else if (microsoftVoice) {
@@ -160,7 +148,6 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     localStorage.setItem('selectedVoice', voiceName);
   }, []);
 
-  // Função addSymbol atualizada para lidar com texto do teclado
   const addSymbol = useCallback((symbolOrText: Symbol | string) => {
     if (typeof symbolOrText === 'string') {
       const newSymbol: Symbol = { id: `custom-${Date.now()}`, text: symbolOrText };
@@ -193,10 +180,9 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
       utterance.voice = voiceToUse;
     }
     
-    // Ajustes finos para uma voz mais natural
     utterance.lang = 'pt-BR';
-    utterance.rate = 0.95; // Levemente mais rápido para soar menos arrastado.
-    utterance.pitch = 1.0; // Tom de voz neutro.
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
     
     window.speechSynthesis.speak(utterance);
   }, [currentPhrase, voices, selectedVoiceName, toast]);
@@ -231,7 +217,6 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
           onVoiceChange={handleVoiceChange}
         />
 
-        {/* Seletor de Modo de Entrada */}
         <div className="flex justify-center mb-4">
           <div className="inline-flex rounded-md shadow-sm">
             <Button 
@@ -251,7 +236,6 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
           </div>
         </div>
 
-        {/* Renderização Condicional */}
         {inputMode === 'symbols' ? (
           <SymbolGrid onSymbolClick={addSymbol} />
         ) : (
@@ -261,4 +245,3 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     </div>
   );
 };
-""
