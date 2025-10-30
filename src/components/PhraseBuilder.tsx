@@ -5,35 +5,26 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { PlayCircle, Trash2, X, Sparkles, Volume2, ChevronLeft, Keyboard as KeyboardIcon, Grid3x3 } from 'lucide-react';
 import { Keyboard } from './Keyboard';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db, Symbol as DbSymbol } from '@/lib/db'; // Importando o DB e o tipo Symbol
 
-interface Symbol {
-  id: string;
-  text: string;
-}
+// A interface Symbol local foi removida para usar a do db.ts
 
 interface PhraseBuilderProps {
   onBack: () => void;
 }
 
-const exampleSymbols: Symbol[] = [
-    { id: 'eu', text: 'Eu' }, { id: 'quero', text: 'quero' }, { id: 'gosto', text: 'gosto' },
-    { id: 'comer', text: 'comer' }, { id: 'beber', text: 'beber' }, { id: 'brincar', text: 'brincar' },
-    { id: 'ir', text: 'ir' }, { id: 'ao', text: 'ao' }, { id: 'banheiro', text: 'banheiro' },
-    { id: 'sim', text: 'sim' }, { id: 'nao', text: 'não' }, { id: 'porfavor', text: 'por favor' },
-    { id: 'obrigado', text: 'obrigado' }, { id: 'agua', text: 'água' }, { id: 'bola', text: 'bola' },
-];
+// A constante exampleSymbols foi removida. Os dados agora vêm do banco de dados.
 
 // --- Subcomponentes Responsivos ---
 
-const PhraseDisplay = ({ phrase }: { phrase: Symbol[] }) => (
-  // Altura mínima e padding responsivos
+const PhraseDisplay = ({ phrase }: { phrase: DbSymbol[] }) => (
   <Card className="mb-4 min-h-[120px] sm:min-h-[160px] shadow-lg bg-white flex items-center justify-center p-2 sm:p-4">
     <CardContent className="w-full">
       {phrase.length > 0 ? (
         <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
           {phrase.map((symbol, index) => (
             <div key={`${symbol.id}-${index}`} className="flex flex-col items-center gap-1 animate-in fade-in zoom-in-95">
-              {/* Tamanho e fonte do símbolo responsivos */}
               <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-100 rounded-lg flex items-center justify-center shadow-inner">
                 <span className="text-xl sm:text-2xl font-bold text-slate-700 text-center px-1">{symbol.text}</span>
               </div>
@@ -51,7 +42,6 @@ const PhraseDisplay = ({ phrase }: { phrase: Symbol[] }) => (
 );
 
 const ActionButtons = ({ onSpeak, onRemoveLast, onClear }: { onSpeak: () => void; onRemoveLast: () => void; onClear: () => void; }) => (
-  // Altura e fonte dos botões responsivas
   <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
     <Button onClick={onSpeak} className="h-20 sm:h-24 bg-green-500 hover:bg-green-600 text-white shadow-xl col-span-2 flex-col gap-1">
       <PlayCircle className="h-7 w-7 sm:h-8 sm:w-8" />
@@ -91,26 +81,29 @@ const VoiceSelector = ({ voices, selectedVoice, onVoiceChange }: { voices: Speec
   </div>
 );
 
-const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: Symbol) => void }) => (
-  <Card className="shadow-lg bg-white">
-    <CardContent className="p-2 sm:p-4">
-      {/* Grid e botões responsivos */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
-        {exampleSymbols.map(symbol => (
-          <Button key={symbol.id} onClick={() => onSymbolClick(symbol)} variant="outline" className="h-24 sm:h-28 text-lg sm:text-xl font-bold text-slate-800 shadow-sm hover:bg-blue-50">
-            {symbol.text}
-          </Button>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
+const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => void }) => {
+  // Hook para buscar símbolos da categoria 'geral' em tempo real
+  const symbols = useLiveQuery(() => db.symbols.where('categoryKey').equals('geral').toArray(), []);
 
+  return (
+    <Card className="shadow-lg bg-white">
+      <CardContent className="p-2 sm:p-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+          {symbols?.map(symbol => (
+            <Button key={symbol.id} onClick={() => onSymbolClick(symbol)} variant="outline" className="h-24 sm:h-28 text-lg sm:text-xl font-bold text-slate-800 shadow-sm hover:bg-blue-50">
+              {symbol.text}
+            </Button>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 type InputMode = 'symbols' | 'keyboard';
 
 export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
-  const [currentPhrase, setCurrentPhrase] = useState<Symbol[]>([]);
+  const [currentPhrase, setCurrentPhrase] = useState<DbSymbol[]>([]);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceName, setSelectedVoiceName] = useState<string>('');
   const [inputMode, setInputMode] = useState<InputMode>('symbols');
@@ -155,9 +148,9 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     localStorage.setItem('selectedVoice', voiceName);
   }, []);
 
-  const addSymbol = useCallback((symbolOrText: Symbol | string) => {
+  const addSymbol = useCallback((symbolOrText: DbSymbol | string) => {
     if (typeof symbolOrText === 'string') {
-      const newSymbol: Symbol = { id: `custom-${Date.now()}`, text: symbolOrText };
+      const newSymbol: DbSymbol = { id: Date.now(), text: symbolOrText, categoryKey: 'custom' }; // Adicionando categoryKey
       setCurrentPhrase(prev => [...prev, newSymbol]);
     } else {
       setCurrentPhrase(prev => [...prev, symbolOrText]);
