@@ -5,7 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus, Trophy } from 'lucide-react';
 import React from 'react';
 import { InfinitySymbol } from './InfinitySymbol';
-import { useNavigation } from '@/contexts/NavigationContext';
+
+// A interface de props foi adicionada para alinhar com o componente pai (Index.tsx)
+interface MainCategoriesScreenProps {
+  onNavigateToCategory: (category: string) => void;
+  onNavigateToPhrase: () => void;
+  onNavigateToMyAT: () => void;
+}
 
 const categoryDetails: { [key: string]: { icon: React.ElementType, description: string } } = {
   quero: { icon: Heart, description: 'Expresse seus desejos e vontades.' },
@@ -13,8 +19,8 @@ const categoryDetails: { [key: string]: { icon: React.ElementType, description: 
   preciso: { icon: HandHeart, description: 'Informe suas necessidades imediatas.' },
 };
 
-export const MainCategoriesScreen = () => {
-  const { navigateTo } = useNavigation();
+// O componente agora recebe as funções de navegação via props
+export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToMyAT }: MainCategoriesScreenProps) => {
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ['mainCategories'],
     queryFn: getCategories,
@@ -32,7 +38,8 @@ export const MainCategoriesScreen = () => {
           <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigateTo('myat')} aria-label="Painel do Usuário">
+          {/* O onClick foi atualizado para usar a prop onNavigateToMyAT */}
+          <Button variant="ghost" size="icon" onClick={onNavigateToMyAT} aria-label="Painel do Usuário">
             <Trophy className="h-6 w-6 text-gray-600 hover:text-blue-600" />
           </Button>
         </div>
@@ -47,7 +54,8 @@ export const MainCategoriesScreen = () => {
             <Card 
               key={category.id} 
               className="cursor-pointer h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300" 
-              onClick={() => navigateTo('category', category.key)}
+              // O onClick foi atualizado para usar a prop onNavigateToCategory
+              onClick={() => onNavigateToCategory(category.key)}
             >
               <CardHeader className="items-center text-center pointer-events-none">
                 <div className="p-4 bg-blue-100 rounded-full"><Icon className="h-10 w-10 text-blue-600" /></div>
@@ -64,7 +72,8 @@ export const MainCategoriesScreen = () => {
       <div className="mt-12 text-center">
         <Card 
           className="cursor-pointer bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4" 
-          onClick={() => navigateTo('phrase')} 
+          // O onClick foi atualizado para usar a prop onNavigateToPhrase
+          onClick={onNavigateToPhrase} 
         >
           <div className="flex items-center justify-center pointer-events-none">
             <MessageSquarePlus className="h-8 w-8 text-green-600 mr-4"/>
