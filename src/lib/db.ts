@@ -1,9 +1,15 @@
 import Dexie, { Table } from 'dexie';
 
-// --- Interfaces de Dados ---
+// --- Novas Interfaces com profileId ---
+
+export interface Profile {
+  id?: number;
+  name: string;
+}
 
 export interface Category {
   id?: number;
+  profileId: number;
   key: string;
   name: string;
   color: string;
@@ -11,66 +17,62 @@ export interface Category {
 
 export interface Symbol {
   id?: number;
+  profileId: number;
   text: string;
   categoryKey: string;
-  image?: Blob; // Novo campo para armazenar a imagem como um Blob
+  image?: Blob;
 }
 
-// --- Definição do Banco de Dados ---
+// --- Definição do Banco de Dados com Versão Atualizada ---
 
 export class MySubClassedDexie extends Dexie {
+  profiles!: Table<Profile>;
   categories!: Table<Category>; 
   symbols!: Table<Symbol>;
 
   constructor() {
     super('MeuMundoEmSimbolosDB');
     
-    // Incrementamos a versão para adicionar o campo de imagem
-    this.version(3).stores({
-      categories: '++id, &key, name, color',
-      symbols: '++id, text, categoryKey, image' // Adicionado o campo image
+    // Versão 4: Adiciona a tabela de perfis e o profileId
+    this.version(4).stores({
+      profiles: '++id, name',
+      categories: '++id, profileId, &[profileId+key]', // Garante que a chave da categoria é única por perfil
+      symbols: '++id, profileId, text, categoryKey'
     });
 
-    this.version(2).stores({
-      categories: '++id, &key, name, color',
-      symbols: '++id, text, categoryKey'
-    });
-    
-    this.version(1).stores({
-      categories: '++id, &key, name',
-      symbols: '++id, text, categoryKey'
-    });
-
-    this.on('populate', () => this.populate());
+    // Mantém as versões anteriores para migração suave
+    this.version(3).stores({ categories: '++id, &key, name, color', symbols: '++id, text, categoryKey, image' });
+    this.version(2).stores({ categories: '++id, &key, name, color', symbols: '++id, text, categoryKey' });
+    this.version(1).stores({ categories: '++id, &key, name', symbols: '++id, text, categoryKey' });
   }
 
-  async populate() {
-    const defaultCategories: Category[] = [
-      { key: 'quero', name: 'Quero', color: 'rose' },
-      { key: 'sinto', name: 'Sinto', color: 'amber' },
-      { key: 'preciso', name: 'Preciso', color: 'sky' },
-      { key: 'geral', name: 'Geral', color: 'slate' },
+  // Nova função para popular dados para um perfil específico
+  async populateForProfile(profileId: number) {
+    const defaultCategories: Omit<Category, 'id'>[] = [
+      { profileId, key: 'quero', name: 'Quero', color: 'rose' },
+      { profileId, key: 'sinto', name: 'Sinto', color: 'amber' },
+      { profileId, key: 'preciso', name: 'Preciso', color: 'sky' },
+      { profileId, key: 'geral', name: 'Geral', color: 'slate' },
     ];
-    await db.categories.bulkAdd(defaultCategories);
+    await db.categories.bulkAdd(defaultCategories as Category[]);
 
-    // Os símbolos padrão não têm imagens, demonstrando a retrocompatibilidade
-    const defaultSymbols: Symbol[] = [
-      { text: 'Eu', categoryKey: 'geral' },
-      { text: 'Comer', categoryKey: 'quero' },
-      { text: 'Beber', categoryKey: 'quero' },
-      { text: 'Brincar', categoryKey: 'quero' },
-      { text: 'Ir ao banheiro', categoryKey: 'preciso' },
-      { text: 'Sim', categoryKey: 'geral' },
-      { text: 'Não', categoryKey: 'geral' },
-      { text: 'Por favor', categoryKey: 'geral' },
-      { text: 'Obrigado', categoryKey: 'geral' },
-      { text: 'Água', categoryKey: 'geral' },
-      { text: 'Feliz', categoryKey: 'sinto' },
-      { text: 'Triste', categoryKey: 'sinto' },
-      { text: 'Com raiva', categoryKey: 'sinto' },
-      { text: 'Ajuda', categoryKey: 'preciso' },
+    const defaultSymbols: Omit<Symbol, 'id'>[] = [
+      { profileId, text: 'Eu', categoryKey: 'geral' },
+      { profileId, text: 'Comer', categoryKey: 'quero' },
+      { profileId, text: 'Beber', categoryKey: 'quero' },
+      { profileId, text: 'Brincar', categoryKey: 'quero' },
+      { profileId, text: 'Ir ao banheiro', categoryKey: 'preciso' },
+      { profileId, text: 'Sim', categoryKey: 'geral' },
+      { profileId, text: 'Não', categoryKey: 'geral' },
+      { profileId, text: 'Por favor', categoryKey: 'geral' },
+      { profileId, text: 'Obrigado', categoryKey: 'geral' },
+      { profileId, text: 'Água', categoryKey: 'geral' },
+      { profileId, text: 'Feliz', categoryKey: 'sinto' },
+      { profileId, text: 'Triste', categoryKey: 'sinto' },
+      { profileId, text: 'Com raiva', categoryKey: 'sinto' },
+      { profileId, text: 'Ajuda', categoryKey: 'preciso' },
     ];
-    await db.symbols.bulkAdd(defaultSymbols);
+    await db.symbols.bulkAdd(defaultSymbols as Symbol[]);
   }
 }
 

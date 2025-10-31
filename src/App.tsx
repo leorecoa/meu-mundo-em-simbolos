@@ -1,26 +1,35 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@/hooks/useTheme';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { useAppInitializer } from '@/components/AppInitializer';
+import { SplashScreen } from '@/components/SplashScreen';
+import { ProfileProvider, useProfile } from './contexts/ProfileContext'; // Importando o context
+import { ProfileScreen } from './pages/ProfileScreen';
 import Index from './pages/Index';
-import ErrorBoundary from './components/ErrorBoundary';
-import { useAppInitializer } from './components/AppInitializer';
-import { SplashScreen } from './components/SplashScreen';
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
+  const { activeProfileId, setActiveProfileId } = useProfile();
   const { isInitialized, error } = useAppInitializer();
 
   if (error) {
     return <div className="h-screen flex items-center justify-center bg-red-900 text-white">Error: {error}</div>;
   }
 
+  // Mostra o splash screen enquanto o app está inicializando
   if (!isInitialized) {
     return <SplashScreen onComplete={() => {}} />;
   }
 
+  // Se o app inicializou mas não há perfil ativo, mostra a tela de perfis
+  if (!activeProfileId) {
+    return <ProfileScreen onProfileSelect={setActiveProfileId} />;
+  }
+
+  // Se tudo está pronto e um perfil está ativo, mostra o conteúdo principal
   return <Index />;
 };
 
@@ -28,15 +37,15 @@ const App = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
+        {/* Envolvemos tudo com o ProfileProvider */}
+        <ProfileProvider>
           <TooltipProvider>
-            {/* O Toaster é movido para fora do BrowserRouter para persistir entre as telas */}
             <Toaster /> 
             <BrowserRouter>
               <AppContent />
             </BrowserRouter>
           </TooltipProvider>
-        </ThemeProvider>
+        </ProfileProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
