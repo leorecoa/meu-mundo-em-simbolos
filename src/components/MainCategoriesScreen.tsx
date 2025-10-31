@@ -2,10 +2,11 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus, Trophy } from 'lucide-react';
+import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus } from 'lucide-react'; // Ícone do Troféu removido
 import React from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 
+// Caminho da imagem corrigido
 const InfinityImage = () => (
   <img src="/infinity-symbol.png" alt="Símbolo do Infinito" className="h-10 w-auto" />
 );
@@ -13,7 +14,7 @@ const InfinityImage = () => (
 interface MainCategoriesScreenProps {
   onNavigateToCategory: (category: string) => void;
   onNavigateToPhrase: () => void;
-  onNavigateToMyAT: () => void;
+  // Prop para navegar para o painel removida
 }
 
 const categoryDetails: { [key: string]: { icon: React.ElementType, description: string, gradient: string } } = {
@@ -22,14 +23,14 @@ const categoryDetails: { [key: string]: { icon: React.ElementType, description: 
   preciso: { icon: HandHeart, description: 'Informe suas necessidades imediatas.', gradient: 'from-sky-400 to-cyan-500' },
 };
 
-export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToMyAT }: MainCategoriesScreenProps) => {
+export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase }: MainCategoriesScreenProps) => {
   const { activeProfileId } = useProfile();
   const categories = useLiveQuery(() => 
     activeProfileId ? db.categories.where('profileId').equals(activeProfileId).toArray() : [], 
   [activeProfileId]);
 
   if (!categories) {
-    return <div className="flex flex-col justify-center items-center h-screen"><Loader2 className="h-12 w-12 text-white animate-spin" /></div>;
+    return <div className="flex flex-col justify-center items-center h-screen"><Loader2 className="h-12 w-12 text-blue-600 animate-spin" /></div>;
   }
 
   return (
@@ -37,9 +38,9 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
       <header className="relative flex items-center justify-between py-4 mb-10">
         <div className="flex items-center gap-3">
           <InfinityImage />
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Meu Mundo em Símbolos</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
         </div>
-        <div className="flex items-center gap-2"><Button variant="ghost" size="icon" onClick={onNavigateToMyAT} aria-label="Painel do Usuário"><Trophy className="h-6 w-6 text-slate-300 hover:text-white" /></Button></div>
+        {/* Seção do botão de troféu completamente removida */}
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -49,15 +50,19 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
           if (!details) return null;
           const Icon = details.icon;
           return (
-            <Card key={category.id} className="cursor-pointer h-full hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 bg-black/30 border-white/10 shadow-lg text-white" onClick={() => onNavigateToCategory(category.key)}>
-              <CardHeader className="items-center text-center pointer-events-none"><div className={`p-4 rounded-full bg-gradient-to-br ${details.gradient}`}><Icon className="h-10 w-10 text-white" /></div><CardTitle className="text-2xl font-semibold mt-4">{category.name}</CardTitle></CardHeader>
-              <CardContent className="pointer-events-none"><CardDescription className="text-center text-base text-slate-300">{details.description}</CardDescription></CardContent>
+            <Card key={category.id} className="cursor-pointer h-full hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 bg-white border-gray-200 shadow-lg" onClick={() => onNavigateToCategory(category.key)}>
+              <CardHeader className="items-center text-center pointer-events-none"><div className={`p-4 rounded-full bg-gradient-to-br ${details.gradient}`}><Icon className="h-10 w-10 text-white" /></div><CardTitle className="text-2xl font-semibold mt-4 text-gray-800">{category.name}</CardTitle></CardHeader>
+              <CardContent className="pointer-events-none"><CardDescription className="text-center text-base text-gray-600">{details.description}</CardDescription></CardContent>
             </Card>
           );
         })}
       </div>
 
-      <div className="mt-12 text-center"><Card className="cursor-pointer hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 p-4 bg-black/30 border-white/10 shadow-lg text-white" onClick={onNavigateToPhrase}><div className="flex items-center justify-center pointer-events-none"><MessageSquarePlus className="h-8 w-8 text-green-400 mr-4"/><div><h2 className="text-xl font-semibold">Frase Livre</h2><p className="text-slate-300">Monte suas próprias frases do zero.</p></div></div></Card></div>
+      <div className="mt-12 text-center">
+        <Card className="cursor-pointer hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 p-4 bg-white border-gray-200 shadow-lg" onClick={onNavigateToPhrase}>
+          <div className="flex items-center justify-center pointer-events-none"><MessageSquarePlus className="h-8 w-8 text-green-500 mr-4"/><div><h2 className="text-xl font-semibold text-gray-800">Frase Livre</h2><p className="text-gray-500">Monte suas próprias frases do zero.</p></div></div>
+        </Card>
+      </div>
     </div>
   );
 };
