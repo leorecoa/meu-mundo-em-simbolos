@@ -29,9 +29,11 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
   const data = useLiveQuery(async () => {
     if (!activeProfileId) return null;
     const lowerSearchTerm = searchTerm.toLowerCase();
-    const symbols = await db.symbols.where({ profileId: activeProfileId, categoryKey: category }).filter(s => s.text.toLowerCase().includes(lowerSearchTerm)).toArray();
+    const symbolsQuery = db.symbols.where({ profileId: activeProfileId, categoryKey: category });
+    const filteredSymbols = await symbolsQuery.filter(s => s.text.toLowerCase().includes(lowerSearchTerm)).toArray();
+    const sortedSymbols = filteredSymbols.sort((a, b) => a.order - b.order);
     const cat = await db.categories.where({ profileId: activeProfileId, key: category }).first();
-    return { symbols, categoryColor: cat?.color || 'default' };
+    return { symbols: sortedSymbols, categoryColor: cat?.color || 'default' };
   }, [category, searchTerm, activeProfileId]);
 
   const getSymbolColor = () => { return colorMap[data?.categoryColor || 'default'] || colorMap.default; };

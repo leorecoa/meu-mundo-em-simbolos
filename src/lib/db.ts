@@ -1,6 +1,6 @@
 import Dexie, { Table } from 'dexie';
 
-// --- Novas Interfaces com profileId ---
+// --- Interfaces de Dados ---
 
 export interface Profile {
   id?: number;
@@ -21,6 +21,7 @@ export interface Symbol {
   text: string;
   categoryKey: string;
   image?: Blob;
+  order: number; // Novo campo para a ordem de exibição
 }
 
 // --- Definição do Banco de Dados com Versão Atualizada ---
@@ -33,20 +34,20 @@ export class MySubClassedDexie extends Dexie {
   constructor() {
     super('MeuMundoEmSimbolosDB');
     
-    // Versão 4: Adiciona a tabela de perfis e o profileId
-    this.version(4).stores({
+    // Versão 5: Adiciona o campo 'order' aos símbolos
+    this.version(5).stores({
       profiles: '++id, name',
-      categories: '++id, profileId, &[profileId+key]', // Garante que a chave da categoria é única por perfil
-      symbols: '++id, profileId, text, categoryKey'
+      categories: '++id, profileId, &[profileId+key]',
+      symbols: '++id, profileId, text, categoryKey, order' // Adicionado 'order'
     });
 
     // Mantém as versões anteriores para migração suave
+    this.version(4).stores({ profiles: '++id, name', categories: '++id, profileId, &[profileId+key]', symbols: '++id, profileId, text, categoryKey, image' });
     this.version(3).stores({ categories: '++id, &key, name, color', symbols: '++id, text, categoryKey, image' });
     this.version(2).stores({ categories: '++id, &key, name, color', symbols: '++id, text, categoryKey' });
     this.version(1).stores({ categories: '++id, &key, name', symbols: '++id, text, categoryKey' });
   }
 
-  // Nova função para popular dados para um perfil específico
   async populateForProfile(profileId: number) {
     const defaultCategories: Omit<Category, 'id'>[] = [
       { profileId, key: 'quero', name: 'Quero', color: 'rose' },
@@ -57,20 +58,20 @@ export class MySubClassedDexie extends Dexie {
     await db.categories.bulkAdd(defaultCategories as Category[]);
 
     const defaultSymbols: Omit<Symbol, 'id'>[] = [
-      { profileId, text: 'Eu', categoryKey: 'geral' },
-      { profileId, text: 'Comer', categoryKey: 'quero' },
-      { profileId, text: 'Beber', categoryKey: 'quero' },
-      { profileId, text: 'Brincar', categoryKey: 'quero' },
-      { profileId, text: 'Ir ao banheiro', categoryKey: 'preciso' },
-      { profileId, text: 'Sim', categoryKey: 'geral' },
-      { profileId, text: 'Não', categoryKey: 'geral' },
-      { profileId, text: 'Por favor', categoryKey: 'geral' },
-      { profileId, text: 'Obrigado', categoryKey: 'geral' },
-      { profileId, text: 'Água', categoryKey: 'geral' },
-      { profileId, text: 'Feliz', categoryKey: 'sinto' },
-      { profileId, text: 'Triste', categoryKey: 'sinto' },
-      { profileId, text: 'Com raiva', categoryKey: 'sinto' },
-      { profileId, text: 'Ajuda', categoryKey: 'preciso' },
+      { profileId, text: 'Eu', categoryKey: 'geral', order: 1 },
+      { profileId, text: 'Sim', categoryKey: 'geral', order: 2 },
+      { profileId, text: 'Não', categoryKey: 'geral', order: 3 },
+      { profileId, text: 'Por favor', categoryKey: 'geral', order: 4 },
+      { profileId, text: 'Obrigado', categoryKey: 'geral', order: 5 },
+      { profileId, text: 'Comer', categoryKey: 'quero', order: 6 },
+      { profileId, text: 'Beber', categoryKey: 'quero', order: 7 },
+      { profileId, text: 'Brincar', categoryKey: 'quero', order: 8 },
+      { profileId, text: 'Ir ao banheiro', categoryKey: 'preciso', order: 9 },
+      { profileId, text: 'Água', categoryKey: 'geral', order: 10 },
+      { profileId, text: 'Feliz', categoryKey: 'sinto', order: 11 },
+      { profileId, text: 'Triste', categoryKey: 'sinto', order: 12 },
+      { profileId, text: 'Com raiva', categoryKey: 'sinto', order: 13 },
+      { profileId, text: 'Ajuda', categoryKey: 'preciso', order: 14 },
     ];
     await db.symbols.bulkAdd(defaultSymbols as Symbol[]);
   }

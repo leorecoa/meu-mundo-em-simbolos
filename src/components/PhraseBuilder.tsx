@@ -39,7 +39,15 @@ const colorMap: { [key: string]: { bg: string, text: string, hover: string, imag
 
 const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => void }) => {
   const { activeProfileId } = useProfile();
-  const data = useLiveQuery(async () => { if (!activeProfileId) return null; const symbols = await db.symbols.where({ profileId: activeProfileId }).toArray(); const categories = await db.categories.where({ profileId: activeProfileId }).toArray(); const categoryColorMap = new Map(categories.map(cat => [cat.key, cat.color])); return { symbols, categoryColorMap }; }, [activeProfileId]);
+  const data = useLiveQuery(async () => { 
+    if (!activeProfileId) return null; 
+    const symbols = await db.symbols.where({ profileId: activeProfileId }).toArray(); 
+    const categories = await db.categories.where({ profileId: activeProfileId }).toArray(); 
+    const categoryColorMap = new Map(categories.map(cat => [cat.key, cat.color])); 
+    const sortedSymbols = symbols.sort((a,b) => a.order - b.order);
+    return { symbols: sortedSymbols, categoryColorMap }; 
+  }, [activeProfileId]);
+
   const filteredSymbols = data?.symbols.filter(s => s.categoryKey !== 'geral');
   const getSymbolColor = (categoryKey: string) => { const colorName = data?.categoryColorMap.get(categoryKey) || 'default'; return colorMap[colorName] || colorMap.default; };
   return (
@@ -70,7 +78,7 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
   useEffect(() => { if (typeof window !== 'undefined' && window.speechSynthesis) { const loadVoices = () => { const availableVoices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('pt')); setVoices(availableVoices); const p = localStorage.getItem('selectedVoice'); if (p && availableVoices.some(v => v.name === p)) { setSelectedVoiceName(p); } else if (availableVoices.length > 0) { const g = availableVoices.find(v => v.name.includes('Google')); const m = availableVoices.find(v => v.name.includes('Microsoft')); let b = availableVoices[0]; if (g) { b = g; } else if (m) { b = m; } setSelectedVoiceName(b.name); localStorage.setItem('selectedVoice', b.name); } }; loadVoices(); window.speechSynthesis.onvoiceschanged = loadVoices; return () => { window.speechSynthesis.onvoiceschanged = null; }; } }, []);
 
   const handleVoiceChange = useCallback((voiceName: string) => { setSelectedVoiceName(voiceName); localStorage.setItem('selectedVoice', voiceName); }, []);
-  const addSymbol = useCallback((symbolOrText: DbSymbol | string) => { if (typeof symbolOrText === 'string') { const newSymbol: DbSymbol = { id: Date.now(), profileId: activeProfileId!, text: symbolOrText, categoryKey: 'custom' }; setCurrentPhrase(prev => [...prev, newSymbol]); } else { setCurrentPhrase(prev => [...prev, symbolOrText]); } }, [activeProfileId]);
+  const addSymbol = useCallback((symbolOrText: DbSymbol | string) => { if (typeof symbolOrText === 'string') { const newSymbol: DbSymbol = { id: Date.now(), profileId: activeProfileId!, text: symbolOrText, categoryKey: 'custom', order: 999 }; setCurrentPhrase(prev => [...prev, newSymbol]); } else { setCurrentPhrase(prev => [...prev, symbolOrText]); } }, [activeProfileId]);
   const removeLastSymbol = useCallback(() => { setCurrentPhrase(prev => prev.slice(0, -1)); }, []);
   const clearPhrase = useCallback(() => { setCurrentPhrase([]); }, []);
   const getPhraseText = () => currentPhrase.map(s => s.text).join(' ');
