@@ -2,10 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  /* Imagem de fundo com sobreposição escura para legibilidade */
-  background-image: linear-gradient(rgba(25, 25, 30, 0.6), rgba(25, 25, 30, 0.8)), url('/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png');
+body::before {
+  content: '';
+  position: fixed; /* Fixa o fundo */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Coloca o pseudo-elemento atrás de todo o conteúdo */
+  
+  /* A imagem de fundo */
+  background-image: url('/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed; /* Mantém o fundo fixo durante o scroll */
+  
+  /* Efeito de desfoque e escurecimento para resolver a "distorção" e melhorar a legibilidade */
+  filter: blur(2px) brightness(0.6);
+  
+  /* Garante que o efeito de desfoque não "vaze" nas bordas */
+  transform: scale(1.05);
+}
+
+/* Garante que o fundo principal do body seja transparente para que o ::before seja visível */
+body {
+  background-color: transparent;
 }
