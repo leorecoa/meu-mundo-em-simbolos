@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Toaster } from '@/components/ui/toaster'; // A peça que faltava
+import { Toaster } from '@/components/ui/toaster';
 import Index from './pages/Index';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAppInitializer } from './components/AppInitializer';
@@ -14,7 +14,7 @@ const AppContent = () => {
   const { isInitialized, error } = useAppInitializer();
 
   if (error) {
-    return <div className="h-screen flex items-center justify-center">Error: {error}</div>;
+    return <div className="h-screen flex items-center justify-center bg-red-900 text-white">Error: {error}</div>;
   }
 
   if (!isInitialized) {
@@ -30,7 +30,7 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <TooltipProvider>
-            {/* O Toaster precisa estar dentro dos providers, mas fora do conteúdo principal */}
+            {/* O Toaster é movido para fora do BrowserRouter para persistir entre as telas */}
             <Toaster /> 
             <BrowserRouter>
               <AppContent />

@@ -6,13 +6,14 @@ export interface Category {
   id?: number;
   key: string;
   name: string;
-  color: string; // Novo campo para a cor da categoria (ex: 'blue', 'red')
+  color: string;
 }
 
 export interface Symbol {
   id?: number;
   text: string;
   categoryKey: string;
+  image?: Blob; // Novo campo para armazenar a imagem como um Blob
 }
 
 // --- Definição do Banco de Dados ---
@@ -23,15 +24,18 @@ export class MySubClassedDexie extends Dexie {
 
   constructor() {
     super('MeuMundoEmSimbolosDB');
-    // Incrementamos a versão do DB para aplicar a nova estrutura
+    
+    // Incrementamos a versão para adicionar o campo de imagem
+    this.version(3).stores({
+      categories: '++id, &key, name, color',
+      symbols: '++id, text, categoryKey, image' // Adicionado o campo image
+    });
+
     this.version(2).stores({
       categories: '++id, &key, name, color',
-      symbols: '++id, text, categoryKey' 
-    }).upgrade(tx => {
-      // A atualização é gerenciada pelo Dexie, mas podemos adicionar lógica aqui se necessário
+      symbols: '++id, text, categoryKey'
     });
     
-    // A versão antiga ainda é suportada para não quebrar usuários existentes
     this.version(1).stores({
       categories: '++id, &key, name',
       symbols: '++id, text, categoryKey'
@@ -49,6 +53,7 @@ export class MySubClassedDexie extends Dexie {
     ];
     await db.categories.bulkAdd(defaultCategories);
 
+    // Os símbolos padrão não têm imagens, demonstrando a retrocompatibilidade
     const defaultSymbols: Symbol[] = [
       { text: 'Eu', categoryKey: 'geral' },
       { text: 'Comer', categoryKey: 'quero' },
