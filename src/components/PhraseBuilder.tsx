@@ -5,16 +5,17 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { PlayCircle, Trash2, X, Sparkles, Volume2, ChevronLeft, Keyboard as KeyboardIcon, Grid3x3, Send } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, Symbol as DbSymbol, Category as DbCategory } from '@/lib/db'; // Importando também a Category
+import { db, Symbol as DbSymbol, Category as DbCategory } from '@/lib/db';
 
 interface PhraseBuilderProps {
   onBack: () => void;
 }
 
-// --- Subcomponentes com Novo Visual ---
+// --- Subcomponentes com Visual Corrigido ---
 
 const PhraseDisplay = ({ phrase }: { phrase: DbSymbol[] }) => (
-  <Card className="mb-4 min-h-[120px] sm:min-h-[160px] shadow-xl bg-black/20 backdrop-blur-lg border-white/10 flex items-center justify-center p-2 sm:p-4 text-white">
+  // Removido o backdrop-blur e ajustada a opacidade do fundo
+  <Card className="mb-4 min-h-[120px] sm:min-h-[160px] shadow-xl bg-black/30 border-white/10 flex items-center justify-center p-2 sm:p-4 text-white">
     <CardContent className="w-full">
       {phrase.length > 0 ? (
         <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
@@ -63,7 +64,8 @@ const VoiceSelector = ({ voices, selectedVoice, onVoiceChange }: { voices: Speec
       id="voice-selector" 
       value={selectedVoice} 
       onChange={(e) => onVoiceChange(e.target.value)} 
-      className="w-full p-2 sm:p-3 border-white/10 rounded-lg bg-black/20 backdrop-blur-lg shadow-md text-white text-sm sm:text-base focus:ring-2 focus:ring-blue-400 focus:outline-none" 
+      // Removido o backdrop-blur
+      className="w-full p-2 sm:p-3 border-white/10 rounded-lg bg-black/30 shadow-md text-white text-sm sm:text-base focus:ring-2 focus:ring-blue-400 focus:outline-none" 
       disabled={voices.length === 0}
     >
       {voices.length > 0 ? (
@@ -76,7 +78,6 @@ const VoiceSelector = ({ voices, selectedVoice, onVoiceChange }: { voices: Speec
   </div>
 );
 
-// Mapeamento de cores Tailwind para ser usado no código
 const colorMap: { [key: string]: { bg: string, text: string, hover: string } } = {
   rose: { bg: 'bg-rose-500/80', text: 'text-white', hover: 'hover:bg-rose-600/90' },
   amber: { bg: 'bg-amber-500/80', text: 'text-white', hover: 'hover:bg-amber-600/90' },
@@ -86,7 +87,6 @@ const colorMap: { [key: string]: { bg: string, text: string, hover: string } } =
 };
 
 const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => void }) => {
-  // Busca símbolos e categorias
   const data = useLiveQuery(async () => {
     const symbols = await db.symbols.toArray();
     const categories = await db.categories.toArray();
@@ -94,7 +94,6 @@ const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => vo
     return { symbols, categoryColorMap };
   }, []);
 
-  // Filtra símbolos da categoria 'geral' para não serem exibidos aqui
   const filteredSymbols = data?.symbols.filter(s => s.categoryKey !== 'geral');
 
   const getSymbolColor = (categoryKey: string) => {
@@ -103,7 +102,8 @@ const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => vo
   };
 
   return (
-    <Card className="shadow-xl bg-black/20 backdrop-blur-lg border-white/10">
+    // Removido o backdrop-blur
+    <Card className="shadow-xl bg-black/30 border-white/10">
       <CardContent className="p-2 sm:p-4">
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
           {filteredSymbols?.map(symbol => {
@@ -143,7 +143,8 @@ const NativeKeyboardInput = ({ onAddSymbol }: { onAddSymbol: (text: string) => v
   };
 
   return (
-    <Card className="shadow-xl bg-black/20 backdrop-blur-lg border-white/10">
+    // Removido o backdrop-blur
+    <Card className="shadow-xl bg-black/30 border-white/10">
       <CardContent className="p-4 flex items-center gap-2">
         <input 
           type="text"
