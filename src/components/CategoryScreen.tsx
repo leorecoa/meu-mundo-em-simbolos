@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Symbol as DbSymbol } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Search } from 'lucide-react';
 
 interface CategoryScreenProps {
   category: string;
@@ -11,12 +11,11 @@ interface CategoryScreenProps {
   onNavigateToPhrase: () => void;
 }
 
-// --- Componente de Símbolo Reutilizável ---
 const SymbolDisplay = ({ symbol }: { symbol: DbSymbol }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (symbol.image) {
+    if (symbol.image && symbol.image instanceof Blob) {
       const url = URL.createObjectURL(symbol.image);
       setImageUrl(url);
       return () => URL.revokeObjectURL(url);
@@ -43,11 +42,17 @@ const colorMap: { [key: string]: { bg: string, text: string, hover: string, imag
 };
 
 export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: CategoryScreenProps) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
   const data = useLiveQuery(async () => {
-    const symbols = await db.symbols.where('categoryKey').equals(category).toArray();
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    const symbols = await db.symbols
+      .where('categoryKey').equals(category)
+      .filter(s => s.text.toLowerCase().includes(lowerSearchTerm))
+      .toArray();
     const cat = await db.categories.where('key').equals(category).first();
     return { symbols, categoryColor: cat?.color || 'default' };
-  }, [category]);
+  }, [category, searchTerm]);
 
   const getSymbolColor = () => {
     return colorMap[data?.categoryColor || 'default'] || colorMap.default;
@@ -56,26 +61,20 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
   return (
     <div className="p-2 sm:p-4 md:p-6 min-h-screen font-sans">
       <header className="flex items-center justify-between mb-4">
-        <Button variant="ghost" onClick={onBack} className="flex items-center gap-1 text-sm sm:text-base text-slate-200 font-semibold">
-          <ChevronLeft className="h-5 w-5" />
-          Voltar
-        </Button>
+        <Button variant="ghost" onClick={onBack} className="flex items-center gap-1 text-sm sm:text-base text-slate-200 font-semibold"><ChevronLeft className="h-5 w-5" />Voltar</Button>
         <h1 className="text-lg sm:text-xl font-bold text-white capitalize">{category}</h1>
         <div className="w-16 sm:w-24"></div>
       </header>
 
       <main>
+        <div className="relative mb-4"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} /><input type="text" placeholder="Buscar nesta categoria..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-100/80 rounded-lg pl-10 pr-4 py-2 text-slate-800" /></div>
         <Card className="shadow-xl bg-black/30 border-white/10">
           <CardContent className="p-2 sm:p-4">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
               {data?.symbols.map(symbol => {
                 const colors = getSymbolColor();
                 return (
-                  <Button 
-                    key={symbol.id} 
-                    onClick={onNavigateToPhrase}
-                    variant="outline" 
-                    className={`relative h-24 sm:h-28 text-lg sm:text-xl font-bold shadow-lg border-none transition-transform hover:scale-105 p-0 overflow-hidden ${colors.bg} ${colors.text} ${colors.hover}`}>
+                  <Button key={symbol.id} onClick={onNavigateToPhrase} variant="outline" className={`relative h-24 sm:h-28 font-bold shadow-lg border-none transition-transform hover:scale-105 p-0 overflow-hidden ${colors.bg} ${colors.text} ${colors.hover}`}>
                     <SymbolDisplay symbol={symbol} />
                     {symbol.image && <div className={`absolute inset-0 bg-gradient-to-t ${colors.imageOverlay} to-transparent`}></div>}
                     <span className="absolute bottom-1 right-2 text-xs font-bold">{symbol.image ? symbol.text : ''}</span>
