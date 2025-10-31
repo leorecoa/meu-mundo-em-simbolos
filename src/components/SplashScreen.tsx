@@ -1,6 +1,5 @@
-
 import { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { InfinitySymbol } from './InfinitySymbol';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -8,70 +7,24 @@ interface SplashScreenProps {
 
 export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   useEffect(() => {
+    // Simula um tempo de carregamento e depois chama onComplete
     const timer = setTimeout(() => {
-      onComplete(); // Transição direta para a tela principal
-    }, 2000); // Reduzido para 2 segundos para uma experiência mais rápida
+      onComplete();
+    }, 2500); // Duração de 2.5 segundos
 
     return () => clearTimeout(timer);
   }, [onComplete]);
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 z-50"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.5, ease: "easeInOut" }}
-      >
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 1.1, opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="flex flex-col items-center"
-        >
-          {/* Imagem do símbolo do infinito 3D azul */}
-          <motion.div
-            className="mb-8"
-            animate={{ 
-              y: [0, -10, 0]
-            }}
-            transition={{ 
-              duration: 2, 
-              ease: "easeInOut",
-              repeat: Infinity
-            }}
-          >
-            <motion.img
-              src="/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png"
-              alt="Símbolo do Infinito 3D"
-              className="w-48 h-auto drop-shadow-2xl"
-              initial={{ scale: 0.8, opacity: 0, rotateY: -180 }}
-              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-            />
-          </motion.div>
-          
-          <motion.h1
-            className="text-3xl font-bold text-white mb-2"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            Meu Mundo em Símbolos
-          </motion.h1>
-          
-          <motion.p
-            className="text-white text-center max-w-xs px-4"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            Tecnologia inclusiva para que todas as vozes sejam compreendidas
-          </motion.p>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+    <div 
+      className="h-screen w-screen flex flex-col items-center justify-center bg-cover bg-center animate-in fade-in duration-500"
+      style={{ backgroundImage: "url('/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png')" }}
+    >
+      <div className="absolute inset-0 bg-black/50"></div> {/* Sobreposição escura */}
+      <div className="relative z-10 flex flex-col items-center text-white">
+        <InfinitySymbol className="h-24 w-24 text-white animate-pulse" />
+        <p className="text-xl font-semibold mt-4 tracking-wider">Carregando seu mundo...</p>
+      </div>
+    </div>
   );
 };

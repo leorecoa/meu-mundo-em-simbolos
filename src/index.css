@@ -2,9 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Aplica o gradiente a todo o corpo da aplicação */
 body {
-  @apply bg-gradient-to-br from-slate-100 to-slate-200;
-  /* Em modo escuro, se houver, você pode definir um gradiente diferente */
-  /* @apply dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900; */
+  /* Imagem de fundo com sobreposição escura para legibilidade */
+  background-image: linear-gradient(rgba(25, 25, 30, 0.6), rgba(25, 25, 30, 0.8)), url('/lovable-uploads/e3f113b1-11eb-4777-bff3-164fac8b0f28.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Mantém o fundo fixo durante o scroll */
 }

@@ -4,14 +4,15 @@ import Dexie, { Table } from 'dexie';
 
 export interface Category {
   id?: number;
-  key: string; // Ex: 'quero', 'sinto'
-  name: string; // Ex: 'Quero', 'Sinto'
+  key: string;
+  name: string;
+  color: string; // Novo campo para a cor da categoria (ex: 'blue', 'red')
 }
 
 export interface Symbol {
   id?: number;
   text: string;
-  categoryKey: string; // A que categoria este símbolo pertence
+  categoryKey: string;
 }
 
 // --- Definição do Banco de Dados ---
@@ -22,24 +23,32 @@ export class MySubClassedDexie extends Dexie {
 
   constructor() {
     super('MeuMundoEmSimbolosDB');
-    this.version(1).stores({
-      categories: '++id, &key, name', // id auto-incrementado, key é única
-      symbols: '++id, text, categoryKey' // id auto-incrementado
+    // Incrementamos a versão do DB para aplicar a nova estrutura
+    this.version(2).stores({
+      categories: '++id, &key, name, color',
+      symbols: '++id, text, categoryKey' 
+    }).upgrade(tx => {
+      // A atualização é gerenciada pelo Dexie, mas podemos adicionar lógica aqui se necessário
     });
-    this.on('populate', () => this.populate()); // Hook para popular dados iniciais
+    
+    // A versão antiga ainda é suportada para não quebrar usuários existentes
+    this.version(1).stores({
+      categories: '++id, &key, name',
+      symbols: '++id, text, categoryKey'
+    });
+
+    this.on('populate', () => this.populate());
   }
 
   async populate() {
-    // Adiciona categorias padrão
     const defaultCategories: Category[] = [
-      { key: 'quero', name: 'Quero' },
-      { key: 'sinto', name: 'Sinto' },
-      { key: 'preciso', name: 'Preciso' },
-      { key: 'geral', name: 'Geral' },
+      { key: 'quero', name: 'Quero', color: 'rose' },
+      { key: 'sinto', name: 'Sinto', color: 'amber' },
+      { key: 'preciso', name: 'Preciso', color: 'sky' },
+      { key: 'geral', name: 'Geral', color: 'slate' },
     ];
     await db.categories.bulkAdd(defaultCategories);
 
-    // Adiciona símbolos padrão
     const defaultSymbols: Symbol[] = [
       { text: 'Eu', categoryKey: 'geral' },
       { text: 'Comer', categoryKey: 'quero' },
