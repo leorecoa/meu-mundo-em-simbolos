@@ -3,8 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { PlayCircle, Trash2, X, Sparkles, Volume2, ChevronLeft, Keyboard as KeyboardIcon, Grid3x3 } from 'lucide-react';
-import { Keyboard } from './Keyboard';
+import { PlayCircle, Trash2, X, Sparkles, Volume2, ChevronLeft, Keyboard as KeyboardIcon, Grid3x3, Send } from 'lucide-react';
+// O componente Keyboard foi removido
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Symbol as DbSymbol } from '@/lib/db';
 
@@ -15,7 +15,6 @@ interface PhraseBuilderProps {
 // --- Subcomponentes com Novo Visual ---
 
 const PhraseDisplay = ({ phrase }: { phrase: DbSymbol[] }) => (
-  // Efeito "vidro fosco" com fundo semi-transparente e desfoque
   <Card className="mb-4 min-h-[120px] sm:min-h-[160px] shadow-xl bg-white/60 backdrop-blur-sm border-white/20 flex items-center justify-center p-2 sm:p-4">
     <CardContent className="w-full">
       {phrase.length > 0 ? (
@@ -40,17 +39,14 @@ const PhraseDisplay = ({ phrase }: { phrase: DbSymbol[] }) => (
 
 const ActionButtons = ({ onSpeak, onRemoveLast, onClear }: { onSpeak: () => void; onRemoveLast: () => void; onClear: () => void; }) => (
   <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
-    {/* Botão Falar com gradiente */}
     <Button onClick={onSpeak} className="h-20 sm:h-24 text-white shadow-xl col-span-2 flex-col gap-1 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none">
       <PlayCircle className="h-7 w-7 sm:h-8 sm:w-8" />
       <span className="text-base sm:text-lg font-bold">Falar</span>
     </Button>
-    {/* Botão Apagar com gradiente */}
     <Button onClick={onRemoveLast} variant="outline" className="h-20 sm:h-24 text-white shadow-lg flex-col gap-1 bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 border-none">
       <X className="h-6 w-6 sm:h-7 sm:w-7" />
       <span className="text-sm sm:text-md">Apagar</span>
     </Button>
-    {/* Botão Limpar com gradiente */}
     <Button onClick={onClear} variant="destructive" className="h-20 sm:h-24 shadow-lg flex-col gap-1 bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 border-none">
       <Trash2 className="h-6 w-6 sm:h-7 sm:w-7" />
       <span className="text-sm sm:text-md">Limpar</span>
@@ -68,7 +64,6 @@ const VoiceSelector = ({ voices, selectedVoice, onVoiceChange }: { voices: Speec
       id="voice-selector" 
       value={selectedVoice} 
       onChange={(e) => onVoiceChange(e.target.value)} 
-      // Estilo de vidro fosco para o seletor
       className="w-full p-2 sm:p-3 border-white/20 rounded-lg bg-white/60 backdrop-blur-sm shadow-md text-sm sm:text-base focus:ring-2 focus:ring-blue-400 focus:outline-none" 
       disabled={voices.length === 0}
     >
@@ -84,14 +79,11 @@ const VoiceSelector = ({ voices, selectedVoice, onVoiceChange }: { voices: Speec
 
 const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => void }) => {
   const symbols = useLiveQuery(() => db.symbols.where('categoryKey').equals('geral').toArray(), []);
-
   return (
-    // Efeito de vidro fosco no card da grade
     <Card className="shadow-xl bg-white/60 backdrop-blur-sm border-white/20">
       <CardContent className="p-2 sm:p-4">
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
           {symbols?.map(symbol => (
-            // Botões dos símbolos com novo estilo
             <Button 
               key={symbol.id} 
               onClick={() => onSymbolClick(symbol)} 
@@ -102,6 +94,43 @@ const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => vo
             </Button>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Novo subcomponente para usar o teclado nativo
+const NativeKeyboardInput = ({ onAddSymbol }: { onAddSymbol: (text: string) => void }) => {
+  const [text, setText] = useState('');
+
+  const handleAdd = () => {
+    const trimmedText = text.trim();
+    if (trimmedText) {
+      onAddSymbol(trimmedText);
+      setText('');
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleAdd();
+    }
+  };
+
+  return (
+    <Card className="shadow-xl bg-white/60 backdrop-blur-sm border-white/20">
+      <CardContent className="p-4 flex items-center gap-2">
+        <input 
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Digite aqui e adicione à frase..."
+          className="w-full h-12 text-lg font-medium bg-slate-100/80 rounded-lg px-4 shadow-inner text-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        />
+        <Button onClick={handleAdd} className="h-12 bg-green-500 hover:bg-green-600 text-white shadow-lg" aria-label="Adicionar Palavra">
+          <Send className="h-6 w-6" />
+        </Button>
       </CardContent>
     </Card>
   );
@@ -198,7 +227,6 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
     setInputMode(prevMode => prevMode === 'symbols' ? 'keyboard' : 'symbols');
   };
 
-  // Removido o bg-slate-50 para permitir que o gradiente global apareça
   return (
     <div className="p-2 sm:p-4 md:p-6 min-h-screen font-sans">
       <header className="flex items-center justify-between mb-4">
@@ -247,7 +275,8 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
         {inputMode === 'symbols' ? (
           <SymbolGrid onSymbolClick={addSymbol} />
         ) : (
-          <Keyboard onAddCustomSymbol={addSymbol} />
+          // Renderiza o novo componente de input nativo
+          <NativeKeyboardInput onAddSymbol={addSymbol} />
         )}
       </main>
     </div>
