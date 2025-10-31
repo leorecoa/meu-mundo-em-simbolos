@@ -1,143 +1,68 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, Loader2 } from 'lucide-react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db, Symbol as DbSymbol } from '@/lib/db';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { getCategoryWithSymbolsByKey } from '@/lib/storage';
-import type { Symbol as SymbolType } from '@/db';
-import { DynamicIcon } from '@/components/IconMap';
+import { Card, CardContent } from '@/components/ui/card';
+import { ChevronLeft } from 'lucide-react';
 
 interface CategoryScreenProps {
-  category: string; // A 'key' da categoria (ex: 'quero')
+  category: string;
   onBack: () => void;
-  onNavigateToPhrase: () => void;
+  onNavigateToPhrase: () => void; // Adicionado para navegação
 }
 
+// Mapeamento de cores para os botões de símbolo
+const colorMap: { [key: string]: { bg: string, text: string, hover: string } } = {
+  rose: { bg: 'bg-rose-500/80', text: 'text-white', hover: 'hover:bg-rose-600/90' },
+  amber: { bg: 'bg-amber-500/80', text: 'text-white', hover: 'hover:bg-amber-600/90' },
+  sky: { bg: 'bg-sky-500/80', text: 'text-white', hover: 'hover:bg-sky-600/90' },
+  slate: { bg: 'bg-slate-500/80', text: 'text-white', hover: 'hover:bg-slate-600/90' },
+  default: { bg: 'bg-white/70', text: 'text-slate-800', hover: 'hover:bg-white/90' },
+};
+
 export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: CategoryScreenProps) => {
-  const [title, setTitle] = useState('');
-  const [symbols, setSymbols] = useState<SymbolType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const { category: cat, symbols: syms } = await getCategoryWithSymbolsByKey(category);
-      if (cat) {
-        setTitle(cat.name);
-        setSymbols(syms);
-      } else {
-        setTitle('Categoria não encontrada');
-        setSymbols([]);
-      }
-      setLoading(false);
-    };
-
-    fetchData();
+  // Busca os símbolos e categorias do banco de dados
+  const data = useLiveQuery(async () => {
+    const symbols = await db.symbols.where('categoryKey').equals(category).toArray();
+    const cat = await db.categories.where('key').equals(category).first();
+    return { symbols, categoryColor: cat?.color || 'default' };
   }, [category]);
 
-  const toggleItem = (id: number, label: string) => {
-    if (!id) return;
-    const a = selectedItems.includes(id)
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter(itemId => itemId !== id));
-      toast({
-        title: "Item removido",
-        description: `${label} foi removido da seleção`,
-      });
-    } else {
-      setSelectedItems([...selectedItems, id]);
-      toast({
-        title: "Item selecionado",
-        description: `${label} foi adicionado à seleção`,
-      });
-    }
+  const getSymbolColor = () => {
+    return colorMap[data?.categoryColor || 'default'] || colorMap.default;
   };
-
-  const handleItemClick = (item: SymbolType) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(item.name);
-      utterance.lang = 'pt-BR';
-      utterance.rate = 0.8;
-      speechSynthesis.speak(utterance);
-    }
-    if (item.id) {
-      toggleItem(item.id, item.name);
-    }
-  };
-
-  const handleAddToPhrase = () => {
-    if (selectedItems.length > 0) {
-      const selectedLabels = symbols
-        .filter(item => item.id && selectedItems.includes(item.id))
-        .map(item => item.name);
-      
-      toast({
-        title: "Itens adicionados à frase",
-        description: `${selectedLabels.join(', ')} foram adicionados`,
-        duration: 3000,
-      });
-      
-      setTimeout(() => {
-        onNavigateToPhrase();
-      }, 1000);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
-        <p className="ml-4 text-lg">Carregando símbolos...</p>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <Button 
-          variant="ghost" 
-          onClick={onBack} 
-          className="flex items-center gap-1 text-blue-700"
-        >
+    <div className="p-2 sm:p-4 md:p-6 min-h-screen font-sans">
+      <header className="flex items-center justify-between mb-4">
+        <Button variant="ghost" onClick={onBack} className="flex items-center gap-1 text-sm sm:text-base text-slate-200 font-semibold">
           <ChevronLeft className="h-5 w-5" />
           Voltar
         </Button>
-        <h1 className="text-xl font-bold text-center flex-1 mr-10">{title}</h1>
-      </div>
+        <h1 className="text-lg sm:text-xl font-bold text-white capitalize">{category}</h1>
+        <div className="w-16 sm:w-24"></div>
+      </header>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-24">
-        {symbols.map((item) => (
-          <Card
-            key={item.id}
-            className={`p-4 flex flex-col items-center justify-center cursor-pointer transition-all 
-              ${item.id && selectedItems.includes(item.id) ? 'ring-4 ring-blue-400 bg-blue-50' : 'bg-white'}
-              hover:bg-gray-50 hover:shadow-md`}
-            onClick={() => handleItemClick(item)}
-          >
-            <div className="h-20 w-20 flex items-center justify-center bg-gray-100 rounded-full mb-2">
-              <DynamicIcon name={item.imageUrl} className="h-10 w-10 text-gray-600" />
+      <main>
+        <Card className="shadow-xl bg-black/30 border-white/10">
+          <CardContent className="p-2 sm:p-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+              {data?.symbols.map(symbol => {
+                const colors = getSymbolColor();
+                return (
+                  <Button 
+                    key={symbol.id} 
+                    // Ao clicar em um símbolo, navega para o PhraseBuilder (a ser implementado)
+                    onClick={onNavigateToPhrase}
+                    variant="outline" 
+                    className={`h-24 sm:h-28 text-lg sm:text-xl font-bold shadow-lg border-none transition-transform hover:scale-105 ${colors.bg} ${colors.text} ${colors.hover}`}>
+                    {symbol.text}
+                  </Button>
+                )
+              })}
             </div>
-            <div className="text-center font-semibold text-sm">{item.name}</div>
-            {item.id && selectedItems.includes(item.id) && (
-              <div className="mt-2 w-2 h-2 bg-blue-500 rounded-full"></div>
-            )}
-          </Card>
-        ))}
-      </div>
-      
-      {selectedItems.length > 0 && (
-        <div className="fixed bottom-4 left-0 right-0 flex justify-center px-4">
-          <Button 
-            className="w-full max-w-md py-6 text-xl font-bold rounded-xl bg-green-100 hover:bg-green-200 text-green-800 shadow-lg"
-            onClick={handleAddToPhrase}
-          >
-            ADICIONAR À FRASE ({selectedItems.length})
-          </Button>
-        </div>
-      )}
+          </CardContent>
+        </Card>
+      </main>
     </div>
   );
 };
