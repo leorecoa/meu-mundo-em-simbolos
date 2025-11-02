@@ -1,6 +1,6 @@
-import Dexie, { Table } from 'dexie';
+import Dexie, { type Table } from 'dexie';
 
-// --- Interfaces de Dados ---
+// --- Interfaces de Dados Unificadas ---
 
 export interface Profile {
   id?: number;
@@ -20,9 +20,18 @@ export interface Symbol {
   profileId: number;
   text: string;
   categoryKey: string;
-  image?: Blob;
-  order: number; // Campo para a ordem de exibição
+  image?: Blob; // Imagens personalizadas serão armazenadas como Blob
+  order: number;
 }
+
+export interface UserSettings { id?: number; voiceType: string; voiceSpeed: number; largeIcons: boolean; useAudioFeedback: boolean; theme: string; language: string; }
+export interface Phrase { id?: number; text: string; symbols: { id: string; text: string }[]; timestamp: number; isFavorite: boolean; }
+export interface Coin { id?: number; total: number; }
+export interface DailyGoal { id: string; name: string; target: number; current: number; completed: boolean; reward: number; lastUpdated: string; }
+export interface Achievement { id: string; name: string; description: string; unlocked: boolean; reward: number; }
+export interface PurchasedReward { id: string; }
+export interface Security { id?: number; pin: string; }
+export interface UsageEvent { id?: number; type: 'symbol_click' | 'phrase_created'; itemId: string; timestamp: number; }
 
 // --- Definição do Banco de Dados ---
 
@@ -30,17 +39,39 @@ export class MySubClassedDexie extends Dexie {
   profiles!: Table<Profile>;
   categories!: Table<Category>; 
   symbols!: Table<Symbol>;
+  userSettings!: Table<UserSettings>;
+  phrases!: Table<Phrase>;
+  coins!: Table<Coin>;
+  dailyGoals!: Table<DailyGoal>;
+  achievements!: Table<Achievement>;
+  purchasedRewards!: Table<PurchasedReward>;
+  security!: Table<Security>;
+  usageEvents!: Table<UsageEvent>;
 
   constructor() {
     super('MeuMundoEmSimbolosDB');
     
+    // INCREMENTANDO A VERSÃO PARA 6 E ADICIONANDO AS NOVAS TABELAS
+    this.version(6).stores({
+      profiles: '++id, name',
+      categories: '++id, profileId, &[profileId+key]',
+      symbols: '++id, profileId, text, categoryKey, order',
+      userSettings: 'id',
+      phrases: '++id, timestamp, isFavorite',
+      coins: 'id',
+      dailyGoals: 'id',
+      achievements: 'id',
+      purchasedRewards: 'id',
+      security: 'id',
+      usageEvents: '++id, type, itemId, timestamp',
+    });
+
+    // Mantendo as versões anteriores para migração
     this.version(5).stores({
       profiles: '++id, name',
       categories: '++id, profileId, &[profileId+key]',
       symbols: '++id, profileId, text, categoryKey, order'
     });
-
-    // Versões anteriores para migração
     this.version(4).stores({ profiles: '++id, name', categories: '++id, profileId, &[profileId+key]', symbols: '++id, profileId, text, categoryKey, image' });
     this.version(3).stores({ categories: '++id, &key, name, color', symbols: '++id, text, categoryKey, image' });
     this.version(2).stores({ categories: '++id, &key, name, color', symbols: '++id, text, categoryKey' });

@@ -10,6 +10,7 @@ export interface DailyGoal { id: string; name: string; target: number; current: 
 export interface Achievement { id: string; name: string; description: string; unlocked: boolean; reward: number; }
 export interface PurchasedReward { id: string; }
 export interface Security { id?: number; pin: string; }
+export interface UsageEvent { id?: number; type: 'symbol_click' | 'phrase_created'; itemId: string; timestamp: number; }
 
 export class MySubClassedDexie extends Dexie {
   categories!: Table<Category>;
@@ -21,6 +22,7 @@ export class MySubClassedDexie extends Dexie {
   achievements!: Table<Achievement>;
   purchasedRewards!: Table<PurchasedReward>;
   security!: Table<Security>;
+  usageEvents!: Table<UsageEvent>;
 
   constructor() {
     super('meuMundoEmSimbolosDB');
@@ -37,6 +39,7 @@ export class MySubClassedDexie extends Dexie {
       achievements: 'id',
       purchasedRewards: 'id',
       security: 'id',
+      usageEvents: '++id, type, itemId, timestamp',
     });
   }
 }

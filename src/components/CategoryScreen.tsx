@@ -3,13 +3,14 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Symbol as DbSymbol } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, Search } from 'lucide-react';
+import { ChevronLeft, Search, PlusCircle } from 'lucide-react'; // Importar o ícone PlusCircle
 import { useProfile } from '@/contexts/ProfileContext';
 
 interface CategoryScreenProps {
   category: string;
   onBack: () => void;
-  onNavigateToPhrase: () => void;
+  onNavigateToPhrase: (symbolId: number) => void;
+  onNavigateToAddSymbol: () => void; // Nova propriedade para navegação
 }
 
 const SymbolDisplay = ({ symbol }: { symbol: DbSymbol }) => {
@@ -22,7 +23,7 @@ const SymbolDisplay = ({ symbol }: { symbol: DbSymbol }) => {
 
 const colorMap: { [key: string]: { bg: string, text: string, hover: string, imageOverlay: string } } = { rose: { bg: 'bg-rose-500/80', text: 'text-white', hover: 'hover:bg-rose-600/90', imageOverlay: 'from-rose-900/50' }, amber: { bg: 'bg-amber-500/80', text: 'text-white', hover: 'hover:bg-amber-600/90', imageOverlay: 'from-amber-900/50' }, sky: { bg: 'bg-sky-500/80', text: 'text-white', hover: 'hover:bg-sky-600/90', imageOverlay: 'from-sky-900/50' }, slate: { bg: 'bg-slate-500/80', text: 'text-white', hover: 'hover:bg-slate-600/90', imageOverlay: 'from-slate-900/50' }, default: { bg: 'bg-white/70', text: 'text-slate-800', hover: 'hover:bg-white/90', imageOverlay: 'from-black/30' }, };
 
-export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: CategoryScreenProps) => {
+export const CategoryScreen = ({ category, onBack, onNavigateToPhrase, onNavigateToAddSymbol }: CategoryScreenProps) => {
   const { activeProfileId } = useProfile();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -35,12 +36,34 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
     const cat = await db.categories.where({ profileId: activeProfileId, key: category }).first();
     return { symbols: sortedSymbols, categoryColor: cat?.color || 'default' };
   }, [category, searchTerm, activeProfileId]);
+  
+  const handleSymbolClick = async (symbol: DbSymbol) => {
+    if (!symbol.id) return;
+    try {
+      await db.usageEvents.add({
+        type: 'symbol_click',
+        itemId: symbol.text,
+        timestamp: Date.now(),
+      });
+    } catch (error) {
+      console.error('Failed to log usage event:', error);
+    }
+    onNavigateToPhrase(symbol.id);
+  };
 
   const getSymbolColor = () => { return colorMap[data?.categoryColor || 'default'] || colorMap.default; };
 
   return (
     <div className="p-2 sm:p-4 md:p-6 min-h-screen font-sans">
-      <header className="flex items-center justify-between mb-4"><Button variant="ghost" onClick={onBack} className="flex items-center gap-1 text-sm sm:text-base text-slate-200 font-semibold"><ChevronLeft className="h-5 w-5" />Voltar</Button><h1 className="text-lg sm:text-xl font-bold text-white capitalize">{category}</h1><div className="w-16 sm:w-24"></div></header>
+      <header className="flex items-center justify-between mb-4">
+        <Button variant="ghost" onClick={onBack} className="flex items-center gap-1 text-sm sm:text-base text-slate-200 font-semibold"><ChevronLeft className="h-5 w-5" />Voltar</Button>
+        <h1 className="text-lg sm:text-xl font-bold text-white capitalize">{category}</h1>
+        {/* Botão para adicionar novo símbolo */}
+        <Button variant="ghost" onClick={onNavigateToAddSymbol} className="flex items-center gap-1 text-sm sm:text-base text-slate-200 font-semibold">
+          <PlusCircle className="h-5 w-5" />
+          Adicionar
+        </Button>
+      </header>
       <main>
         <div className="relative mb-4"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} /><input type="text" placeholder="Buscar nesta categoria..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-100/80 rounded-lg pl-10 pr-4 py-2 text-slate-800" /></div>
         <Card className="shadow-xl bg-black/30 border-white/10">
@@ -48,7 +71,7 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase }: Categor
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
               {data?.symbols.map(symbol => {
                 const colors = getSymbolColor();
-                return (<Button key={symbol.id} onClick={onNavigateToPhrase} variant="outline" className={`relative h-24 sm:h-28 font-bold shadow-lg border-none transition-transform hover:scale-105 p-0 overflow-hidden ${colors.bg} ${colors.text} ${colors.hover}`}><SymbolDisplay symbol={symbol} />{symbol.image && <div className={`absolute inset-0 bg-gradient-to-t ${colors.imageOverlay} to-transparent`}></div>}<span className="absolute bottom-1 right-2 text-xs font-bold">{symbol.image ? symbol.text : ''}</span></Button>)
+                return (<Button key={symbol.id} onClick={() => handleSymbolClick(symbol)} variant="outline" className={`relative h-24 sm:h-28 font-bold shadow-lg border-none transition-transform hover:scale-105 p-0 overflow-hidden ${colors.bg} ${colors.text} ${colors.hover}`}><SymbolDisplay symbol={symbol} />{symbol.image && <div className={`absolute inset-0 bg-gradient-to-t ${colors.imageOverlay} to-transparent`}></div>}<span className="absolute bottom-1 right-2 text-xs font-bold">{symbol.image ? symbol.text : ''}</span></Button>)
               })}
             </div>
           </CardContent>
