@@ -14,7 +14,6 @@ interface ManagementScreenProps {
   onBack: () => void;
 }
 
-// Gerenciador de Categorias (sem alterações)
 const CategoryManager = () => { 
   const { activeProfileId } = useProfile();
   const { toast } = useToast();
@@ -66,7 +65,6 @@ const CategoryManager = () => {
   );
  };
 
-// --- Gerenciador de Símbolos com Reordenação ---
 const SymbolManager = () => {
   const { activeProfileId } = useProfile();
   const { toast } = useToast();

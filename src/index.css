@@ -3,10 +3,9 @@
 @tailwind utilities;
 
 body {
-  /* 
-    Nova Base Visual: Um gradiente suave e claro.
-    Isso cria uma atmosfera mais calma, profissional e convidativa,
-    ideal para ambientes clínicos e educacionais.
-  */
-  @apply bg-gradient-to-br from-slate-50 to-blue-100;
+  /* Restaurando o fundo escuro com imagem, que é a base do nosso design profissional */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/infinity-symbol.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }

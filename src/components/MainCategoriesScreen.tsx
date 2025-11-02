@@ -2,11 +2,10 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus } from 'lucide-react'; // Ícone do Troféu removido
+import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus } from 'lucide-react';
 import React from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 
-// Caminho da imagem corrigido
 const InfinityImage = () => (
   <img src="/infinity-symbol.png" alt="Símbolo do Infinito" className="h-10 w-auto" />
 );
@@ -14,13 +13,15 @@ const InfinityImage = () => (
 interface MainCategoriesScreenProps {
   onNavigateToCategory: (category: string) => void;
   onNavigateToPhrase: () => void;
-  // Prop para navegar para o painel removida
 }
 
 const categoryDetails: { [key: string]: { icon: React.ElementType, description: string, gradient: string } } = {
   quero: { icon: Heart, description: 'Expresse seus desejos e vontades.', gradient: 'from-rose-500 to-fuchsia-600' },
   sinto: { icon: Smile, description: 'Comunique seus sentimentos e emoções.', gradient: 'from-yellow-400 to-orange-500' },
   preciso: { icon: HandHeart, description: 'Informe suas necessidades imediatas.', gradient: 'from-sky-400 to-cyan-500' },
+  pessoas: { icon: User, description: 'Pessoas importantes em sua vida.', gradient: 'from-lime-500 to-green-600' },
+  lugares: { icon: MapPin, description: 'Lugares que você frequenta.', gradient: 'from-cyan-500 to-teal-600' },
+  comida: { icon: Utensils, description: 'Suas comidas e bebidas favoritas.', gradient: 'from-orange-500 to-red-600' },
 };
 
 export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase }: MainCategoriesScreenProps) => {
@@ -40,7 +41,6 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase 
           <InfinityImage />
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
         </div>
-        {/* Seção do botão de troféu completamente removida */}
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
