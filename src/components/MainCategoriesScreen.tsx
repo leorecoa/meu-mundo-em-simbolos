@@ -1,68 +1,85 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/lib/db';
+import { Heart, Users, Utensils, Gamepad2, Settings, LineChart, Home, Activity } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Heart, Smile, HandHeart, MessageSquarePlus } from 'lucide-react';
-import React from 'react';
-import { useProfile } from '@/contexts/ProfileContext';
-
-const InfinityImage = () => (
-  <img src="/infinity-symbol.png" alt="Símbolo do Infinito" className="h-10 w-auto" />
-);
+import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/hooks/use-theme';
 
 interface MainCategoriesScreenProps {
   onNavigateToCategory: (category: string) => void;
   onNavigateToPhrase: () => void;
+  onNavigateToAnalytics: () => void; 
+  onNavigateToMyAT: () => void;
 }
 
 const categoryDetails: { [key: string]: { icon: React.ElementType, description: string, gradient: string } } = {
-  quero: { icon: Heart, description: 'Expresse seus desejos e vontades.', gradient: 'from-rose-500 to-fuchsia-600' },
-  sinto: { icon: Smile, description: 'Comunique seus sentimentos e emoções.', gradient: 'from-yellow-400 to-orange-500' },
-  preciso: { icon: HandHeart, description: 'Informe suas necessidades imediatas.', gradient: 'from-sky-400 to-cyan-500' },
-  pessoas: { icon: User, description: 'Pessoas importantes em sua vida.', gradient: 'from-lime-500 to-green-600' },
-  lugares: { icon: MapPin, description: 'Lugares que você frequenta.', gradient: 'from-cyan-500 to-teal-600' },
-  comida: { icon: Utensils, description: 'Suas comidas e bebidas favoritas.', gradient: 'from-orange-500 to-red-600' },
+  pessoas: { icon: Users, description: 'Pessoas importantes em sua vida.', gradient: 'from-lime-500 to-green-500' },
+  acoes: { icon: Heart, description: 'O que você quer fazer ou sente.', gradient: 'from-rose-500 to-red-500' },
+  sentimentos: { icon: Utensils, description: 'Expresse seus sentimentos.', gradient: 'from-amber-500 to-orange-500' },
+  lugares: { icon: Home, description: 'Lugares que você frequenta.', gradient: 'from-sky-500 to-blue-500' },
+  comida: { icon: Utensils, description: 'O que você quer comer ou beber.', gradient: 'from-yellow-500 to-amber-500' },
+  geral: { icon: Gamepad2, description: 'Palavras e frases do dia a dia.', gradient: 'from-slate-500 to-gray-500' },
 };
 
-export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase }: MainCategoriesScreenProps) => {
-  const { activeProfileId } = useProfile();
-  const categories = useLiveQuery(() => 
-    activeProfileId ? db.categories.where('profileId').equals(activeProfileId).toArray() : [], 
-  [activeProfileId]);
 
-  if (!categories) {
-    return <div className="flex flex-col justify-center items-center h-screen"><Loader2 className="h-12 w-12 text-blue-600 animate-spin" /></div>;
-  }
+export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToAnalytics, onNavigateToMyAT }: MainCategoriesScreenProps) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { currentTheme } = useTheme();
 
+  const handleCategoryClick = (categoryId: string) => {
+    onNavigateToCategory(categoryId);
+  };
+
+  const handlePhraseClick = () => {
+    onNavigateToPhrase();
+  };
+
+  const handleSettingsClick = () => {
+    navigate('/configuracoes');
+  };
+  
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
-      <header className="relative flex items-center justify-between py-4 mb-10">
-        <div className="flex items-center gap-3">
-          <InfinityImage />
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight">Meu Mundo em Símbolos</h1>
+    <div className={`p-4 space-y-6 ${currentTheme.bgColor} min-h-screen`}>
+      <div className={`flex justify-end items-center mb-6`}>
+        <div className="flex gap-3">
+          <Button variant="outline" size="icon" className="bg-green-50 hover:bg-green-100" onClick={onNavigateToAnalytics} aria-label="Relatório de Uso">
+            <LineChart className="h-5 w-5 text-green-800" />
+          </Button>
+          <Button variant="outline" size="icon" className="bg-blue-50 hover:bg-blue-100" onClick={handleSettingsClick} aria-label="Configurações">
+            <Settings className="h-5 w-5 text-blue-800" />
+          </Button>
+          <Button variant="outline" size="icon" className="bg-indigo-50 hover:bg-indigo-100" onClick={onNavigateToMyAT} aria-label="Meu AT">
+            <Activity className="h-5 w-5 text-indigo-800" />
+          </Button>
         </div>
-      </header>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {categories.map(category => {
-          if (category.key === 'geral') return null;
-          const details = categoryDetails[category.key];
-          if (!details) return null;
-          const Icon = details.icon;
-          return (
-            <Card key={category.id} className="cursor-pointer h-full hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 bg-white border-gray-200 shadow-lg" onClick={() => onNavigateToCategory(category.key)}>
-              <CardHeader className="items-center text-center pointer-events-none"><div className={`p-4 rounded-full bg-gradient-to-br ${details.gradient}`}><Icon className="h-10 w-10 text-white" /></div><CardTitle className="text-2xl font-semibold mt-4 text-gray-800">{category.name}</CardTitle></CardHeader>
-              <CardContent className="pointer-events-none"><CardDescription className="text-center text-base text-gray-600">{details.description}</CardDescription></CardContent>
+      <Button 
+        className={`w-full py-6 text-xl font-bold rounded-xl ${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor} shadow-md`}
+        onClick={handlePhraseClick}
+      >
+        MONTAR FRASE
+      </Button>
+
+      <div>
+        <h2 className="text-xl font-semibold text-gray-700 mb-3">Categorias Principais:</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {Object.entries(categoryDetails).map(([key, value]) => (
+            <Card 
+              key={key} 
+              className={`h-32 bg-gradient-to-br ${value.gradient} text-white shadow-lg rounded-xl flex flex-col items-center justify-center p-2 cursor-pointer transition-transform hover:scale-105`}
+              onClick={() => handleCategoryClick(key)}
+            >
+              <value.icon className="h-10 w-10" />
+              <div className="text-lg font-bold text-center">
+                {key.charAt(0).toUpperCase() + key.slice(1)}
+              </div>
             </Card>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
-      <div className="mt-12 text-center">
-        <Card className="cursor-pointer hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 p-4 bg-white border-gray-200 shadow-lg" onClick={onNavigateToPhrase}>
-          <div className="flex items-center justify-center pointer-events-none"><MessageSquarePlus className="h-8 w-8 text-green-500 mr-4"/><div><h2 className="text-xl font-semibold text-gray-800">Frase Livre</h2><p className="text-gray-500">Monte suas próprias frases do zero.</p></div></div>
-        </Card>
-      </div>
     </div>
   );
 };

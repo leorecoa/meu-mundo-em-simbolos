@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, User, Trash2 } from 'lucide-react';
+import { PlusCircle, Users, Trash2 } from 'lucide-react'; // Corrigido: User para Users
 
 interface ProfileScreenProps {
   onProfileSelect: (profileId: number) => void;
@@ -64,7 +64,8 @@ export const ProfileScreen = ({ onProfileSelect }: ProfileScreenProps) => {
                   onClick={() => onProfileSelect(profile.id!)} 
                   className="flex-grow h-16 text-lg justify-start bg-black/20 hover:bg-black/40"
                 >
-                  <User className="mr-4 ml-2" />
+                  {/* Corrigido: User para Users */}
+                  <Users className="mr-4 ml-2" />
                   {profile.name}
                 </Button>
                 <Button onClick={() => handleDeleteProfile(profile.id!)} size="icon" variant="destructive" className="h-16 bg-red-600/80"><Trash2 /></Button>
