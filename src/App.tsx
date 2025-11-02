@@ -6,7 +6,6 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { useAppInitializer } from '@/components/AppInitializer';
 import { SplashScreen } from '@/components/SplashScreen';
 import { ProfileProvider, useProfile } from './contexts/ProfileContext';
-import { ThemeProvider } from './hooks/useTheme'; // 1. Importar o ThemeProvider
 import { ProfileScreen } from './pages/ProfileScreen';
 import Index from './pages/Index';
 
@@ -35,17 +34,14 @@ const App = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        {/* 2. Envolver a aplicação com o ThemeProvider */}
-        <ThemeProvider>
-          <ProfileProvider>
-            <TooltipProvider>
-              <Toaster /> 
-              <BrowserRouter>
-                <AppContent />
-              </BrowserRouter>
-            </TooltipProvider>
-          </ProfileProvider>
-        </ThemeProvider>
+        <ProfileProvider>
+          <TooltipProvider>
+            <Toaster /> 
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          </TooltipProvider>
+        </ProfileProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
