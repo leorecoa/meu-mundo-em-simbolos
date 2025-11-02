@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, Camera, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, Camera, Image as ImageIcon, Award } from 'lucide-react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useToast } from '@/hooks/use-toast';
 import { Camera as CapacitorCamera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -51,6 +51,25 @@ export const AddSymbolScreen = ({ onBack }: AddSymbolScreenProps) => {
       toast({ title: 'Erro ao selecionar imagem', description: 'Não foi possível carregar a imagem. Verifique as permissões do app.', variant: 'destructive' });
     }
   };
+  
+  const checkAndAwardAchievement = async () => {
+    const achievementId = 'achievement_custom_symbol';
+    try {
+      const achievement = await db.achievements.get(achievementId);
+      if (achievement && !achievement.unlocked) {
+        await db.achievements.update(achievementId, { unlocked: true });
+        await db.coins.where('id').equals(1).modify(c => { c.total += achievement.reward; });
+        
+        toast({
+          title: 'Conquista Desbloqueada!',
+          description: `${achievement.name} (+${achievement.reward} moedas)`,
+          action: <Award className="h-5 w-5 text-yellow-500" />
+        });
+      }
+    } catch (error) {
+      console.error("Failed to award achievement:", error);
+    }
+  };
 
   const handleSave = async () => {
     if (!activeProfileId || !symbolText || !selectedCategory || !imageBlob) {
@@ -69,6 +88,8 @@ export const AddSymbolScreen = ({ onBack }: AddSymbolScreenProps) => {
         image: imageBlob,
         order: newOrder,
       });
+      
+      await checkAndAwardAchievement(); // Checa e concede a conquista
 
       toast({ title: 'Sucesso!', description: `Símbolo "${symbolText}" adicionado com sucesso.` });
       onBack(); // Go back after saving
@@ -105,7 +126,7 @@ export const AddSymbolScreen = ({ onBack }: AddSymbolScreenProps) => {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Imagem</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Imagem</CardTitle></Header>
           <CardContent className="space-y-4">
             <div className="flex justify-around">
               <Button variant="outline" onClick={() => selectImage(CameraSource.Camera)} className="flex flex-col h-24 w-24 items-center justify-center gap-2"><Camera className="h-8 w-8" />Tirar Foto</Button>

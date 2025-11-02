@@ -1,4 +1,4 @@
-import { db } from '@/db';
+import { db } from '@/lib/db'; // Corrigindo a importação
 
 const defaultAchievements = [
   { id: 'achievement_first_phrase', name: 'Primeira Comunicação', description: 'Crie sua primeira frase', unlocked: false, reward: 15 },
