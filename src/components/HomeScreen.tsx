@@ -52,13 +52,39 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
   const handlePhraseClick = () => {
     if (isPaused) {
       toast({
-        title: "App pausado", 
+        title: "App pausado",
         description: "Clique no botão de pausa para continuar",
         variant: "destructive",
       });
       return;
     }
     onNavigateToPhrase();
+  };
+
+  const handleSettingsClick = () => {
+    if (isPaused) {
+      toast({
+        title: "App pausado",
+        description: "Clique no botão de pausa para continuar",
+        variant: "destructive",
+      });
+      return;
+    }
+    onNavigateToSettings();
+  };
+
+  const handleMyATClick = () => {
+    if (isPaused) {
+      toast({
+        title: "App pausado",
+        description: "Clique no botão de pausa para continuar",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (onNavigateToMyAT) {
+      onNavigateToMyAT();
+    }
   };
 
   const mainCategories = [
@@ -78,9 +104,9 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
       {/* Header com controles de acessibilidade */}
       <div className={`flex justify-between items-center mb-6 ${currentTheme.cardBg} rounded-lg p-3 shadow-sm`}>
         <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             className={`${isPaused ? 'bg-red-100 hover:bg-red-200' : 'bg-blue-50 hover:bg-blue-100'} pointer-events-auto`}
             aria-label={isPaused ? "Retomar" : "Pausar"}
             onClick={handlePause}
@@ -91,8 +117,8 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
               <Pause className="h-5 w-5 text-blue-800" />
             )}
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="icon"
             className={`${volumeLevel === 0 ? 'bg-gray-100' : 'bg-blue-50 hover:bg-blue-100'} pointer-events-auto`}
             aria-label="Ajustar som"
@@ -102,24 +128,21 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
           </Button>
         </div>
         <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             className="bg-blue-50 hover:bg-blue-100 pointer-events-auto"
-            onClick={() => {
-              console.log('Botão de configurações clicado');
-              onNavigateToSettings();
-            }}
+            onClick={handleSettingsClick}
             aria-label="Configurações"
           >
             <Settings className="h-5 w-5 text-blue-800" />
           </Button>
           {onNavigateToMyAT && (
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               className="bg-indigo-50 hover:bg-indigo-100 pointer-events-auto"
-              onClick={() => onNavigateToMyAT()}
+              onClick={handleMyATClick}
               aria-label="Meu AT"
             >
               <Activity className="h-5 w-5 text-indigo-800" />
@@ -129,7 +152,7 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
       </div>
 
       {/* Botão para ir direto à montagem de frases */}
-      <Button 
+      <Button
         className={`w-full py-6 text-xl font-bold rounded-xl ${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor} shadow-md`}
         onClick={handlePhraseClick}
       >
@@ -174,15 +197,15 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
 
       {/* Botão para Meu AT */}
       {onNavigateToMyAT && (
-        <Button 
+        <Button
           className="w-full py-4 text-lg font-bold rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-800 shadow-md flex items-center justify-center gap-2"
-          onClick={() => onNavigateToMyAT()}
+          onClick={handleMyATClick}
         >
           <Activity className="h-6 w-6" />
           MEU ASSISTENTE TERAPÊUTICO
         </Button>
       )}
-      
+
       {/* Barra de progresso - Gamificação */}
       <div className={`${currentTheme.cardBg} rounded-lg p-4 shadow-sm`}>
         <div className={`text-sm ${currentTheme.textColor} mb-1`}>Você ainda não usou palavras hoje!</div>
