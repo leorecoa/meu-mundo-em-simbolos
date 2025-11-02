@@ -126,7 +126,7 @@ export const AddSymbolScreen = ({ onBack }: AddSymbolScreenProps) => {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Imagem</CardTitle></Header>
+          <CardHeader><CardTitle>Imagem</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-around">
               <Button variant="outline" onClick={() => selectImage(CameraSource.Camera)} className="flex flex-col h-24 w-24 items-center justify-center gap-2"><Camera className="h-8 w-8" />Tirar Foto</Button>
