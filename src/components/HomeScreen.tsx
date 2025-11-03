@@ -1,5 +1,4 @@
 import { Heart, Users, Smile, Gamepad2, Settings, LineChart, Home, Activity, Trophy, Utensils } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useTheme } from '@/hooks/use-theme';
@@ -23,8 +22,7 @@ const categoryDetails: { [key: string]: { icon: React.ElementType, description: 
 };
 
 export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToAnalytics, onNavigateToMyAT, onNavigateToSettings, onNavigateToRewards }: HomeScreenProps) => {
-  const navigate = useNavigate();
-  const { currentTheme } = useTheme(); // Adicionado de volta
+  const { currentTheme } = useTheme();
 
   return (
     <div id="home-screen-container" className={`p-4 space-y-6 ${currentTheme.bgColor} min-h-screen`}>
