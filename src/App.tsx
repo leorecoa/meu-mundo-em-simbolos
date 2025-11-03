@@ -14,7 +14,7 @@ import Index from './pages/Index';
 
 import { ProfileProvider, useProfile } from './contexts/ProfileContext';
 import { ThemeProvider } from './hooks/useTheme';
-import { useAppInitializer } from '@/components/AppInitializer'; // Corrigido o caminho
+import { useAppInitializer } from '@/components/AppInitializer';
 
 const queryClient = new QueryClient();
 
@@ -23,8 +23,8 @@ function AppContent() {
   const { isInitialized, error } = useAppInitializer();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const userSettings = useLiveQuery(() =>
-    activeProfileId ? db.userSettings.where({ profileId: activeProfileId }).first() : undefined,
+  const userSettings = useLiveQuery(() => 
+    activeProfileId ? db.userSettings.where({ profileId: activeProfileId }).first() : undefined, 
     [activeProfileId]
   );
 
@@ -54,6 +54,7 @@ function AppContent() {
   }
 
   return (
+    // O ThemeProvider deve estar aqui para ter acesso ao perfil e configurações futuras
     <ThemeProvider>
       <Index />
       {showOnboarding && <OnboardingGuide onComplete={handleOnboardingComplete} />}
@@ -65,6 +66,7 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        {/* A ordem correta dos provedores globais */}
         <BrowserRouter>
           <ProfileProvider>
             <TooltipProvider>

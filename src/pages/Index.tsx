@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
+
 import { HomeScreen } from '@/components/HomeScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
@@ -12,26 +13,17 @@ import { PinScreen } from '@/components/PinScreen';
 import { RewardsScreen } from '@/components/RewardsScreen';
 import { StoreScreen } from '@/components/StoreScreen';
 
-// --- Componentes de Página ---
+// --- Páginas ---
 
 const HomePage = () => {
   const navigate = useNavigate();
-  return (
-    <HomeScreen 
-      onNavigateToCategory={(key) => navigate(`/categoria/${key}`)}
-      onNavigateToPhrase={() => navigate('/frase-livre')}
-      onNavigateToMyAT={() => navigate('/meu-painel')}
-      onNavigateToAnalytics={() => navigate('/relatorio')}
-      onNavigateToSettings={() => navigate('/configuracoes')}
-      onNavigateToRewards={() => navigate('/recompensas')}
-    />
-  );
+  return <HomeScreen onNavigateToCategory={(key) => navigate(`/categoria/${key}`)} onNavigateToPhrase={() => navigate('/frase-livre')} onNavigateToMyAT={() => navigate('/meu-painel')} onNavigateToAnalytics={() => navigate('/relatorio')} onNavigateToSettings={() => navigate('/configuracoes')} onNavigateToRewards={() => navigate('/recompensas')} />;
 };
 
 const CategoryPage = () => {
   const { key } = useParams<{ key: string }>();
   const navigate = useNavigate();
-  if (!key) return <div>Categoria não encontrada</div>;
+  if (!key) return null;
   return <CategoryScreen category={key} onBack={() => navigate('/')} onNavigateToPhrase={(symbolId) => navigate(`/frase-livre/${symbolId}`)} onNavigateToAddSymbol={() => navigate(`/categoria/${key}/adicionar`)} />;
 };
 
@@ -43,23 +35,21 @@ const PhraseBuilderPage = () => {
 
 const ProtectedPage = () => {
   const navigate = useNavigate();
-  const [isVerified, setIsVerified] = useState(false);
+  const [isVerified, setIsVerified] = useState(sessionStorage.getItem('pinVerified') === 'true');
   const security = useLiveQuery(() => db.security.get(1));
+  const handlePinVerified = () => {
+    sessionStorage.setItem('pinVerified', 'true');
+    setIsVerified(true);
+  };
   if (!security) return <div>Carregando...</div>;
-  if (!isVerified) return <PinScreen storedPin={security.pin} onPinVerified={() => setIsVerified(true)} />;
+  if (!isVerified) return <PinScreen storedPin={security.pin} onPinVerified={handlePinVerified} />;
   return <ManagementScreen onBack={() => navigate('/')} />;
 };
 
 const AnalyticsPage = () => {
-  const navigate = useNavigate();
-  return <AnalyticsScreen onBack={() => navigate('/')} />;
-};
-
-const AddSymbolPage = () => {
-  const { key } = useParams<{ key: string }>();
-  const navigate = useNavigate();
-  return <AddSymbolScreen onBack={() => navigate(`/categoria/${key}`)} />;
-};
+    const navigate = useNavigate();
+    return <AnalyticsScreen onBack={() => navigate('/')} />
+}
 
 const RewardsPage = () => {
   const navigate = useNavigate();
@@ -71,6 +61,13 @@ const StorePage = () => {
   return <StoreScreen onBack={() => navigate('/recompensas')} />;
 };
 
+const AddSymbolPage = () => {
+  const { key } = useParams<{ key: string }>();
+  const navigate = useNavigate();
+  if (!key) return null;
+  return <AddSymbolScreen onBack={() => navigate(`/categoria/${key}`)} />;
+};
+
 // --- Roteador Principal ---
 const Index = () => {
   return (
@@ -80,9 +77,9 @@ const Index = () => {
       <Route path="/categoria/:key/adicionar" element={<AddSymbolPage />} />
       <Route path="/frase-livre" element={<PhraseBuilderPage />} />
       <Route path="/frase-livre/:symbolId" element={<PhraseBuilderPage />} />
-      <Route path="/relatorio" element={<AnalyticsPage />} />
       <Route path="/recompensas" element={<RewardsPage />} />
       <Route path="/loja" element={<StorePage />} />
+      <Route path="/relatorio" element={<AnalyticsPage />} />
       <Route path="/meu-painel" element={<ProtectedPage />} />
       <Route path="/configuracoes" element={<ProtectedPage />} />
     </Routes>

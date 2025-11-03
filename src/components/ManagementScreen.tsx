@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Category, Symbol as DbSymbol } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, Trash2, PlusCircle, Edit, Check, ImageUp, Search, Download, Upload, GripVertical, FileText, Settings, ShieldCheck, LineChart } from 'lucide-react';
+import { ChevronLeft, Trash2, PlusCircle, Edit, Check, Search, Download, Upload, GripVertical, FileText, Settings, ShieldCheck, LineChart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -50,15 +50,15 @@ const CategoryManager = () => {
     };
 
     return (
-        <Card className="bg-white/80 backdrop-blur-sm">
+        <Card className="bg-white/90 backdrop-blur-sm mb-6">
             <CardHeader><CardTitle>Gerenciar Categorias</CardTitle></CardHeader>
             <CardContent>
                 <div className="flex gap-2 mb-4">
-                    <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="Nome da nova categoria" className="w-full bg-slate-100/80 rounded-lg px-3" />
-                    <Button onClick={handleAddCategory} size="icon"><PlusCircle /></Button>
+                    <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="Nome da nova categoria" className="w-full bg-slate-100 rounded-lg px-3 py-2 border" />
+                    <Button onClick={handleAddCategory}><PlusCircle size={16} /></Button>
                 </div>
                 <ul className="space-y-2">
-                    {categories?.map(cat => (<li key={cat.id} className="flex items-center justify-between bg-black/5 p-2 rounded-md">{editingCategoryId === cat.id ? (<input type="text" value={editingCategoryName} onChange={(e) => setEditingCategoryName(e.target.value)} className="w-full" />) : (<span>{cat.name}</span>)}<div className="flex gap-2 ml-2">{editingCategoryId === cat.id ? (<Button onClick={handleUpdateCategory} size="icon" className="bg-green-500"><Check size={16} /></Button>) : (<Button onClick={() => handleEditClick(cat)} size="icon" className="bg-blue-500"><Edit size={16} /></Button>)}<AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="destructive"><Trash2 size={16} /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apagar Categoria?</AlertDialogTitle><AlertDialogDescription>Isso vai apagar permanentemente a categoria e TODOS os símbolos dentro dela.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteCategory(cat.id!)}>Apagar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></div></li>))}
+                    {categories?.map(cat => (<li key={cat.id} className="flex items-center justify-between bg-slate-50 p-2 rounded-md">{editingCategoryId === cat.id ? (<input type="text" value={editingCategoryName} onChange={(e) => setEditingCategoryName(e.target.value)} className="w-full" />) : (<span>{cat.name}</span>)}<div className="flex gap-2 ml-2">{editingCategoryId === cat.id ? (<Button onClick={handleUpdateCategory} size="icon" variant="ghost" className="text-green-600"><Check size={18} /></Button>) : (<Button onClick={() => handleEditClick(cat)} size="icon" variant="ghost" className="text-blue-600"><Edit size={16} /></Button>)}<AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-red-600"><Trash2 size={16} /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apagar Categoria?</AlertDialogTitle><AlertDialogDescription>Isso vai apagar permanentemente a categoria e TODOS os símbolos dentro dela.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteCategory(cat.id!)}>Apagar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></div></li>))}
                 </ul>
             </CardContent>
         </Card>
@@ -86,21 +86,22 @@ const SymbolManager = () => {
     };
 
     return (
-        <Card className="bg-white/80 backdrop-blur-sm mt-6">
-            <CardHeader><div className="flex justify-between items-center"><CardTitle>Gerenciar Símbolos</CardTitle><Button onClick={() => setIsOrganizeMode(!isOrganizeMode)} variant={isOrganizeMode ? 'default' : 'outline'}>{isOrganizeMode ? 'Concluir' : 'Organizar'}</Button></div></CardHeader>
+        <Card className="bg-white/90 backdrop-blur-sm">
+            <CardHeader><div className="flex justify-between items-center"><CardTitle>Gerenciar Símbolos</CardTitle><Button onClick={() => setIsOrganizeMode(!isOrganizeMode)} variant={isOrganizeMode ? 'default' : 'outline'}>{isOrganizeMode ? 'Concluir Organização' : 'Organizar Símbolos'}</Button></div></CardHeader>
             <CardContent>
                 <DragDropContext onDragEnd={handleOnDragEnd}>
                     <Droppable droppableId="symbols">
                         {(provided) => (
-                            <ul className="space-y-2 max-h-96 overflow-y-auto" {...provided.droppableProps} ref={provided.innerRef}>
+                            <ul className="space-y-2 max-h-[50vh] overflow-y-auto p-1" {...provided.droppableProps} ref={provided.innerRef}>
                                 {symbols.map((sym, index) => (
                                     <Draggable key={sym.id} draggableId={sym.id!.toString()} index={index} isDragDisabled={!isOrganizeMode}>
                                         {(provided, snapshot) => (
-                                            <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`flex items-center justify-between p-2 rounded-md ${snapshot.isDragging ? 'bg-blue-100' : 'bg-black/5'}`}>
-                                                <div className="flex items-center gap-2">
-                                                    {isOrganizeMode && <GripVertical className="cursor-move" />}
+                                            <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`flex items-center justify-between p-2 rounded-md ${snapshot.isDragging ? 'bg-blue-100 shadow-lg' : 'bg-slate-50'}`}>
+                                                <div className="flex items-center gap-3">
+                                                    {isOrganizeMode && <GripVertical className="cursor-move text-gray-400" />}
                                                     <span>{sym.text}</span>
                                                 </div>
+                                                {/* Adicionar botões de editar/apagar símbolo aqui se necessário */}
                                             </li>
                                         )}
                                     </Draggable>
@@ -117,11 +118,7 @@ const SymbolManager = () => {
 
 const ContentManager = ({ onBack }: { onBack: () => void }) => (
     <div>
-        <header className="flex items-center justify-between mb-4">
-            <Button variant="ghost" onClick={onBack}><ChevronLeft /> Voltar</Button>
-            <h1 className="text-xl font-bold">Gerenciar Conteúdo</h1>
-            <div className="w-24"></div>
-        </header>
+        <header className="flex items-center mb-4"><Button variant="ghost" onClick={onBack} className="text-lg"><ChevronLeft size={20} className="mr-2"/> Voltar</Button></header>
         <CategoryManager />
         <SymbolManager />
     </div>
@@ -159,7 +156,7 @@ const BackupManager = ({ onBack }: { onBack: () => void }) => {
                 if (!backup.categories || !backup.symbols) throw new Error("Arquivo inválido");
                 await db.transaction('rw', db.categories, db.symbols, async () => {
                     await db.categories.where({ profileId: activeProfileId }).delete();
-                    await db.symbols.where({ profileId: activeİd }).delete();
+                    await db.symbols.where({ profileId: activeProfileId }).delete();
                     await db.categories.bulkAdd(backup.categories.map((c: Category) => ({ ...c, profileId: activeProfileId })));
                     await db.symbols.bulkAdd(backup.symbols.map((s: DbSymbol) => ({ ...s, profileId: activeProfileId })));
                 });
@@ -172,8 +169,8 @@ const BackupManager = ({ onBack }: { onBack: () => void }) => {
 
     return (
         <div>
-             <header className="flex items-center justify-between mb-4"><Button variant="ghost" onClick={onBack}><ChevronLeft /> Voltar</Button><h1 className="text-xl font-bold">Backup</h1><div className="w-24"></div></header>
-             <Card><CardHeader><CardTitle>Backup e Restauração</CardTitle></CardHeader><CardContent className="grid grid-cols-2 gap-4"><input type="file" accept=".json" ref={importFileRef} onChange={handleImport} className="hidden" /><Button onClick={handleExport}><Download className="mr-2" />Exportar</Button><AlertDialog><AlertDialogTrigger asChild><Button variant="outline"><Upload className="mr-2" />Importar</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Importar Backup?</AlertDialogTitle><AlertDialogDescription>Isso substituirá TODOS os dados atuais deste perfil. Esta ação não pode ser desfeita.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => importFileRef.current?.click()}>Continuar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></CardContent></Card>
+             <header className="flex items-center mb-4"><Button variant="ghost" onClick={onBack} className="text-lg"><ChevronLeft size={20} className="mr-2"/> Voltar</Button></header>
+             <Card><CardHeader><CardTitle>Backup e Restauração</CardTitle></CardHeader><CardContent className="grid grid-cols-2 gap-4"><input type="file" accept=".json" ref={importFileRef} onChange={handleImport} className="hidden" /><Button onClick={handleExport} className="h-16"><Download className="mr-2" />Exportar</Button><AlertDialog><AlertDialogTrigger asChild><Button variant="outline" className="h-16"><Upload className="mr-2" />Importar</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Importar Backup?</AlertDialogTitle><AlertDialogDescription>Isso substituirá TODOS os dados atuais deste perfil. Esta ação não pode ser desfeita.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => importFileRef.current?.click()}>Continuar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></CardContent></Card>
         </div>
     );
 };
@@ -182,8 +179,6 @@ const ReportsManager = ({ onBack }: { onBack: () => void }) => <AnalyticsScreen 
 const AppSettingsManager = ({ onBack }: { onBack: () => void }) => <SettingsScreen onBack={onBack} />;
 
 // #endregion
-
-// --- Tela Principal do Painel ---
 
 interface ManagementScreenProps {
   onBack: () => void;
@@ -204,13 +199,13 @@ export const ManagementScreen = ({ onBack }: ManagementScreenProps) => {
     }
   };
 
-  return <div className="p-4">{renderContent()}</div>;
+  return <div className="p-4 bg-slate-50 min-h-screen">{renderContent()}</div>;
 };
 
 const MainMenu = ({ setView, onBack }: { setView: (view: View) => void; onBack: () => void }) => (
     <div>
-        <header className="flex items-center justify-between mb-6"><Button variant="ghost" onClick={onBack}><ChevronLeft /> Voltar</Button><h1 className="text-xl font-bold">Meu Painel</h1><div className="w-24"></div></header>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <header className="flex items-center justify-between mb-6"><Button variant="ghost" onClick={onBack} className="text-lg"><ChevronLeft size={20} className="mr-2"/>Sair do Painel</Button><h1 className="text-2xl font-bold text-slate-700">Meu Painel</h1><div className="w-36"></div></header>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <MenuButton icon={FileText} title="Gerenciar Conteúdo" description="Edite, apague e reorganize categorias e símbolos." onClick={() => setView('content')} />
             <MenuButton icon={ShieldCheck} title="Backup e Restauração" description="Salve ou recupere os dados de um perfil." onClick={() => setView('backup')} />
             <MenuButton icon={LineChart} title="Relatórios de Uso" description="Veja o progresso e as palavras mais usadas." onClick={() => setView('reports')} />
@@ -220,5 +215,5 @@ const MainMenu = ({ setView, onBack }: { setView: (view: View) => void; onBack: 
 );
 
 const MenuButton = ({ icon: Icon, title, description, onClick }: { icon: React.ElementType, title: string, description: string, onClick: () => void }) => (
-    <Card onClick={onClick} className="hover:bg-gray-100 cursor-pointer"><CardHeader className="flex-row items-center gap-4"><Icon className="h-8 w-8 text-sky-600" /><div><CardTitle>{title}</CardTitle><p className="text-sm text-gray-600">{description}</p></div></CardHeader></Card>
+    <Card onClick={onClick} className="bg-white shadow-md hover:shadow-xl hover:bg-gray-50 cursor-pointer transition-all"><CardHeader className="flex-row items-center gap-5 p-5"><Icon className="h-10 w-10 text-sky-500 flex-shrink-0" /><div><CardTitle className="text-lg">{title}</CardTitle><p className="text-sm text-gray-500">{description}</p></div></CardHeader></Card>
 );
