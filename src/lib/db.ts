@@ -4,7 +4,7 @@ import Dexie, { type Table } from 'dexie';
 export interface Profile { id?: number; name: string; }
 export interface Category { id?: number; profileId: number; key: string; name: string; color: string; }
 export interface Symbol { id?: number; profileId: number; text: string; categoryKey: string; image?: Blob; order: number; }
-export interface UserSettings { id?: number; profileId: number; onboardingCompleted: boolean; voiceType?: string; voiceSpeed?: number; theme?: string; language?: string; }
+export interface UserSettings { id?: number; profileId: number; onboardingCompleted: boolean; }
 export interface Coin { id: number; total: number; }
 export interface DailyGoal { id: string; name: string; target: number; current: number; completed: boolean; reward: number; lastUpdated: string; }
 export interface Achievement { id: string; name: string; description: string; unlocked: boolean; reward: number; }
@@ -31,12 +31,12 @@ export class MySubClassedDexie extends Dexie {
 
   constructor() {
     super('MeuMundoEmSimbolosDB');
-    // Incrementar a versão para aplicar a nova estrutura de índice
-    this.version(10).stores({
+    // Definição de Schema ÚNICA E FINAL. Sem mais migrações.
+    this.version(1).stores({
       profiles: '++id, name',
       categories: '++id, profileId, &[profileId+key]',
       symbols: '++id, profileId, text, categoryKey, order',
-      userSettings: '++id, &profileId, onboardingCompleted, voiceType, voiceSpeed, theme, language', // Corrigido: &profileId torna-o um índice único
+      userSettings: '++id, &profileId, onboardingCompleted',
       coins: '&id',
       dailyGoals: '&id',
       achievements: '&id',
@@ -44,19 +44,6 @@ export class MySubClassedDexie extends Dexie {
       security: '&id',
       usageEvents: '++id, type, itemId, timestamp',
     });
-    // Manter a versão anterior para a migração
-    this.version(9).stores({
-        profiles: '++id, name',
-        categories: '++id, profileId, &[profileId+key]',
-        symbols: '++id, profileId, text, categoryKey, order',
-        userSettings: '++id, profileId, onboardingCompleted',
-        coins: '&id',
-        dailyGoals: '&id',
-        achievements: '&id',
-        rewards: '&id',
-        security: '&id',
-        usageEvents: '++id, type, itemId, timestamp',
-      });
   }
 
   async populateInitialData() {
@@ -77,8 +64,9 @@ export class MySubClassedDexie extends Dexie {
     const defaultSymbols = [ { text: 'Eu', categoryKey: 'pessoas', order: 1 }, { text: 'Você', categoryKey: 'pessoas', order: 2 }, { text: 'Mãe', categoryKey: 'pessoas', order: 3 }, { text: 'Pai', categoryKey: 'pessoas', order: 4 }, { text: 'Quero', categoryKey: 'acoes', order: 10 }, { text: 'Não quero', categoryKey: 'acoes', order: 11 }, { text: 'Feliz', categoryKey: 'sentimentos', order: 21 }, { text: 'Triste', categoryKey: 'sentimentos', order: 22 }, { text: 'Casa', categoryKey: 'lugares', order: 30 }, { text: 'Escola', categoryKey: 'lugares', order: 31 }, { text: 'Comer', categoryKey: 'comida', order: 40 }, { text: 'Beber', categoryKey: 'comida', order: 41 }, { text: 'Sim', categoryKey: 'geral', order: 50 }, { text: 'Não', categoryKey: 'geral', order: 51 } ];
     
     await this.transaction('rw', this.categories, this.symbols, this.userSettings, async () => {
-      if ((await this.userSettings.where({ profileId }).count()) === 0) {
-        await this.userSettings.add({ profileId, onboardingCompleted: false, voiceType: 'feminina', voiceSpeed: 50, theme: 'Padrão', language: 'pt-BR' } as any);
+      const userSettingsExists = await this.userSettings.where({ profileId }).first();
+      if (!userSettingsExists) {
+        await this.userSettings.add({ profileId, onboardingCompleted: false } as any);
       }
       const catCount = await this.categories.where({ profileId }).count();
       if(catCount === 0) {
