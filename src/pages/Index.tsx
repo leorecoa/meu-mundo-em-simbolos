@@ -2,27 +2,27 @@ import { useState } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { MainCategoriesScreen } from '@/components/MainCategoriesScreen';
+import { HomeScreen } from '@/components/HomeScreen'; // Corrigido
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { ManagementScreen } from '@/components/ManagementScreen';
 import { AnalyticsScreen } from '@/components/AnalyticsScreen';
 import { AddSymbolScreen } from '@/components/AddSymbolScreen';
 import { PinScreen } from '@/components/PinScreen';
-import { RewardsScreen } from '@/components/RewardsScreen'; // Importar
+import { RewardsScreen } from '@/components/RewardsScreen';
 
 // --- Componentes de Página ---
 
 const HomePage = () => {
   const navigate = useNavigate();
   return (
-    <MainCategoriesScreen 
+    <HomeScreen // Corrigido
       onNavigateToCategory={(key) => navigate(`/categoria/${key}`)}
       onNavigateToPhrase={() => navigate('/frase-livre')}
       onNavigateToMyAT={() => navigate('/meu-painel')}
       onNavigateToAnalytics={() => navigate('/relatorio')}
       onNavigateToSettings={() => navigate('/configuracoes')}
-      onNavigateToRewards={() => navigate('/recompensas')} // Conectar
+      onNavigateToRewards={() => navigate('/recompensas')}
     />
   );
 };
@@ -87,7 +87,7 @@ const Index = () => {
       <Route path="/frase-livre" element={<PhraseBuilderPage />} />
       <Route path="/frase-livre/:symbolId" element={<PhraseBuilderPage />} />
       <Route path="/relatorio" element={<AnalyticsPage />} />
-      <Route path="/recompensas" element={<RewardsPage />} /> {/* Adicionar rota */}
+      <Route path="/recompensas" element={<RewardsPage />} />
       
       {/* Rotas protegidas */}
       <Route path="/meu-painel" element={<ProtectedPage />} />

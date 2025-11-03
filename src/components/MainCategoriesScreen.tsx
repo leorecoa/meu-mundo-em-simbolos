@@ -1,32 +1,29 @@
-import { Heart, Users, Utensils, Gamepad2, Settings, LineChart, Home, Activity, Trophy } from 'lucide-react'; // Adicionado Trophy
+import { Heart, Users, Smile, Gamepad2, Settings, LineChart, Home, Activity, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/hooks/use-theme';
 
-interface MainCategoriesScreenProps {
+interface HomeScreenProps {
   onNavigateToCategory: (category: string) => void;
   onNavigateToPhrase: () => void;
   onNavigateToAnalytics: () => void; 
   onNavigateToMyAT: () => void;
   onNavigateToSettings: () => void; 
-  onNavigateToRewards: () => void; // Novo
+  onNavigateToRewards: () => void;
 }
 
 const categoryDetails: { [key: string]: { icon: React.ElementType, description: string, gradient: string } } = {
   pessoas: { icon: Users, description: 'Pessoas importantes em sua vida.', gradient: 'from-lime-500 to-green-500' },
-  acoes: { icon: Heart, description: 'O que você quer fazer ou sente.', gradient: 'from-rose-500 to-red-500' },
-  sentimentos: { icon: Utensils, description: 'Expresse seus sentimentos.', gradient: 'from-amber-500 to-orange-500' },
+  acoes: { icon: Smile, description: 'O que você quer fazer ou sente.', gradient: 'from-rose-500 to-red-500' },
+  sentimentos: { icon: Heart, description: 'Expresse seus sentimentos.', gradient: 'from-amber-500 to-orange-500' },
   lugares: { icon: Home, description: 'Lugares que você frequenta.', gradient: 'from-sky-500 to-blue-500' },
   comida: { icon: Utensils, description: 'O que você quer comer ou beber.', gradient: 'from-yellow-500 to-amber-500' },
   geral: { icon: Gamepad2, description: 'Palavras e frases do dia a dia.', gradient: 'from-slate-500 to-gray-500' },
 };
 
-
-export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToAnalytics, onNavigateToMyAT, onNavigateToSettings, onNavigateToRewards }: MainCategoriesScreenProps) => {
+export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToAnalytics, onNavigateToMyAT, onNavigateToSettings, onNavigateToRewards }: HomeScreenProps) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { currentTheme } = useTheme();
 
   return (
