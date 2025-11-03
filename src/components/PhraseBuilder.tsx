@@ -1,47 +1,60 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { /* ...imports... */ Download } from 'lucide-react';
-import * as htmlToImage from 'html-to-image';
+import { useState, useEffect, useCallback } from 'react';
+import { /* ...imports... */ } from 'lucide-react';
+import { db, Symbol as DbSymbol } from '@/lib/db';
+import { useProfile } from '@/contexts/ProfileContext';
+import { usePhraseActions } from '@/hooks/usePhraseActions';
+import { useGamification } from '@/hooks/useGamification';
+import { SymbolDisplay } from '@/components/ui/SymbolDisplay';
 
-// ... (outros componentes)
+interface PhraseBuilderProps {
+  onBack: () => void;
+  initialSymbolId?: number;
+}
 
-const PhraseDisplay = ({ phrase, forwardedRef }: { phrase: DbSymbol[], forwardedRef: React.Ref<HTMLDivElement> }) => (
-    <Card ref={forwardedRef} className="mb-4 min-h-[160px]">
-      {/* ... (conteúdo do display) ... */}
-    </Card>
-);
-
+// Sub-componentes de UI (PhraseDisplay, ActionButtons, etc.) permanecem aqui
+// ...
 
 export const PhraseBuilder = ({ onBack, initialSymbolId }: PhraseBuilderProps) => {
-  const [currentPhrase, setCurrentPhrase] = useState<DbSymbol[]>([]);
-  const phraseDisplayRef = useRef<HTMLDivElement>(null);
-  // ... (outros estados e lógica)
+  const { activeProfileId } = useProfile();
+  const { 
+    currentPhrase, 
+    addSymbol, 
+    removeLastSymbol, 
+    clearPhrase, 
+    speakPhrase, 
+    exportPhrase, 
+    phraseDisplayRef,
+    getPhraseText
+  } = usePhraseActions();
+  
+  const { triggerPhraseGamification } = useGamification();
 
-  const handleExport = useCallback(() => {
-    if (phraseDisplayRef.current === null) return;
-
-    htmlToImage.toPng(phraseDisplayRef.current)
-      .then(function (dataUrl) {
-        const link = document.createElement('a');
-        link.download = 'minha-frase.png';
-        link.href = dataUrl;
-        link.click();
+  useEffect(() => {
+    // Lógica para adicionar símbolo inicial, se houver
+    if (initialSymbolId && activeProfileId) {
+      db.symbols.get(initialSymbolId).then(symbol => {
+        if (symbol) addSymbol(symbol);
       });
-  }, []);
+    }
+  }, [initialSymbolId, activeProfileId, addSymbol]);
 
-  // ... (outras funções)
+  const handleSpeak = () => {
+    speakPhrase();
+    triggerPhraseGamification(currentPhrase.length);
+  };
 
   return (
     <div className="p-4">
-        {/* ... (região live) ... */}
-        <main>
-            <PhraseDisplay phrase={currentPhrase} forwardedRef={phraseDisplayRef} />
-            <ActionButtons 
-                // ...
-                onExport={handleExport} // Adicionar nova prop
-            />
-            {/* ... */}
-        </main>
-        {/* ... */}
+      <header>...</header>
+      <main>
+        <PhraseDisplay phrase={currentPhrase} forwardedRef={phraseDisplayRef} />
+        <ActionButtons 
+          onSpeak={handleSpeak} 
+          onExport={exportPhrase}
+          // ...outros botões
+        />
+        {/* ...outros componentes de UI... */}
+      </main>
     </div>
   );
 };
