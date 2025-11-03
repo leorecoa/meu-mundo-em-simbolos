@@ -10,7 +10,7 @@ import { AnalyticsScreen } from '@/components/AnalyticsScreen';
 import { AddSymbolScreen } from '@/components/AddSymbolScreen';
 import { PinScreen } from '@/components/PinScreen';
 import { RewardsScreen } from '@/components/RewardsScreen';
-import { StoreScreen } from '@/components/StoreScreen'; // Importar
+import { StoreScreen } from '@/components/StoreScreen';
 
 // --- Componentes de Página ---
 
@@ -28,28 +28,61 @@ const HomePage = () => {
   );
 };
 
+const CategoryPage = () => {
+  const { key } = useParams<{ key: string }>();
+  const navigate = useNavigate();
+  if (!key) return <div>Categoria não encontrada</div>;
+  return <CategoryScreen category={key} onBack={() => navigate('/')} onNavigateToPhrase={(symbolId) => navigate(`/frase-livre/${symbolId}`)} onNavigateToAddSymbol={() => navigate(`/categoria/${key}/adicionar`)} />;
+};
+
+const PhraseBuilderPage = () => {
+  const navigate = useNavigate();
+  const { symbolId } = useParams<{ symbolId?: string }>();
+  return <PhraseBuilder onBack={() => navigate('/')} initialSymbolId={symbolId ? Number(symbolId) : undefined} />;
+};
+
+const ProtectedPage = () => {
+  const navigate = useNavigate();
+  const [isVerified, setIsVerified] = useState(false);
+  const security = useLiveQuery(() => db.security.get(1));
+  if (!security) return <div>Carregando...</div>;
+  if (!isVerified) return <PinScreen storedPin={security.pin} onPinVerified={() => setIsVerified(true)} />;
+  return <ManagementScreen onBack={() => navigate('/')} />;
+};
+
+const AnalyticsPage = () => {
+  const navigate = useNavigate();
+  return <AnalyticsScreen onBack={() => navigate('/')} />;
+};
+
+const AddSymbolPage = () => {
+  const { key } = useParams<{ key: string }>();
+  const navigate = useNavigate();
+  return <AddSymbolScreen onBack={() => navigate(`/categoria/${key}`)} />;
+};
+
 const RewardsPage = () => {
-    const navigate = useNavigate();
-    return <RewardsScreen onBack={() => navigate('/')} onNavigateToStore={() => navigate('/loja')} />;
-}
+  const navigate = useNavigate();
+  return <RewardsScreen onBack={() => navigate('/')} onNavigateToStore={() => navigate('/loja')} />;
+};
 
 const StorePage = () => {
-    const navigate = useNavigate();
-    return <StoreScreen onBack={() => navigate('/recompensas')} />;
-}
-
-// ... (outros componentes de página)
+  const navigate = useNavigate();
+  return <StoreScreen onBack={() => navigate('/recompensas')} />;
+};
 
 // --- Roteador Principal ---
 const Index = () => {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      {/* ... (outras rotas) */}
+      <Route path="/categoria/:key" element={<CategoryPage />} />
+      <Route path="/categoria/:key/adicionar" element={<AddSymbolPage />} />
+      <Route path="/frase-livre" element={<PhraseBuilderPage />} />
+      <Route path="/frase-livre/:symbolId" element={<PhraseBuilderPage />} />
+      <Route path="/relatorio" element={<AnalyticsPage />} />
       <Route path="/recompensas" element={<RewardsPage />} />
-      <Route path="/loja" element={<StorePage />} /> {/* Adicionar rota */}
-      
-      {/* Rotas protegidas */}
+      <Route path="/loja" element={<StorePage />} />
       <Route path="/meu-painel" element={<ProtectedPage />} />
       <Route path="/configuracoes" element={<ProtectedPage />} />
     </Routes>
