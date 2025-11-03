@@ -31,11 +31,12 @@ export class MySubClassedDexie extends Dexie {
 
   constructor() {
     super('MeuMundoEmSimbolosDB');
-    this.version(9).stores({
+    // Incrementar a versão para aplicar a nova estrutura de índice
+    this.version(10).stores({
       profiles: '++id, name',
       categories: '++id, profileId, &[profileId+key]',
       symbols: '++id, profileId, text, categoryKey, order',
-      userSettings: '++id, profileId, onboardingCompleted',
+      userSettings: '++id, &profileId, onboardingCompleted', // Corrigido: &profileId torna-o um índice único
       coins: '&id',
       dailyGoals: '&id',
       achievements: '&id',
@@ -43,6 +44,19 @@ export class MySubClassedDexie extends Dexie {
       security: '&id',
       usageEvents: '++id, type, itemId, timestamp',
     });
+    // Manter a versão anterior para a migração
+    this.version(9).stores({
+        profiles: '++id, name',
+        categories: '++id, profileId, &[profileId+key]',
+        symbols: '++id, profileId, text, categoryKey, order',
+        userSettings: '++id, profileId, onboardingCompleted',
+        coins: '&id',
+        dailyGoals: '&id',
+        achievements: '&id',
+        rewards: '&id',
+        security: '&id',
+        usageEvents: '++id, type, itemId, timestamp',
+      });
   }
 
   async populateInitialData() {
