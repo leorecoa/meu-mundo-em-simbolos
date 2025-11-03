@@ -14,7 +14,7 @@ import Index from './pages/Index';
 
 import { ProfileProvider, useProfile } from './contexts/ProfileContext';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
-import { useAppInitializer } from './hooks/useAppInitializer';
+import { useAppInitializer } from '@/components/AppInitializer'; // Corrigido
 
 const queryClient = new QueryClient();
 
