@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 
@@ -13,19 +13,18 @@ import { ProfileScreen } from './pages/ProfileScreen';
 import Index from './pages/Index';
 
 import { ProfileProvider, useProfile } from './contexts/ProfileContext';
-import { ThemeProvider, useTheme } from './hooks/useTheme';
-import { useAppInitializer } from '@/components/AppInitializer'; // Corrigido
+import { ThemeProvider } from './hooks/useTheme';
+import { useAppInitializer } from '@/components/AppInitializer'; // Corrigido o caminho
 
 const queryClient = new QueryClient();
 
-// Componente que decide o que renderizar: Splash, Perfil, ou o App principal.
-const AppContent = () => {
+function AppContent() {
   const { activeProfileId, setActiveProfileId } = useProfile();
   const { isInitialized, error } = useAppInitializer();
   const [showOnboarding, setShowOnboarding] = useState(false);
-  
-  const userSettings = useLiveQuery(() => 
-    activeProfileId ? db.userSettings.where({ profileId: activeProfileId }).first() : undefined, 
+
+  const userSettings = useLiveQuery(() =>
+    activeProfileId ? db.userSettings.where({ profileId: activeProfileId }).first() : undefined,
     [activeProfileId]
   );
 
@@ -36,7 +35,7 @@ const AppContent = () => {
   }, [userSettings]);
 
   const handleOnboardingComplete = async () => {
-    if(userSettings?.id) {
+    if (userSettings?.id) {
       await db.userSettings.update(userSettings.id, { onboardingCompleted: true });
     }
     setShowOnboarding(false);
@@ -54,33 +53,29 @@ const AppContent = () => {
     return <ProfileScreen onProfileSelect={setActiveProfileId} />;
   }
 
-  // Se tudo está pronto, renderiza o app principal com o tema correto.
   return (
     <ThemeProvider>
-        <div className="app-container">
-            <Index />
-            {showOnboarding && <OnboardingGuide onComplete={handleOnboardingComplete} />}
-        </div>
+      <Index />
+      {showOnboarding && <OnboardingGuide onComplete={handleOnboardingComplete} />}
     </ThemeProvider>
   );
-};
+}
 
-// Componente Raiz que organiza todos os provedores na ordem correta.
-const App = () => {
+function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <BrowserRouter>
-            <ProfileProvider>
+        <BrowserRouter>
+          <ProfileProvider>
+            <TooltipProvider>
+              <Toaster />
               <AppContent />
-            </ProfileProvider>
-          </BrowserRouter>
-        </TooltipProvider>
+            </TooltipProvider>
+          </ProfileProvider>
+        </BrowserRouter>
       </QueryClientProvider>
     </ErrorBoundary>
   );
-};
+}
 
 export default App;
