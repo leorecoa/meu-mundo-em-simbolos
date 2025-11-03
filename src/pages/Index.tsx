@@ -1,12 +1,16 @@
+import { useState } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/lib/db';
 import { MainCategoriesScreen } from '@/components/MainCategoriesScreen';
 import { CategoryScreen } from '@/components/CategoryScreen';
 import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { ManagementScreen } from '@/components/ManagementScreen';
 import { AnalyticsScreen } from '@/components/AnalyticsScreen';
 import { AddSymbolScreen } from '@/components/AddSymbolScreen';
+import { PinScreen } from '@/components/PinScreen'; // Importar
 
-// Componentes de Página para encapsular a lógica de navegação
+// --- Componentes de Página ---
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -29,7 +33,7 @@ const CategoryPage = () => {
     <CategoryScreen 
       category={key} 
       onBack={() => navigate('/')} 
-      onNavigateToPhrase={(symbolId) => navigate(`/frase-livre/${symbolId}`)} // Passa o ID do símbolo
+      onNavigateToPhrase={(symbolId) => navigate(`/frase-livre/${symbolId}`)}
       onNavigateToAddSymbol={() => navigate(`/categoria/${key}/adicionar`)}
     />
   );
@@ -37,12 +41,22 @@ const CategoryPage = () => {
 
 const PhraseBuilderPage = () => {
   const navigate = useNavigate();
-  const { symbolId } = useParams<{ symbolId?: string }>(); // Recebe o ID do símbolo
+  const { symbolId } = useParams<{ symbolId?: string }>();
   return <PhraseBuilder onBack={() => navigate('/')} initialSymbolId={symbolId ? Number(symbolId) : undefined} />;
 };
 
-const ManagementPage = () => {
+// Página protegida que requer PIN
+const ProtectedPage = () => {
   const navigate = useNavigate();
+  const [isVerified, setIsVerified] = useState(false);
+  const security = useLiveQuery(() => db.security.get(1));
+
+  if (!security) return <div>Carregando segurança...</div>;
+
+  if (!isVerified) {
+    return <PinScreen storedPin={security.pin} onPinVerified={() => setIsVerified(true)} />;
+  }
+
   return <ManagementScreen onBack={() => navigate('/')} />;
 };
 
@@ -57,7 +71,7 @@ const AddSymbolPage = () => {
     return <AddSymbolScreen onBack={() => navigate(`/categoria/${key}`)} />;
 }
 
-// O componente Index agora é o nosso roteador principal
+// --- Roteador Principal ---
 const Index = () => {
   return (
     <Routes>
@@ -65,10 +79,12 @@ const Index = () => {
       <Route path="/categoria/:key" element={<CategoryPage />} />
       <Route path="/categoria/:key/adicionar" element={<AddSymbolPage />} />
       <Route path="/frase-livre" element={<PhraseBuilderPage />} />
-      <Route path="/frase-livre/:symbolId" element={<PhraseBuilderPage />} /> {/* Nova rota */}
-      <Route path="/meu-painel" element={<ManagementPage />} />
-      <Route path="/configuracoes" element={<ManagementPage />} />
+      <Route path="/frase-livre/:symbolId" element={<PhraseBuilderPage />} />
       <Route path="/relatorio" element={<AnalyticsPage />} />
+      
+      {/* Rotas protegidas */}
+      <Route path="/meu-painel" element={<ProtectedPage />} />
+      <Route path="/configuracoes" element={<ProtectedPage />} />
     </Routes>
   );
 };

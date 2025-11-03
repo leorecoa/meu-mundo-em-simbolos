@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input'; // Importar Input
 import { ChevronLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,22 +13,26 @@ interface SettingsScreenProps {
 
 export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
   const { toast } = useToast();
-  const [settings, setSettings] = useState({ voiceSpeed: 1, theme: 'light' }); // Valores padrão
+  const [settings, setSettings] = useState({ voiceSpeed: 1, theme: 'light' });
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState('');
+  const [currentPin, setCurrentPin] = useState('');
+  const [newPin, setNewPin] = useState('');
 
   useEffect(() => {
-    // Carregar configurações do DB
-    const loadSettings = async () => {
+    const loadData = async () => {
       const savedSettings = await db.userSettings.get(1);
       if (savedSettings) {
         setSettings({ voiceSpeed: savedSettings.voiceSpeed, theme: savedSettings.theme });
         setSelectedVoice(savedSettings.voiceType);
       }
+      const security = await db.security.get(1);
+      if (security) {
+        // Não armazenamos o PIN atual no estado por segurança, mas confirmamos que ele existe
+      }
     };
-    loadSettings();
+    loadData();
 
-    // Carregar vozes da síntese de voz
     const loadVoices = () => {
         const availableVoices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('pt'));
         setVoices(availableVoices);
@@ -37,52 +42,73 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
     return () => { window.speechSynthesis.onvoiceschanged = null; };
   }, []);
 
-  const handleSave = async () => {
+  const handleSaveSettings = async () => {
     try {
       await db.userSettings.update(1, { 
         voiceSpeed: settings.voiceSpeed,
         theme: settings.theme,
         voiceType: selectedVoice
       });
-      toast({ title: 'Sucesso', description: 'Configurações salvas.' });
-      onBack();
+      toast({ title: 'Sucesso', description: 'Configurações de aparência e voz salvas.' });
     } catch (error) {
       toast({ title: 'Erro', description: 'Não foi possível salvar as configurações.', variant: 'destructive' });
     }
   };
 
+  const handleSavePin = async () => {
+    const security = await db.security.get(1);
+    if (security?.pin !== currentPin) {
+      toast({ title: 'PIN Atual Incorreto', variant: 'destructive' });
+      return;
+    }
+    if (newPin.length !== 4 || !/^[0-9]*$/.test(newPin)) {
+      toast({ title: 'Novo PIN Inválido', description: 'O PIN deve conter 4 números.', variant: 'destructive' });
+      return;
+    }
+    await db.security.update(1, { pin: newPin });
+    toast({ title: 'Sucesso!', description: 'Seu PIN foi alterado.'});
+    setCurrentPin('');
+    setNewPin('');
+  };
+
   return (
     <div>
-        <header className="flex items-center justify-between mb-4">
-            <Button variant="ghost" onClick={onBack} className="flex items-center gap-1 text-sm sm:text-base text-gray-800 font-semibold"><ChevronLeft className="h-5 w-5" />Voltar</Button>
-            <h1 className="text-lg sm:text-xl font-bold text-gray-700">Configurações do App</h1>
-            <div className="w-16 sm:w-24"></div>
-        </header>
-        <Card className="bg-white/80 backdrop-blur-sm border-gray-200/50 shadow-lg text-gray-800">
+      <header className="flex items-center justify-between mb-4">
+        <Button variant="ghost" onClick={onBack} className="flex items-center gap-1"><ChevronLeft />Voltar</Button>
+        <h1 className="text-xl font-bold">Configurações do App</h1>
+        <div className="w-24"></div>
+      </header>
+      <div className="space-y-6">
+        <Card>
             <CardHeader><CardTitle>Ajustes Gerais</CardTitle></CardHeader>
             <CardContent className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Voz Preferida</label>
+                    <label className="block text-sm font-medium mb-1">Voz Preferida</label>
                     <Select onValueChange={setSelectedVoice} value={selectedVoice}>
-                        <SelectTrigger><SelectValue placeholder="Selecione uma voz..." /></SelectTrigger>
-                        <SelectContent>
-                            {voices.map(v => <SelectItem key={v.name} value={v.name}>{`${v.name} (${v.lang})`}</SelectItem>)}
-                        </SelectContent>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>{voices.map(v => <SelectItem key={v.name} value={v.name}>{`${v.name} (${v.lang})`}</SelectItem>)}</SelectContent>
                     </Select>
                 </div>
                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tema do Aplicativo</label>
-                    <Select onValueChange={(value) => setSettings(s => ({...s, theme: value}))} value={settings.theme}>
-                        <SelectTrigger><SelectValue placeholder="Selecione um tema..." /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="light">Claro</SelectItem>
-                            <SelectItem value="dark">Escuro</SelectItem>
-                        </SelectContent>
+                    <label className="block text-sm font-medium mb-1">Tema do Aplicativo</label>
+                    <Select onValueChange={(v) => setSettings(s => ({...s, theme: v}))} value={settings.theme}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="light">Claro</SelectItem><SelectItem value="dark">Escuro</SelectItem></SelectContent>
                     </Select>
                 </div>
-                <Button onClick={handleSave} className="w-full">Salvar Alterações</Button>
+                <Button onClick={handleSaveSettings} className="w-full">Salvar Ajustes</Button>
             </CardContent>
         </Card>
+
+        <Card>
+            <CardHeader><CardTitle>Alterar PIN de Segurança</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+                <Input type="password" placeholder="PIN Atual" maxLength={4} value={currentPin} onChange={e => setCurrentPin(e.target.value)} />
+                <Input type="password" placeholder="Novo PIN (4 dígitos)" maxLength={4} value={newPin} onChange={e => setNewPin(e.target.value)} />
+                <Button onClick={handleSavePin} variant="destructive" className="w-full">Alterar PIN</Button>
+            </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
