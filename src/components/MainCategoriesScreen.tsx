@@ -1,4 +1,4 @@
-import { Heart, Users, Smile, Gamepad2, Settings, LineChart, Home, Activity, Trophy } from 'lucide-react';
+import { Heart, Users, Smile, Gamepad2, Settings, LineChart, Home, Activity, Trophy, Utensils } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

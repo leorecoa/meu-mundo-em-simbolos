@@ -7,6 +7,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Symbol as DbSymbol } from '@/lib/db';
 import { useProfile } from '@/contexts/ProfileContext';
 
+type InputMode = 'symbols' | 'keyboard';
+
 interface PhraseBuilderProps {
   onBack: () => void;
   initialSymbolId?: number;

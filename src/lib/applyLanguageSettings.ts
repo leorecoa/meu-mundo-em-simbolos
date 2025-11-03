@@ -1,14 +1,16 @@
 import { getAppSettings, saveAppSettings } from './appSettings';
-import { getSettings, saveSettings } from './storage';
+import { db } from '@/lib/db';
 
 // Aplicar configurações de idioma
-export const applyLanguageSettings = (language: string): void => {
+export const applyLanguageSettings = async (language: string): Promise<void> => {
   // Salvar na configuração geral
-  const userSettings = getSettings();
-  saveSettings({
-    ...userSettings,
-    language
-  });
+  const activeProfileId = localStorage.getItem('activeProfileId');
+  if (activeProfileId) {
+    const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
+    if (settings?.id) {
+      await db.userSettings.update(settings.id, { language });
+    }
+  }
   
   // Salvar nas configurações do aplicativo
   const appSettings = getAppSettings();

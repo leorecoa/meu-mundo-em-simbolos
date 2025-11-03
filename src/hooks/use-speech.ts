@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getSettings } from '@/lib/storage';
-import { applyLanguageSettings } from '@/lib/applyLanguageSettings';
+import { db } from '@/lib/db';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface SpeechOptions {
   rate?: number;
@@ -11,6 +11,7 @@ interface SpeechOptions {
 }
 
 export function useSpeech() {
+  const { activeProfileId } = useProfile();
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -23,10 +24,7 @@ export function useSpeech() {
       setVoices(availableVoices);
     };
 
-    // Carregar vozes iniciais
     loadVoices();
-
-    // Adicionar evento para quando as vozes forem carregadas
     window.speechSynthesis.onvoiceschanged = loadVoices;
 
     return () => {
@@ -44,10 +42,12 @@ export function useSpeech() {
   }, [utterance]);
 
   // Obter voz com base nas configurações
-  const getVoiceFromSettings = () => {
-    const settings = getSettings();
-    const preferredVoiceType = settings.voiceType;
-    const preferredLang = settings.language || 'pt-BR';
+  const getVoiceFromSettings = async () => {
+    if (!activeProfileId) return voices[0] || null;
+    
+    const settings = await db.userSettings.where({ profileId: activeProfileId }).first();
+    const preferredVoiceType = settings?.voiceType || 'feminina';
+    const preferredLang = settings?.language || 'pt-BR';
     
     // Filtrar vozes por idioma
     let langVoices = voices.filter(voice => 
@@ -55,14 +55,8 @@ export function useSpeech() {
       voice.lang === preferredLang
     );
     
-    // Se não encontrar vozes para o idioma preferido, tente encontrar qualquer voz
     if (langVoices.length === 0) {
-      // Tentar encontrar vozes em inglês como fallback
-      langVoices = voices.filter(voice => 
-        voice.lang.startsWith('en')
-      );
-      
-      // Se ainda não encontrar, use qualquer voz disponível
+      langVoices = voices.filter(voice => voice.lang.startsWith('en'));
       if (langVoices.length === 0) {
         return voices[0] || null;
       }
@@ -85,7 +79,6 @@ export function useSpeech() {
       if (maleVoice) return maleVoice;
     }
     
-    // Retornar a primeira voz disponível se não encontrar correspondência
     return langVoices[0];
   };
   
@@ -110,28 +103,25 @@ export function useSpeech() {
   };
 
   // Função para falar texto
-  const speak = (text: string, options: SpeechOptions = {}) => {
-    // Cancelar qualquer fala anterior
+  const speak = async (text: string, options: SpeechOptions = {}) => {
     window.speechSynthesis.cancel();
     
-    const settings = getSettings();
+    const settings = activeProfileId 
+      ? await db.userSettings.where({ profileId: activeProfileId }).first()
+      : null;
     
-    // Criar nova utterance
     const newUtterance = new SpeechSynthesisUtterance(text);
     
-    // Configurar opções
-    newUtterance.lang = options.lang || settings.language || 'pt-BR';
-    newUtterance.rate = options.rate || settings.voiceSpeed / 50; // Converter de 0-100 para aproximadamente 0-2
+    newUtterance.lang = options.lang || settings?.language || 'pt-BR';
+    newUtterance.rate = options.rate || (settings?.voiceSpeed || 50) / 50;
     newUtterance.pitch = options.pitch || 1;
     newUtterance.volume = options.volume || 1;
     
-    // Selecionar voz
-    const voice = options.voice || getVoiceFromSettings();
+    const voice = options.voice || await getVoiceFromSettings();
     if (voice) {
       newUtterance.voice = voice;
     }
     
-    // Configurar eventos
     newUtterance.onstart = () => {
       setIsSpeaking(true);
       setIsPaused(false);
@@ -149,14 +139,10 @@ export function useSpeech() {
       setUtterance(null);
     };
     
-    // Armazenar utterance para controle
     setUtterance(newUtterance);
-    
-    // Iniciar fala
     window.speechSynthesis.speak(newUtterance);
   };
 
-  // Pausar fala
   const pause = () => {
     if (isSpeaking && !isPaused) {
       window.speechSynthesis.pause();
@@ -164,7 +150,6 @@ export function useSpeech() {
     }
   };
 
-  // Retomar fala
   const resume = () => {
     if (isSpeaking && isPaused) {
       window.speechSynthesis.resume();
@@ -172,7 +157,6 @@ export function useSpeech() {
     }
   };
 
-  // Cancelar fala
   const cancel = () => {
     window.speechSynthesis.cancel();
     setIsSpeaking(false);

@@ -46,7 +46,7 @@ function AppContent() {
   }
 
   if (!isInitialized) {
-    return <SplashScreen />;
+    return <SplashScreen onComplete={() => {}} />;
   }
 
   if (!activeProfileId) {

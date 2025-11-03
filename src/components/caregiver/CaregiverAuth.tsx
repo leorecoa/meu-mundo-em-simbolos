@@ -4,7 +4,7 @@ import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { getPin } from '@/lib/storage';
+import { db } from '@/lib/db';
 
 interface CaregiverAuthProps {
   onAuthenticated: () => void;
@@ -15,8 +15,9 @@ export const CaregiverAuth = ({ onAuthenticated, onBack }: CaregiverAuthProps) =
   const [pin, setPin] = useState('');
   const { toast } = useToast();
 
-  const handleLogin = () => {
-    const storedPin = getPin();
+  const handleLogin = async () => {
+    const security = await db.security.get(1);
+    const storedPin = security?.pin || '1234';
     if (pin === storedPin) {
       onAuthenticated();
       toast({

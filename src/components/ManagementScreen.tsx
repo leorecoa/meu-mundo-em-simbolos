@@ -125,12 +125,12 @@ const ContentManager = ({ onBack }: { onBack: () => void }) => (
 );
 
 const BackupManager = ({ onBack }: { onBack: () => void }) => {
-    const { activeProfileId, activeProfile } = useProfile();
+    const { activeProfileId } = useProfile();
     const { toast } = useToast();
     const importFileRef = useRef<HTMLInputElement>(null);
 
     const handleExport = useCallback(async () => {
-        if (!activeProfileId || !activeProfile) return;
+        if (!activeProfileId) return;
         try {
             const categories = await db.categories.where({ profileId: activeProfileId }).toArray();
             const symbols = await db.symbols.where({ profileId: activeProfileId }).toArray();

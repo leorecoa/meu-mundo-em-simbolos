@@ -7,9 +7,10 @@ import { Switch } from '@/components/ui/switch';
 import { useTheme } from '@/hooks/useTheme';
 import { getAppSettings, applyVolumeSettings, applyFontSizeSettings, applyAccessibilitySettings } from '@/lib/appSettings';
 import { useSpeech } from '@/hooks/use-speech';
-import { getSettings, saveSettings } from '@/lib/storage';
+import { db } from '@/lib/db';
 import { commonLanguages } from '@/lib/commonLanguages';
 import { useToast } from '@/hooks/use-toast';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface SettingsProps {
   onBack: () => void;
@@ -265,8 +266,11 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
       setLanguages(allLanguages);
       
       // Obter idioma atual das configurações
-      const settings = getSettings();
-      setSelectedLanguage(settings.language || 'pt-BR');
+      const activeProfileId = localStorage.getItem('activeProfileId');
+      if (activeProfileId) {
+        const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
+        setSelectedLanguage(settings?.language || 'pt-BR');
+      }
     } catch (error) {
       console.error('Erro ao carregar idiomas:', error);
       // Garantir que pelo menos os idiomas comuns estejam disponíveis

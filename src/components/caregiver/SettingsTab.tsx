@@ -6,106 +6,161 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { getSettings, saveSettings, setPin, exportAllData, importAllData } from '@/lib/storage';
-import type { UserSettings } from '@/db';
+import { db } from '@/lib/db';
+import { useProfile } from '@/contexts/ProfileContext';
 
 export const SettingsTab = () => {
-  const [settings, setSettings] = useState<Partial<UserSettings>>({});
+  const { activeProfileId } = useProfile();
+  const [settings, setSettings] = useState<any>({});
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const { toast } = useToast();
 
-  // Lógica robusta e segura para carregar dados e vozes
   useEffect(() => {
     const loadInitialData = async () => {
       try {
         setLoading(true);
-        const storedSettings = await getSettings();
-        setSettings(storedSettings);
+        if (activeProfileId) {
+          const storedSettings = await db.userSettings.where({ profileId: activeProfileId }).first();
+          setSettings(storedSettings || {});
+        }
 
-        // Abordagem "paciente" para carregar as vozes
         if ('speechSynthesis' in window) {
           const updateVoices = () => {
             const availableVoices = window.speechSynthesis.getVoices();
             if (availableVoices.length > 0) {
-              setVoices(availableVoices.filter(v => v.lang.startsWith('pt')));
+              setVoices(availableVoices);
             }
           };
-
-          updateVoices(); // Tenta pegar as vozes imediatamente
-          // E registra um "ouvinte" para caso elas demorem a carregar
+          updateVoices();
           window.speechSynthesis.onvoiceschanged = updateVoices;
-        } else {
-          console.warn('API de Síntese de Voz não suportada neste navegador.');
         }
       } catch (error) {
-        console.error("Falha ao carregar dados iniciais:", error);
-        toast({ title: "Erro Crítico", description: "Não foi possível carregar as configurações.", variant: 'destructive' });
+        console.error('Erro ao carregar dados iniciais:', error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     loadInitialData();
-  }, []);
+  }, [activeProfileId]);
 
-  const handleSettingChange = async (key: keyof UserSettings, value: any) => {
-    await saveSettings({ [key]: value });
-    setSettings(prev => ({ ...prev, [key]: value }));
-    toast({ title: "Configuração salva" });
-  };
-  
-  const handleChangePin = async () => {
-    // ... (lógica do PIN) ...
+  const handleSettingChange = async (key: string, value: any) => {
+    if (activeProfileId && settings.id) {
+      await db.userSettings.update(settings.id, { [key]: value });
+      setSettings({ ...settings, [key]: value });
+      toast({ title: 'Configuração atualizada' });
+    }
   };
 
-  const handleExport = async () => {
-    // ... (lógica de exportação) ...
+  const handlePinChange = async () => {
+    if (newPin !== confirmPin) {
+      toast({ title: 'Erro', description: 'Os PINs não coincidem', variant: 'destructive' });
+      return;
+    }
+    if (newPin.length !== 4) {
+      toast({ title: 'Erro', description: 'O PIN deve ter 4 dígitos', variant: 'destructive' });
+      return;
+    }
+    await db.security.put({ id: 1, pin: newPin });
+    toast({ title: 'PIN alterado com sucesso' });
+    setNewPin('');
+    setConfirmPin('');
   };
 
-  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // ... (lógica de importação) ...
+  const handleExportData = async () => {
+    try {
+      const allData = {
+        categories: await db.categories.toArray(),
+        symbols: await db.symbols.toArray(),
+        userSettings: await db.userSettings.toArray(),
+        coins: await db.coins.toArray(),
+        dailyGoals: await db.dailyGoals.toArray(),
+        achievements: await db.achievements.toArray(),
+        rewards: await db.rewards.toArray(),
+        security: await db.security.toArray(),
+      };
+      const dataStr = JSON.stringify(allData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+      const exportFileDefaultName = `mms-backup-${new Date().toISOString().split('T')[0]}.json`;
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      toast({ title: 'Dados exportados com sucesso' });
+    } catch (error) {
+      toast({ title: 'Erro', description: 'Falha ao exportar dados', variant: 'destructive' });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader><CardTitle>Voz e Acessibilidade</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SettingsIcon className="h-5 w-5" />
+            Configurações Gerais
+          </CardTitle>
+        </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="voice-select" className="text-base">Voz do App</Label>
-            <select 
-              id="voice-select"
-              className="p-2 border rounded-md bg-white shadow-sm"
-              value={settings.voiceType || ''}
-              onChange={(e) => handleSettingChange('voiceType', e.target.value)}
-              disabled={voices.length === 0} // Desabilita se nenhuma voz for encontrada
-            >
-              {voices.length > 0 ? (
-                <>
-                  <option value="" disabled>Selecione uma voz</option>
-                  {voices.map(voice => (
-                    <option key={voice.name} value={voice.name}>
-                      {`${voice.name} (${voice.lang})`}
-                    </option>
-                  ))}
-                </>
-              ) : (
-                <option>Nenhuma voz encontrada</option>
-              )}
-            </select>
+            <Label>Audio Feedback</Label>
+            <Switch
+              checked={settings.useAudioFeedback || false}
+              onCheckedChange={(checked) => handleSettingChange('useAudioFeedback', checked)}
+            />
           </div>
-           <div className="flex items-center justify-between">
-            <Label htmlFor="large-icons">Ícones grandes</Label>
-            <Switch id="large-icons" checked={!!settings.largeIcons} onCheckedChange={(v) => handleSettingChange('largeIcons', v)} />
-          </div>
-           <p className="text-xs text-gray-500 pt-2">A lista de vozes depende das instaladas no seu dispositivo. Para mais opções, busque por como "instalar vozes de texto para fala" no seu sistema.</p>
         </CardContent>
       </Card>
 
-       {/* ... (Outras seções: Segurança, Backup) ... */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Alterar PIN</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Novo PIN</Label>
+            <Input
+              type="password"
+              maxLength={4}
+              value={newPin}
+              onChange={(e) => setNewPin(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label>Confirmar PIN</Label>
+            <Input
+              type="password"
+              maxLength={4}
+              value={confirmPin}
+              onChange={(e) => setConfirmPin(e.target.value)}
+            />
+          </div>
+          <Button onClick={handlePinChange}>Alterar PIN</Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Backup & Restauração</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={handleExportData} className="w-full">
+            <Download className="mr-2 h-4 w-4" />
+            Exportar Dados
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };

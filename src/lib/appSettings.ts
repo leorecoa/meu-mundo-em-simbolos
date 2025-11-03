@@ -1,5 +1,5 @@
 // Configurações do aplicativo
-import { getSettings, saveSettings } from './storage';
+import { db } from '@/lib/db';
 
 // Tipos para as configurações do aplicativo
 export interface AppSettings {
@@ -57,7 +57,7 @@ export const saveAppSettings = (settings: AppSettings): void => {
 };
 
 // Aplicar configurações de volume
-export const applyVolumeSettings = (volume: 'alto' | 'médio' | 'baixo'): void => {
+export const applyVolumeSettings = async (volume: 'alto' | 'médio' | 'baixo'): Promise<void> => {
   // Mapear configurações de volume para valores numéricos
   const volumeValues = {
     'alto': 1.0,
@@ -72,11 +72,15 @@ export const applyVolumeSettings = (volume: 'alto' | 'médio' | 'baixo'): void =
   });
   
   // Salvar na configuração geral
-  const userSettings = getSettings();
-  saveSettings({
-    ...userSettings,
-    voiceSpeed: volume === 'alto' ? 70 : volume === 'médio' ? 50 : 30
-  });
+  const activeProfileId = localStorage.getItem('activeProfileId');
+  if (activeProfileId) {
+    const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
+    if (settings?.id) {
+      await db.userSettings.update(settings.id, {
+        voiceSpeed: volume === 'alto' ? 70 : volume === 'médio' ? 50 : 30
+      });
+    }
+  }
   
   // Salvar nas configurações do aplicativo
   const appSettings = getAppSettings();
@@ -88,17 +92,14 @@ export const applyVolumeSettings = (volume: 'alto' | 'médio' | 'baixo'): void =
 
 // Aplicar configurações de tamanho da fonte
 export const applyFontSizeSettings = (fontSize: 'grande' | 'médio' | 'pequeno'): void => {
-  // Mapear configurações de tamanho da fonte para valores CSS
   const fontSizeValues = {
     'grande': '1.2rem',
     'médio': '1rem',
     'pequeno': '0.875rem'
   };
   
-  // Aplicar configuração de tamanho da fonte ao sistema
   document.documentElement.style.setProperty('--base-font-size', fontSizeValues[fontSize]);
   
-  // Salvar nas configurações do aplicativo
   const appSettings = getAppSettings();
   saveAppSettings({
     ...appSettings,
@@ -113,17 +114,14 @@ export const applyAccessibilitySettings = (
 ): void => {
   const appSettings = getAppSettings();
   
-  // Atualizar configuração específica
   appSettings.accessibility[setting] = value;
   
-  // Aplicar configurações de acessibilidade
   if (setting === 'highContrast' && value) {
     document.documentElement.classList.add('high-contrast');
   } else if (setting === 'highContrast' && !value) {
     document.documentElement.classList.remove('high-contrast');
   }
   
-  // Salvar nas configurações do aplicativo
   saveAppSettings(appSettings);
 };
 

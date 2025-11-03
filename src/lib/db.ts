@@ -4,7 +4,7 @@ import Dexie, { type Table } from 'dexie';
 export interface Profile { id?: number; name: string; }
 export interface Category { id?: number; profileId: number; key: string; name: string; color: string; }
 export interface Symbol { id?: number; profileId: number; text: string; categoryKey: string; image?: Blob; order: number; }
-export interface UserSettings { id?: number; profileId: number; onboardingCompleted: boolean; }
+export interface UserSettings { id?: number; profileId: number; onboardingCompleted: boolean; voiceType?: string; voiceSpeed?: number; theme?: string; language?: string; }
 export interface Coin { id: number; total: number; }
 export interface DailyGoal { id: string; name: string; target: number; current: number; completed: boolean; reward: number; lastUpdated: string; }
 export interface Achievement { id: string; name: string; description: string; unlocked: boolean; reward: number; }
@@ -36,7 +36,7 @@ export class MySubClassedDexie extends Dexie {
       profiles: '++id, name',
       categories: '++id, profileId, &[profileId+key]',
       symbols: '++id, profileId, text, categoryKey, order',
-      userSettings: '++id, &profileId, onboardingCompleted', // Corrigido: &profileId torna-o um índice único
+      userSettings: '++id, &profileId, onboardingCompleted, voiceType, voiceSpeed, theme, language', // Corrigido: &profileId torna-o um índice único
       coins: '&id',
       dailyGoals: '&id',
       achievements: '&id',
@@ -78,7 +78,7 @@ export class MySubClassedDexie extends Dexie {
     
     await this.transaction('rw', this.categories, this.symbols, this.userSettings, async () => {
       if ((await this.userSettings.where({ profileId }).count()) === 0) {
-        await this.userSettings.add({ profileId, onboardingCompleted: false } as any);
+        await this.userSettings.add({ profileId, onboardingCompleted: false, voiceType: 'feminina', voiceSpeed: 50, theme: 'Padrão', language: 'pt-BR' } as any);
       }
       const catCount = await this.categories.where({ profileId }).count();
       if(catCount === 0) {
