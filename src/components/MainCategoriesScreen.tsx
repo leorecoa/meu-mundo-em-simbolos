@@ -1,4 +1,4 @@
-import { Heart, Users, Utensils, Gamepad2, Settings, LineChart, Home, Activity } from 'lucide-react';
+import { Heart, Users, Utensils, Gamepad2, Settings, LineChart, Home, Activity, Trophy } from 'lucide-react'; // Adicionado Trophy
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,6 +10,8 @@ interface MainCategoriesScreenProps {
   onNavigateToPhrase: () => void;
   onNavigateToAnalytics: () => void; 
   onNavigateToMyAT: () => void;
+  onNavigateToSettings: () => void; 
+  onNavigateToRewards: () => void; // Novo
 }
 
 const categoryDetails: { [key: string]: { icon: React.ElementType, description: string, gradient: string } } = {
@@ -22,31 +24,22 @@ const categoryDetails: { [key: string]: { icon: React.ElementType, description: 
 };
 
 
-export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToAnalytics, onNavigateToMyAT }: MainCategoriesScreenProps) => {
+export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToAnalytics, onNavigateToMyAT, onNavigateToSettings, onNavigateToRewards }: MainCategoriesScreenProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { currentTheme } = useTheme();
 
-  const handleCategoryClick = (categoryId: string) => {
-    onNavigateToCategory(categoryId);
-  };
-
-  const handlePhraseClick = () => {
-    onNavigateToPhrase();
-  };
-
-  const handleSettingsClick = () => {
-    navigate('/configuracoes');
-  };
-  
   return (
     <div className={`p-4 space-y-6 ${currentTheme.bgColor} min-h-screen`}>
-      <div className={`flex justify-end items-center mb-6`}>
+      <div className={`flex justify-between items-center mb-6`}>
+        <Button variant="outline" size="icon" className="bg-yellow-50 hover:bg-yellow-100" onClick={onNavigateToRewards} aria-label="Minhas Recompensas">
+            <Trophy className="h-5 w-5 text-yellow-700" />
+        </Button>
         <div className="flex gap-3">
           <Button variant="outline" size="icon" className="bg-green-50 hover:bg-green-100" onClick={onNavigateToAnalytics} aria-label="Relatório de Uso">
             <LineChart className="h-5 w-5 text-green-800" />
           </Button>
-          <Button variant="outline" size="icon" className="bg-blue-50 hover:bg-blue-100" onClick={handleSettingsClick} aria-label="Configurações">
+          <Button variant="outline" size="icon" className="bg-blue-50 hover:bg-blue-100" onClick={onNavigateToSettings} aria-label="Configurações">
             <Settings className="h-5 w-5 text-blue-800" />
           </Button>
           <Button variant="outline" size="icon" className="bg-indigo-50 hover:bg-indigo-100" onClick={onNavigateToMyAT} aria-label="Meu AT">
@@ -57,7 +50,7 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
 
       <Button 
         className={`w-full py-6 text-xl font-bold rounded-xl ${currentTheme.buttonBg} ${currentTheme.buttonHover} ${currentTheme.textColor} shadow-md`}
-        onClick={handlePhraseClick}
+        onClick={onNavigateToPhrase}
       >
         MONTAR FRASE
       </Button>
@@ -69,7 +62,7 @@ export const MainCategoriesScreen = ({ onNavigateToCategory, onNavigateToPhrase,
             <Card 
               key={key} 
               className={`h-32 bg-gradient-to-br ${value.gradient} text-white shadow-lg rounded-xl flex flex-col items-center justify-center p-2 cursor-pointer transition-transform hover:scale-105`}
-              onClick={() => handleCategoryClick(key)}
+              onClick={() => onNavigateToCategory(key)}
             >
               <value.icon className="h-10 w-10" />
               <div className="text-lg font-bold text-center">

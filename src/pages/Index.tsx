@@ -8,7 +8,8 @@ import { PhraseBuilder } from '@/components/PhraseBuilder';
 import { ManagementScreen } from '@/components/ManagementScreen';
 import { AnalyticsScreen } from '@/components/AnalyticsScreen';
 import { AddSymbolScreen } from '@/components/AddSymbolScreen';
-import { PinScreen } from '@/components/PinScreen'; // Importar
+import { PinScreen } from '@/components/PinScreen';
+import { RewardsScreen } from '@/components/RewardsScreen'; // Importar
 
 // --- Componentes de Página ---
 
@@ -21,6 +22,7 @@ const HomePage = () => {
       onNavigateToMyAT={() => navigate('/meu-painel')}
       onNavigateToAnalytics={() => navigate('/relatorio')}
       onNavigateToSettings={() => navigate('/configuracoes')}
+      onNavigateToRewards={() => navigate('/recompensas')} // Conectar
     />
   );
 };
@@ -45,7 +47,6 @@ const PhraseBuilderPage = () => {
   return <PhraseBuilder onBack={() => navigate('/')} initialSymbolId={symbolId ? Number(symbolId) : undefined} />;
 };
 
-// Página protegida que requer PIN
 const ProtectedPage = () => {
   const navigate = useNavigate();
   const [isVerified, setIsVerified] = useState(false);
@@ -71,6 +72,11 @@ const AddSymbolPage = () => {
     return <AddSymbolScreen onBack={() => navigate(`/categoria/${key}`)} />;
 }
 
+const RewardsPage = () => {
+    const navigate = useNavigate();
+    return <RewardsScreen onBack={() => navigate('/')} />;
+}
+
 // --- Roteador Principal ---
 const Index = () => {
   return (
@@ -81,6 +87,7 @@ const Index = () => {
       <Route path="/frase-livre" element={<PhraseBuilderPage />} />
       <Route path="/frase-livre/:symbolId" element={<PhraseBuilderPage />} />
       <Route path="/relatorio" element={<AnalyticsPage />} />
+      <Route path="/recompensas" element={<RewardsPage />} /> {/* Adicionar rota */}
       
       {/* Rotas protegidas */}
       <Route path="/meu-painel" element={<ProtectedPage />} />
