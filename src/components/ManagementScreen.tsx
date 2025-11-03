@@ -3,8 +3,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Category, Symbol as DbSymbol } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, Trash2, PlusCircle, Edit, Check, ImageUp, ImageOff, RefreshCcw, Search, Download, Upload, GripVertical, FileText, Settings, ShieldCheck } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { ChevronLeft, Trash2, PlusCircle, Edit, Check, ImageUp, ImageOff, RefreshCcw, Search, Download, Upload, GripVertical, FileText, Settings, ShieldCheck, LineChart } from 'lucide-react'; // Adicionado LineChart
+import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -24,13 +24,77 @@ const ContentManager = ({ onBack }: { onBack: () => void }) => (
 );
 
 const BackupManager = ({ onBack }: { onBack: () => void }) => {
-    // (O código completo do BackupManager que já tínhamos vai aqui)
     const { activeProfile, activeProfileId } = useProfile();
     const { toast } = useToast();
     const importFileRef = useRef<HTMLInputElement>(null);
 
-    const handleExport = async () => { /* ...código de exportação... */ };
-    const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => { /* ...código de importação... */ };
+    const handleExport = async () => {
+      if (!activeProfileId || !activeProfile) return;
+      try {
+        const categories = await db.categories.where({ profileId: activeProfileId }).toArray();
+        const symbols = await db.symbols.where({ profileId: activeProfileId }).toArray();
+        const symbolsWithBase64 = await Promise.all(symbols.map(async (s) => {
+          if (s.image instanceof Blob) {
+            const reader = new FileReader();
+            return new Promise(resolve => {
+              reader.onloadend = () => resolve({ ...s, image: reader.result });
+              reader.readAsDataURL(s.image);
+            });
+          }
+          return s;
+        }));
+        const backupData = JSON.stringify({ profileName: activeProfile.name, categories, symbols: symbolsWithBase64 }, null, 2);
+        const blob = new Blob([backupData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mms_backup_${activeProfile.name.replace(/\s/g, '_')}_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast({ title: 'Sucesso', description: 'Seu backup foi salvo no dispositivo.' });
+      } catch (error) {
+        console.error("Erro ao exportar dados:", error);
+        toast({ title: 'Erro', description: 'Não foi possível criar o backup.', variant: 'destructive' });
+      }
+    };
+  
+    const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (!activeProfileId) return;
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const backup = JSON.parse(e.target?.result as string);
+          if (!backup.profileName || !Array.isArray(backup.categories) || !Array.isArray(backup.symbols)) {
+            throw new Error('Arquivo de backup inválido.');
+          }
+          const symbolsWithBlobs = await Promise.all((backup.symbols as any[]).map(async (s) => {
+            if (typeof s.image === 'string' && s.image.startsWith('data:image')) {
+              const res = await fetch(s.image);
+              const blob = await res.blob();
+              return { ...s, image: blob, profileId: activeProfileId };
+            }
+            return { ...s, image: undefined, profileId: activeProfileId };
+          }));
+          const categoriesToImport = backup.categories.map((c: any) => ({ ...c, profileId: activeProfileId }));
+          await db.transaction('rw', db.categories, db.symbols, async () => {
+            await db.categories.where({ profileId: activeProfileId }).delete();
+            await db.symbols.where({ profileId: activeProfileId }).delete();
+            await db.categories.bulkAdd(categoriesToImport);
+            await db.symbols.bulkAdd(symbolsWithBlobs);
+          });
+          toast({ title: 'Sucesso!', description: 'Seus dados foram restaurados.' });
+        } catch (error) {
+          console.error("Erro ao importar dados:", error);
+          toast({ title: 'Erro', description: 'O arquivo de backup é inválido ou está corrompido.', variant: 'destructive' });
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    };
 
     return (
         <div>
@@ -46,7 +110,7 @@ const BackupManager = ({ onBack }: { onBack: () => void }) => {
                     <Button onClick={handleExport} className="h-16 text-lg bg-blue-600 hover:bg-blue-700 text-white"><Download className="mr-2" />Exportar Dados</Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild><Button variant="outline" className="h-16 text-lg bg-orange-600 hover:bg-orange-700 text-white"><Upload className="mr-2" />Importar Dados</Button></AlertDialogTrigger>
-                        <AlertDialogContent> <AlertDialogHeader><AlertDialogTitle>Aviso Importante</AlertDialogTitle><AlertDialogDescription>A importação de um backup irá **substituir todos os dados atuais** (categorias e símbolos) deste perfil. Esta ação não pode ser desfeita. Deseja continuar?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => importFileRef.current?.click()}>Continuar</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Aviso Importante</AlertDialogTitle><AlertDialogDescription>A importação de um backup irá **substituir todos os dados atuais** (categorias e símbolos) deste perfil. Esta ação não pode ser desfeita. Deseja continuar?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => importFileRef.current?.click()}>Continuar</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
                     </AlertDialog>
                 </CardContent>
             </Card>
@@ -55,8 +119,8 @@ const BackupManager = ({ onBack }: { onBack: () => void }) => {
 };
 
 // --- Componentes Internos (reutilizados) ---
-const CategoryManager = () => { /* ...código do CategoryManager... */ return null; };
-const SymbolManager = () => { /* ...código do SymbolManager... */ return null; };
+const CategoryManager = () => { /* ...código do CategoryManager... */ return <div/>; };
+const SymbolManager = () => { /* ...código do SymbolManager... */ return <div/>; };
 
 
 // --- Tela Principal do Painel ---
