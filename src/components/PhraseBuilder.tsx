@@ -9,6 +9,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 
 interface PhraseBuilderProps {
   onBack: () => void;
+  initialSymbolId?: number;
 }
 
 const SymbolDisplay = ({ symbol }: { symbol: DbSymbol }) => {
@@ -64,7 +65,7 @@ const NativeKeyboardInput = ({ onAddSymbol }: { onAddSymbol: (text: string) => v
 
 type InputMode = 'symbols' | 'keyboard';
 
-export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
+export const PhraseBuilder = ({ onBack, initialSymbolId }: PhraseBuilderProps) => {
   const { activeProfileId } = useProfile();
   const phraseStorageKey = `currentPhrase_${activeProfileId}`;
 
@@ -76,6 +77,21 @@ export const PhraseBuilder = ({ onBack }: PhraseBuilderProps) => {
 
   useEffect(() => { try { localStorage.setItem(phraseStorageKey, JSON.stringify(currentPhrase)); } catch (error) { console.error("Falha ao salvar a frase", error); } }, [currentPhrase, phraseStorageKey]);
   useEffect(() => { if (typeof window !== 'undefined' && window.speechSynthesis) { const loadVoices = () => { const availableVoices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('pt')); setVoices(availableVoices); const p = localStorage.getItem('selectedVoice'); if (p && availableVoices.some(v => v.name === p)) { setSelectedVoiceName(p); } else if (availableVoices.length > 0) { const g = availableVoices.find(v => v.name.includes('Google')); const m = availableVoices.find(v => v.name.includes('Microsoft')); let b = availableVoices[0]; if (g) { b = g; } else if (m) { b = m; } setSelectedVoiceName(b.name); localStorage.setItem('selectedVoice', b.name); } }; loadVoices(); window.speechSynthesis.onvoiceschanged = loadVoices; return () => { window.speechSynthesis.onvoiceschanged = null; }; } }, []);
+
+  useEffect(() => {
+    const addInitialSymbol = async () => {
+      if (initialSymbolId && activeProfileId) {
+        const symbol = await db.symbols.get(initialSymbolId);
+        if (symbol) {
+            // Evita adicionar o símbolo se a página for apenas recarregada
+            if (!currentPhrase.find(s => s.id === symbol.id)) {
+                 setCurrentPhrase(prev => [...prev, symbol]);
+            }
+        }
+      }
+    };
+    addInitialSymbol();
+  }, [initialSymbolId, activeProfileId]);
 
   const handleVoiceChange = useCallback((voiceName: string) => { setSelectedVoiceName(voiceName); localStorage.setItem('selectedVoice', voiceName); }, []);
   const addSymbol = useCallback((symbolOrText: DbSymbol | string) => { if (typeof symbolOrText === 'string') { const newSymbol: DbSymbol = { id: Date.now(), profileId: activeProfileId!, text: symbolOrText, categoryKey: 'custom', order: 999 }; setCurrentPhrase(prev => [...prev, newSymbol]); } else { setCurrentPhrase(prev => [...prev, symbolOrText]); } }, [activeProfileId]);
