@@ -225,11 +225,14 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
     setLanguages(allLanguages);
     
     // Obter idioma atual das configurações
-    const activeProfileId = localStorage.getItem('activeProfileId');
-    if (activeProfileId) {
-      const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
-      setSelectedLanguage(settings?.language || 'pt-BR');
-    }
+    const loadSettings = async () => {
+      const activeProfileId = localStorage.getItem('activeProfileId');
+      if (activeProfileId) {
+        const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
+        setSelectedLanguage(settings?.language || 'pt-BR');
+      }
+    };
+    loadSettings();
   }, [getAvailableLanguages]);
   
   const handleLanguageChange = (language: string) => {

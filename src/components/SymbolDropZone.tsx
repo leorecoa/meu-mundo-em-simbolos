@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '@/hooks/useTheme';
-import { PhraseSymbol } from '@/lib/storage';
+import { Symbol as DbSymbol } from '@/lib/db';
 
 interface SymbolDropZoneProps {
-  onDrop: (item: PhraseSymbol) => void;
+  onDrop: (item: DbSymbol) => void;
   children: React.ReactNode;
   className?: string;
 }
@@ -50,10 +50,12 @@ export const SymbolDropZone = ({ onDrop, children, className = '' }: SymbolDropZ
           
           // Verificar se é um símbolo válido
           if (parsedData.type === 'symbol' || parsedData.id) {
-            const symbol: PhraseSymbol = {
+            const symbol: DbSymbol = {
               id: parsedData.id,
               text: parsedData.text,
-              iconUrl: parsedData.iconUrl
+              profileId: parsedData.profileId || 1,
+              categoryKey: parsedData.categoryKey || 'geral',
+              order: parsedData.order || 0
             };
             
             // Chamar callback com o símbolo

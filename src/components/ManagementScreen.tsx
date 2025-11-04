@@ -128,23 +128,28 @@ const BackupManager = ({ onBack }: { onBack: () => void }) => {
     const { activeProfileId } = useProfile();
     const { toast } = useToast();
     const importFileRef = useRef<HTMLInputElement>(null);
+    
+    const profile = useLiveQuery(() => 
+      activeProfileId ? db.profiles.get(activeProfileId) : undefined, 
+      [activeProfileId]
+    );
 
     const handleExport = useCallback(async () => {
-        if (!activeProfileId) return;
+        if (!activeProfileId || !profile) return;
         try {
             const categories = await db.categories.where({ profileId: activeProfileId }).toArray();
             const symbols = await db.symbols.where({ profileId: activeProfileId }).toArray();
-            const backupData = JSON.stringify({ profileName: activeProfile.name, categories, symbols }, null, 2);
+            const backupData = JSON.stringify({ profileName: profile.name, categories, symbols }, null, 2);
             const blob = new Blob([backupData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `mms_backup_${activeProfile.name.replace(/\s/g, '_')}.json`;
+            a.download = `mms_backup_${profile.name.replace(/\s/g, '_')}.json`;
             a.click();
             URL.revokeObjectURL(a.href);
             toast({ title: 'Sucesso', description: 'Backup salvo no seu dispositivo.' });
-        } catch (e) { toast({ title: 'Erro', description: 'Não foi possível exportar os dados.', variant: 'destructive' }); }
-    }, [activeProfileId, activeProfile, toast]);
+        } catch (e) { toast({ title: 'Erro', description: 'Não foi possível exportar os dados.' }); }
+    }, [activeProfileId, profile, toast]);
 
     const handleImport = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];

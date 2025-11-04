@@ -15,7 +15,15 @@ interface CategoryScreenProps {
 }
 
 const SymbolDisplay = ({ symbol }: { symbol: DbSymbol }) => { /* ...código... */ return null; };
-const colorMap: { [key: string]: { bg: string, text: string, hover: string, imageOverlay: string } } = { /* ...código... */ };
+const colorMap: { [key: string]: { bg: string, text: string, hover: string, imageOverlay: string } } = {
+  sky: { bg: 'bg-sky-500', text: 'text-white', hover: 'hover:bg-sky-600', imageOverlay: 'from-transparent to-sky-900/70' },
+  rose: { bg: 'bg-rose-500', text: 'text-white', hover: 'hover:bg-rose-600', imageOverlay: 'from-transparent to-rose-900/70' },
+  amber: { bg: 'bg-amber-500', text: 'text-white', hover: 'hover:bg-amber-600', imageOverlay: 'from-transparent to-amber-900/70' },
+  emerald: { bg: 'bg-emerald-500', text: 'text-white', hover: 'hover:bg-emerald-600', imageOverlay: 'from-transparent to-emerald-900/70' },
+  orange: { bg: 'bg-orange-500', text: 'text-white', hover: 'hover:bg-orange-600', imageOverlay: 'from-transparent to-orange-900/70' },
+  slate: { bg: 'bg-slate-500', text: 'text-white', hover: 'hover:bg-slate-600', imageOverlay: 'from-transparent to-slate-900/70' },
+  default: { bg: 'bg-gray-500', text: 'text-white', hover: 'hover:bg-gray-600', imageOverlay: 'from-transparent to-gray-900/70' }
+};
 
 // --- Componentes de Estado ---
 const LoadingState = () => (

@@ -88,7 +88,7 @@ export const PhraseBuilder = ({ onBack, initialSymbolId }: PhraseBuilderProps) =
     // #region Speak, Export, Present
     const speakPhrase = useCallback(() => {
         const phraseText = getPhraseText();
-        if (!phraseText) { toast({ title: "Frase vazia!", variant: "destructive" }); return; }
+        if (!phraseText) { toast({ title: "Frase vazia!" }); return; }
         const utterance = new SpeechSynthesisUtterance(phraseText);
         // ... (lógica de configurar voz)
         window.speechSynthesis.speak(utterance);
@@ -102,7 +102,7 @@ export const PhraseBuilder = ({ onBack, initialSymbolId }: PhraseBuilderProps) =
             link.download = 'frase.png';
             link.href = dataUrl;
             link.click();
-        }).catch(err => toast({ title: "Erro ao exportar imagem", variant: "destructive" }));
+        }).catch(err => toast({ title: "Erro ao exportar imagem" }));
     }, [phraseDisplayRef, toast]);
     // #endregion
 

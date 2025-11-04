@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/useTheme';
-import { PhraseSymbol } from '@/lib/storage';
+import { Symbol as DbSymbol } from '@/lib/db';
 
 interface DraggableSymbolProps {
-  symbol: PhraseSymbol;
+  symbol: DbSymbol;
   index: number;
   onRemove: (index: number) => void;
   onDragEnd: (result: { source: number; destination: number | null }) => void;
@@ -122,8 +122,8 @@ export const DraggableSymbol = ({ symbol, index, onRemove, onDragEnd }: Draggabl
         <X className="h-3 w-3 text-gray-500" />
       </Button>
       <div className="h-16 w-16 bg-gray-200 rounded-lg mb-2 flex items-center justify-center text-3xl">
-        {symbol.iconUrl ? (
-          <img src={symbol.iconUrl} alt={symbol.text} className="h-12 w-12" />
+        {symbol.image ? (
+          <img src={URL.createObjectURL(symbol.image)} alt={symbol.text} className="h-12 w-12 object-cover" />
         ) : (
           symbol.text.charAt(0)
         )}

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/useTheme';
-import { PhraseSymbol } from '@/lib/storage';
+import { Symbol as DbSymbol } from '@/lib/db';
 
 interface QuickPhraseBarProps {
-  onUsePhrase: (symbols: PhraseSymbol[]) => void;
+  onUsePhrase: (symbols: DbSymbol[]) => void;
 }
 
 export const QuickPhraseBar = ({ onUsePhrase }: QuickPhraseBarProps) => {
@@ -21,33 +21,33 @@ export const QuickPhraseBar = ({ onUsePhrase }: QuickPhraseBarProps) => {
   ];
   
   // Frases organizadas por categoria
-  const quickPhrases: Record<string, {text: string, symbols: PhraseSymbol[]}[]> = {
+  const quickPhrases: Record<string, {text: string, symbols: DbSymbol[]}[]> = {
     'Frequentes': [
       {
         text: 'EU QUERO ÁGUA',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'quero', text: 'QUERO' },
-          { id: 'agua', text: 'ÁGUA' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 2, text: 'QUERO', profileId: 1, categoryKey: 'acoes', order: 10 },
+          { id: 3, text: 'ÁGUA', profileId: 1, categoryKey: 'comida', order: 42 },
         ]
       },
       {
         text: 'EU ESTOU COM FOME',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'estou', text: 'ESTOU' },
-          { id: 'com', text: 'COM' },
-          { id: 'fome', text: 'FOME' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 4, text: 'ESTOU', profileId: 1, categoryKey: 'acoes', order: 12 },
+          { id: 5, text: 'COM', profileId: 1, categoryKey: 'geral', order: 52 },
+          { id: 6, text: 'FOME', profileId: 1, categoryKey: 'sentimentos', order: 24 }
         ]
       },
       {
         text: 'EU PRECISO IR AO BANHEIRO',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'preciso', text: 'PRECISO' },
-          { id: 'ir', text: 'IR' },
-          { id: 'ao', text: 'AO' },
-          { id: 'banheiro', text: 'BANHEIRO' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 7, text: 'PRECISO', profileId: 1, categoryKey: 'acoes', order: 13 },
+          { id: 8, text: 'IR', profileId: 1, categoryKey: 'acoes', order: 14 },
+          { id: 9, text: 'AO', profileId: 1, categoryKey: 'geral', order: 53 },
+          { id: 10, text: 'BANHEIRO', profileId: 1, categoryKey: 'lugares', order: 32 }
         ]
       }
     ],
@@ -55,33 +55,33 @@ export const QuickPhraseBar = ({ onUsePhrase }: QuickPhraseBarProps) => {
       {
         text: 'EU QUERO COMER',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'quero', text: 'QUERO' },
-          { id: 'comer', text: 'COMER' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 2, text: 'QUERO', profileId: 1, categoryKey: 'acoes', order: 10 },
+          { id: 11, text: 'COMER', profileId: 1, categoryKey: 'comida', order: 40 }
         ]
       },
       {
         text: 'EU QUERO BEBER',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'quero', text: 'QUERO' },
-          { id: 'beber', text: 'BEBER' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 2, text: 'QUERO', profileId: 1, categoryKey: 'acoes', order: 10 },
+          { id: 12, text: 'BEBER', profileId: 1, categoryKey: 'comida', order: 41 }
         ]
       },
       {
         text: 'EU PRECISO DESCANSAR',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'preciso', text: 'PRECISO' },
-          { id: 'descansar', text: 'DESCANSAR' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 7, text: 'PRECISO', profileId: 1, categoryKey: 'acoes', order: 13 },
+          { id: 13, text: 'DESCANSAR', profileId: 1, categoryKey: 'acoes', order: 15 }
         ]
       },
       {
         text: 'EU QUERO DORMIR',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'quero', text: 'QUERO' },
-          { id: 'dormir', text: 'DORMIR' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 2, text: 'QUERO', profileId: 1, categoryKey: 'acoes', order: 10 },
+          { id: 14, text: 'DORMIR', profileId: 1, categoryKey: 'acoes', order: 16 }
         ]
       }
     ],
@@ -89,27 +89,27 @@ export const QuickPhraseBar = ({ onUsePhrase }: QuickPhraseBarProps) => {
       {
         text: 'ONDE ESTÁ?',
         symbols: [
-          { id: 'onde', text: 'ONDE' },
-          { id: 'esta', text: 'ESTÁ' },
-          { id: 'interrogacao', text: '?' }
+          { id: 15, text: 'ONDE', profileId: 1, categoryKey: 'geral', order: 54 },
+          { id: 16, text: 'ESTÁ', profileId: 1, categoryKey: 'acoes', order: 17 },
+          { id: 17, text: '?', profileId: 1, categoryKey: 'geral', order: 55 }
         ]
       },
       {
         text: 'POSSO IR?',
         symbols: [
-          { id: 'posso', text: 'POSSO' },
-          { id: 'ir', text: 'IR' },
-          { id: 'interrogacao', text: '?' }
+          { id: 18, text: 'POSSO', profileId: 1, categoryKey: 'acoes', order: 18 },
+          { id: 8, text: 'IR', profileId: 1, categoryKey: 'acoes', order: 14 },
+          { id: 17, text: '?', profileId: 1, categoryKey: 'geral', order: 55 }
         ]
       },
       {
         text: 'VOCÊ PODE ME AJUDAR?',
         symbols: [
-          { id: 'voce', text: 'VOCÊ' },
-          { id: 'pode', text: 'PODE' },
-          { id: 'me', text: 'ME' },
-          { id: 'ajudar', text: 'AJUDAR' },
-          { id: 'interrogacao', text: '?' }
+          { id: 2, text: 'VOCÊ', profileId: 1, categoryKey: 'pessoas', order: 2 },
+          { id: 19, text: 'PODE', profileId: 1, categoryKey: 'acoes', order: 19 },
+          { id: 20, text: 'ME', profileId: 1, categoryKey: 'pessoas', order: 5 },
+          { id: 21, text: 'AJUDAR', profileId: 1, categoryKey: 'acoes', order: 20 },
+          { id: 17, text: '?', profileId: 1, categoryKey: 'geral', order: 55 }
         ]
       }
     ],
@@ -117,34 +117,34 @@ export const QuickPhraseBar = ({ onUsePhrase }: QuickPhraseBarProps) => {
       {
         text: 'EU ESTOU FELIZ',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'estou', text: 'ESTOU' },
-          { id: 'feliz', text: 'FELIZ' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 4, text: 'ESTOU', profileId: 1, categoryKey: 'acoes', order: 12 },
+          { id: 7, text: 'FELIZ', profileId: 1, categoryKey: 'sentimentos', order: 21 }
         ]
       },
       {
         text: 'EU ESTOU TRISTE',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'estou', text: 'ESTOU' },
-          { id: 'triste', text: 'TRISTE' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 4, text: 'ESTOU', profileId: 1, categoryKey: 'acoes', order: 12 },
+          { id: 22, text: 'TRISTE', profileId: 1, categoryKey: 'sentimentos', order: 22 }
         ]
       },
       {
         text: 'EU ESTOU COM DOR',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'estou', text: 'ESTOU' },
-          { id: 'com', text: 'COM' },
-          { id: 'dor', text: 'DOR' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 4, text: 'ESTOU', profileId: 1, categoryKey: 'acoes', order: 12 },
+          { id: 5, text: 'COM', profileId: 1, categoryKey: 'geral', order: 52 },
+          { id: 23, text: 'DOR', profileId: 1, categoryKey: 'sentimentos', order: 23 }
         ]
       },
       {
         text: 'EU ESTOU CANSADO',
         symbols: [
-          { id: 'eu', text: 'EU' },
-          { id: 'estou', text: 'ESTOU' },
-          { id: 'cansado', text: 'CANSADO' }
+          { id: 1, text: 'EU', profileId: 1, categoryKey: 'pessoas', order: 1 },
+          { id: 4, text: 'ESTOU', profileId: 1, categoryKey: 'acoes', order: 12 },
+          { id: 24, text: 'CANSADO', profileId: 1, categoryKey: 'sentimentos', order: 24 }
         ]
       }
     ],
@@ -152,32 +152,32 @@ export const QuickPhraseBar = ({ onUsePhrase }: QuickPhraseBarProps) => {
       {
         text: 'OLÁ',
         symbols: [
-          { id: 'ola', text: 'OLÁ' }
+          { id: 25, text: 'OLÁ', profileId: 1, categoryKey: 'geral', order: 56 }
         ]
       },
       {
         text: 'TCHAU',
         symbols: [
-          { id: 'tchau', text: 'TCHAU' }
+          { id: 26, text: 'TCHAU', profileId: 1, categoryKey: 'geral', order: 57 }
         ]
       },
       {
         text: 'OBRIGADO',
         symbols: [
-          { id: 'obrigado', text: 'OBRIGADO' }
+          { id: 27, text: 'OBRIGADO', profileId: 1, categoryKey: 'geral', order: 58 }
         ]
       },
       {
         text: 'POR FAVOR',
         symbols: [
-          { id: 'por', text: 'POR' },
-          { id: 'favor', text: 'FAVOR' }
+          { id: 28, text: 'POR', profileId: 1, categoryKey: 'geral', order: 59 },
+          { id: 29, text: 'FAVOR', profileId: 1, categoryKey: 'geral', order: 60 }
         ]
       },
       {
         text: 'DESCULPE',
         symbols: [
-          { id: 'desculpe', text: 'DESCULPE' }
+          { id: 30, text: 'DESCULPE', profileId: 1, categoryKey: 'geral', order: 61 }
         ]
       }
     ]

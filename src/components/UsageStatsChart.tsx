@@ -1,42 +1,80 @@
-import { useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getUsageStats } from '@/lib/storage';
+import { db } from '@/lib/db';
 import { useTheme } from '@/hooks/useTheme';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface ChartData {
   name: string;
   value: number;
+  [key: string]: string | number;
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export const UsageStatsChart = () => {
   const { currentTheme } = useTheme();
-  const [chartType, setChartType] = useState<'bar' | 'pie'>('bar');
+  const { activeProfileId } = useProfile();
   
-  // Obter estatísticas de uso
-  const usageStats = getUsageStats();
+  // Obter eventos de uso do banco de dados
+  const usageEvents = useLiveQuery(() => 
+    activeProfileId ? db.usageEvents.where({ type: 'symbol_used' }).toArray() : [],
+    [activeProfileId]
+  );
   
   // Preparar dados para o gráfico
   const prepareChartData = (): ChartData[] => {
-    const symbolsUsed = usageStats.symbolsUsed;
+    if (!usageEvents || usageEvents.length === 0) return [];
+    
+    // Contar uso de cada símbolo
+    const symbolCount: Record<string, number> = {};
+    usageEvents.forEach(event => {
+      const symbol = event.itemId;
+      symbolCount[symbol] = (symbolCount[symbol] || 0) + 1;
+    });
     
     // Converter objeto de contagem em array para o gráfico
-    const chartData = Object.entries(symbolsUsed)
+    const chartData = Object.entries(symbolCount)
       .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value) // Ordenar por uso (decrescente)
-      .slice(0, 10); // Limitar aos 10 mais usados
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10);
     
     return chartData;
   };
   
   const chartData = prepareChartData();
   
+  // Calcular estatísticas gerais
+  const phrasesCreated = useLiveQuery(() => 
+    db.usageEvents.where({ type: 'phrase_created' }).count(), 
+    []
+  );
+  
+  const totalSymbolsUsed = usageEvents?.length || 0;
+  const uniqueSymbolsUsed = chartData.length;
+  const averagePerPhrase = phrasesCreated && phrasesCreated > 0 
+    ? (totalSymbolsUsed / phrasesCreated).toFixed(1) 
+    : '0';
+  
+  // Calcular tempo total (estimativa: 2 segundos por evento)
+  const totalTimeSpent = (usageEvents?.length || 0) * 2;
+  
+  // Formatar tempo total
+  const formatTimeSpent = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}min`;
+    }
+    return `${minutes}min`;
+  };
+
   // Renderizar gráfico de barras
   const renderBarChart = () => (
     <ResponsiveContainer width="100%" height={300}>
@@ -84,24 +122,6 @@ export const UsageStatsChart = () => {
       </PieChart>
     </ResponsiveContainer>
   );
-  
-  // Calcular estatísticas gerais
-  const totalSymbolsUsed = Object.values(usageStats.symbolsUsed).reduce((sum, count) => sum + count, 0);
-  const uniqueSymbolsUsed = Object.keys(usageStats.symbolsUsed).length;
-  const averagePerPhrase = usageStats.phrasesCreated > 0 
-    ? (totalSymbolsUsed / usageStats.phrasesCreated).toFixed(1) 
-    : '0';
-  
-  // Formatar tempo total
-  const formatTimeSpent = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes}min`;
-    }
-    return `${minutes}min`;
-  };
 
   return (
     <Card className={`p-4 ${currentTheme.cardBg}`}>
@@ -113,7 +133,7 @@ export const UsageStatsChart = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 p-3 rounded-lg text-center">
           <p className="text-sm text-gray-600">Frases criadas</p>
-          <p className="text-2xl font-bold text-blue-700">{usageStats.phrasesCreated}</p>
+          <p className="text-2xl font-bold text-blue-700">{phrasesCreated || 0}</p>
         </div>
         <div className="bg-green-50 p-3 rounded-lg text-center">
           <p className="text-sm text-gray-600">Símbolos usados</p>
@@ -125,13 +145,13 @@ export const UsageStatsChart = () => {
         </div>
         <div className="bg-orange-50 p-3 rounded-lg text-center">
           <p className="text-sm text-gray-600">Tempo total</p>
-          <p className="text-2xl font-bold text-orange-700">{formatTimeSpent(usageStats.totalTimeSpent)}</p>
+          <p className="text-2xl font-bold text-orange-700">{formatTimeSpent(totalTimeSpent)}</p>
         </div>
       </div>
       
       {/* Seleção de tipo de gráfico */}
       <div className="mb-4">
-        <Tabs defaultValue="bar" onValueChange={(value) => setChartType(value as 'bar' | 'pie')}>
+        <Tabs defaultValue="bar">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="bar">Gráfico de Barras</TabsTrigger>
             <TabsTrigger value="pie">Gráfico de Pizza</TabsTrigger>
@@ -161,7 +181,7 @@ export const UsageStatsChart = () => {
       
       {/* Nota informativa */}
       <p className="text-xs text-gray-500 mt-2">
-        Última atualização: {new Date(usageStats.lastUsed).toLocaleDateString()}
+        Última atualização: {new Date().toLocaleDateString()}
       </p>
     </Card>
   );

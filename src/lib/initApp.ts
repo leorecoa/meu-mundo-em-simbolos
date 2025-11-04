@@ -1,12 +1,12 @@
 // Arquivo de inicialização do aplicativo
-import { getSettings } from './storage';
+import { db } from './db';
 import { getAppSettings, saveAppSettings } from './appSettings';
 
 /**
  * Inicializa as configurações do aplicativo
  * Esta função deve ser chamada na inicialização do aplicativo
  */
-export const initializeApp = (): void => {
+export const initializeApp = async (): Promise<void> => {
   try {
     console.log('Inicializando aplicativo...');
     
@@ -18,18 +18,21 @@ export const initializeApp = (): void => {
       localStorage.setItem('app-theme', 'Padrão');
     }
     
-    // Verificar se o idioma está definido
-    const settings = getSettings();
-    if (settings.language) {
-      // Definir o idioma do documento
-      document.documentElement.lang = settings.language.split('-')[0];
-      
-      // Verificar se o idioma está definido nas configurações do aplicativo
-      if (!appSettings.language) {
-        saveAppSettings({
-          ...appSettings,
-          language: settings.language
-        });
+    // Obter idioma das configurações do usuário no DB
+    const activeProfileId = localStorage.getItem('activeProfileId');
+    if (activeProfileId) {
+      const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
+      if (settings?.language) {
+        // Definir o idioma do documento
+        document.documentElement.lang = settings.language.split('-')[0];
+        
+        // Verificar se o idioma está definido nas configurações do aplicativo
+        if (!appSettings.language) {
+          saveAppSettings({
+            ...appSettings,
+            language: settings.language
+          });
+        }
       }
     }
     
@@ -61,20 +64,6 @@ export const repairSettings = (): void => {
     
     // Salvar configurações padrão
     localStorage.setItem('app-settings', JSON.stringify(defaultAppSettings));
-    
-    // Configurações padrão do usuário
-    const defaultUserSettings = {
-      voiceType: 'feminina',
-      voiceSpeed: 50,
-      iconSize: 50,
-      useAudioFeedback: true,
-      theme: 'Padrão',
-      largeIcons: false,
-      language: 'pt-BR'
-    };
-    
-    // Salvar configurações padrão do usuário
-    localStorage.setItem('mms-settings', JSON.stringify(defaultUserSettings));
     
     // Definir tema padrão
     localStorage.setItem('app-theme', 'Padrão');

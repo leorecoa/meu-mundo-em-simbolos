@@ -1,5 +1,5 @@
 // Implementação das configurações do sistema FiveCoin
-import { getSettings, saveSettings, getPurchasedRewards } from './storage';
+import { db } from './db';
 
 // Tipos para as configurações do FiveCoin
 export interface FiveCoinSettings {
@@ -54,15 +54,13 @@ export const saveFiveCoinSettings = (settings: FiveCoinSettings): void => {
 };
 
 // Verificar se uma recompensa está desbloqueada
-export const isRewardUnlocked = (rewardId: string): boolean => {
-  const purchasedRewards = getPurchasedRewards();
-  return purchasedRewards.includes(rewardId);
+export const isRewardUnlocked = async (rewardId: string): Promise<boolean> => {
+  const reward = await db.rewards.get(rewardId);
+  return reward?.purchased || false;
 };
 
 // Aplicar configurações de volume
 export const applyVolumeSettings = (volume: 'alto' | 'médio' | 'baixo'): void => {
-  const settings = getSettings();
-  
   // Mapear configurações de volume para valores numéricos
   const volumeValues = {
     'alto': 1.0,
@@ -76,13 +74,6 @@ export const applyVolumeSettings = (volume: 'alto' | 'médio' | 'baixo'): void =
     audio.volume = volumeValues[volume];
   });
   
-  // Salvar na configuração geral
-  const userSettings = getSettings();
-  saveSettings({
-    ...userSettings,
-    voiceSpeed: volume === 'alto' ? 70 : volume === 'médio' ? 50 : 30
-  });
-  
   // Salvar nas configurações do FiveCoin
   const fiveCoinSettings = getFiveCoinSettings();
   saveFiveCoinSettings({
@@ -93,8 +84,6 @@ export const applyVolumeSettings = (volume: 'alto' | 'médio' | 'baixo'): void =
 
 // Aplicar configurações de tamanho da fonte
 export const applyFontSizeSettings = (fontSize: 'grande' | 'médio' | 'pequeno'): void => {
-  const settings = getSettings();
-  
   // Mapear configurações de tamanho da fonte para valores CSS
   const fontSizeValues = {
     'grande': '1.2rem',
@@ -147,33 +136,12 @@ export const isTaskComplete = (taskId: string): boolean => {
 };
 
 // Verificar se uma meta diária está completa
-export const isDailyGoalComplete = (goalId: string): boolean => {
+export const isDailyGoalComplete = async (goalId: string): Promise<boolean> => {
   try {
-    const storedGoals = localStorage.getItem('mms-daily-goals');
-    if (!storedGoals) return false;
-    
-    const parsedData = JSON.parse(storedGoals);
-    const goals = parsedData.goals;
-    const goal = goals.find((g: any) => g.id === goalId);
-    return goal ? goal.completed : false;
+    const goal = await db.dailyGoals.get(goalId);
+    return goal?.completed || false;
   } catch (error) {
     console.error('Erro ao verificar conclusão da meta diária:', error);
-    return false;
-  }
-};
-
-// Verificar se um desafio está completo
-export const isDailyChallengeComplete = (challengeId: string): boolean => {
-  try {
-    const storedChallenges = localStorage.getItem('mms-daily-challenges');
-    if (!storedChallenges) return false;
-    
-    const parsedData = JSON.parse(storedChallenges);
-    const challenges = parsedData.challenges;
-    const challenge = challenges.find((c: any) => c.id === challengeId);
-    return challenge ? challenge.completed : false;
-  } catch (error) {
-    console.error('Erro ao verificar conclusão do desafio:', error);
     return false;
   }
 };

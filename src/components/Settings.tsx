@@ -266,11 +266,14 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
       setLanguages(allLanguages);
       
       // Obter idioma atual das configurações
-      const activeProfileId = localStorage.getItem('activeProfileId');
-      if (activeProfileId) {
-        const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
-        setSelectedLanguage(settings?.language || 'pt-BR');
-      }
+      const loadSettings = async () => {
+        const activeProfileId = localStorage.getItem('activeProfileId');
+        if (activeProfileId) {
+          const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
+          setSelectedLanguage(settings?.language || 'pt-BR');
+        }
+      };
+      loadSettings();
     } catch (error) {
       console.error('Erro ao carregar idiomas:', error);
       // Garantir que pelo menos os idiomas comuns estejam disponíveis
@@ -285,13 +288,6 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
       // Aplicar configurações de idioma
       import('@/lib/applyLanguageSettings').then(({ applyLanguageSettings }) => {
         applyLanguageSettings(language);
-        
-        // Atualizar configurações globais
-        const settings = getSettings();
-        saveSettings({
-          ...settings,
-          language
-        });
         
         // Forçar atualização do documento
         document.documentElement.lang = language.split('-')[0];

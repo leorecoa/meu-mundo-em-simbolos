@@ -3,9 +3,9 @@ import { db } from '@/lib/db';
 // ... (outras definições)
 
 const defaultRewards = [
-  { id: 'pack_animals', name: 'Pacote: Animais', description: 'Desbloqueie 5 símbolos de animais.', cost: 150, type: 'symbol_pack', purchased: false },
-  { id: 'pack_toys', name: 'Pacote: Brinquedos', description: 'Desbloqueie 5 símbolos de brinquedos.', cost: 200, type: 'symbol_pack', purchased: false },
-  { id: 'pack_vehicles', name: 'Pacote: Veículos', description: 'Desbloqueie 5 símbolos de veículos.', cost: 250, type: 'symbol_pack', purchased: false },
+  { id: 'pack_animals', name: 'Pacote: Animais', description: 'Desbloqueie 5 símbolos de animais.', cost: 150, type: 'symbol_pack' as const, purchased: false },
+  { id: 'pack_toys', name: 'Pacote: Brinquedos', description: 'Desbloqueie 5 símbolos de brinquedos.', cost: 200, type: 'symbol_pack' as const, purchased: false },
+  { id: 'pack_vehicles', name: 'Pacote: Veículos', description: 'Desbloqueie 5 símbolos de veículos.', cost: 250, type: 'symbol_pack' as const, purchased: false },
 ];
 
 export async function seedGamification() {

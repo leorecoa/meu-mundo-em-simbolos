@@ -4,7 +4,7 @@ import Dexie, { type Table } from 'dexie';
 export interface Profile { id?: number; name: string; }
 export interface Category { id?: number; profileId: number; key: string; name: string; color: string; }
 export interface Symbol { id?: number; profileId: number; text: string; categoryKey: string; image?: Blob; order: number; }
-export interface UserSettings { id?: number; profileId: number; onboardingCompleted: boolean; }
+export interface UserSettings { id?: number; profileId: number; onboardingCompleted: boolean; voiceType?: string; voiceSpeed?: number; theme?: string; language?: string; }
 export interface Coin { id: number; total: number; }
 export interface DailyGoal { id: string; name: string; target: number; current: number; completed: boolean; reward: number; lastUpdated: string; }
 export interface Achievement { id: string; name: string; description: string; unlocked: boolean; reward: number; }
@@ -32,11 +32,11 @@ export class MySubClassedDexie extends Dexie {
   constructor() {
     super('MeuMundoEmSimbolosDB');
     // Definição de Schema ÚNICA E FINAL. Sem mais migrações.
-    this.version(1).stores({
+    this.version(11).stores({
       profiles: '++id, name',
       categories: '++id, profileId, &[profileId+key]',
       symbols: '++id, profileId, text, categoryKey, order',
-      userSettings: '++id, &profileId, onboardingCompleted',
+      userSettings: '++id, &profileId, onboardingCompleted, voiceType, voiceSpeed, theme, language',
       coins: '&id',
       dailyGoals: '&id',
       achievements: '&id',
@@ -47,7 +47,7 @@ export class MySubClassedDexie extends Dexie {
   }
 
   async populateInitialData() {
-    await this.transaction('rw', this.achievements, this.dailyGoals, this.coins, this.security, this.rewards, async () => {
+    await this.transaction('rw', [this.achievements, this.dailyGoals, this.coins, this.security, this.rewards], async () => {
       if ((await this.coins.count()) === 0) await this.coins.put({ id: 1, total: 100 });
       if ((await this.security.count()) === 0) await this.security.put({ id: 1, pin: '1234' });
       if ((await this.achievements.count()) === 0) await this.achievements.bulkAdd(defaultAchievements as any);
@@ -66,7 +66,7 @@ export class MySubClassedDexie extends Dexie {
     await this.transaction('rw', this.categories, this.symbols, this.userSettings, async () => {
       const userSettingsExists = await this.userSettings.where({ profileId }).first();
       if (!userSettingsExists) {
-        await this.userSettings.add({ profileId, onboardingCompleted: false } as any);
+        await this.userSettings.add({ profileId, onboardingCompleted: false, voiceType: 'feminina', voiceSpeed: 1, theme: 'light', language: 'pt-BR' } as any);
       }
       const catCount = await this.categories.where({ profileId }).count();
       if(catCount === 0) {
