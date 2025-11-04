@@ -36,7 +36,7 @@ export class MySubClassedDexie extends Dexie {
     super('MeuMundoEmSimbolosDB');
 
     // 1. Definição do Schema (código que você já tinha)
-    this.version(1).stores({
+    this.version(2).stores({
       profiles: '++id, name',
       categories: '++id, profileId, &[profileId+key]',
       symbols: '++id, profileId, text, categoryKey, order',
