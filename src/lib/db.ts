@@ -1,39 +1,72 @@
 import Dexie, { type Table } from 'dexie';
 
-// ... (Interfaces e Dados Iniciais)
+// --- INTERFACES ---
+export interface Profile { id?: number; name: string; }
+export interface Category { id?: number; profileId: number; key: string; name: string; color: string; }
+export interface Symbol { id?: number; profileId: number; text: string; categoryKey: string; image?: Blob; order: number; }
+export interface UserSettings { id?: number; profileId: number; onboardingCompleted: boolean; }
+export interface Coin { id: number; total: number; }
+export interface DailyGoal { id: string; name: string; target: number; current: number; completed: boolean; reward: number; lastUpdated: string; }
+export interface Achievement { id: string; name: string; description: string; unlocked: boolean; reward: number; }
+export interface Reward { id: string; name: string; description: string; cost: number; type: 'symbol_pack'; purchased: boolean; }
+export interface Security { id: number; pin: string; }
+export interface UsageEvent { id?: number; type: string; itemId: string; timestamp: number; }
+
+// --- DADOS INICIAIS ---
+const defaultAchievements = [{ id: 'achievement_first_phrase', name: 'Primeira Comunicação', unlocked: false, reward: 15 }, { id: 'achievement_custom_symbol', name: 'Mundo Personalizado', unlocked: false, reward: 30 }];
+const defaultGoals = [{ id: 'goal_phrases', name: 'Crie 3 frases', target: 3, current: 0, completed: false, reward: 10 }, { id: 'goal_symbols', name: 'Use 10 símbolos', target: 10, current: 0, completed: false, reward: 15 }, { id: 'goal_categories', name: 'Explore 2 categorias', target: 2, current: 0, completed: false, reward: 5 }];
+const defaultRewards: Reward[] = [{ id: 'pack_animals', name: 'Pacote: Animais', cost: 150, type: 'symbol_pack', purchased: false, description: '' }, { id: 'pack_toys', name: 'Pacote: Brinquedos', cost: 200, type: 'symbol_pack', purchased: false, description: '' }, { id: 'pack_vehicles', name: 'Pacote: Veículos', cost: 250, type: 'symbol_pack', purchased: false, description: '' }];
+const defaultCategories = [ { key: 'pessoas', name: 'Pessoas', color: 'sky' }, { key: 'acoes', name: 'Ações', color: 'rose' }, { key: 'sentimentos', name: 'Sentimentos', color: 'amber' }, { key: 'lugares', name: 'Lugares', color: 'emerald' }, { key: 'comida', name: 'Comida', color: 'orange' }, { key: 'geral', name: 'Geral', color: 'slate' } ];
+const defaultSymbols = [ { text: 'Eu', categoryKey: 'pessoas', order: 1 }, { text: 'Você', categoryKey: 'pessoas', order: 2 }, { text: 'Mãe', categoryKey: 'pessoas', order: 3 }, { text: 'Pai', categoryKey: 'pessoas', order: 4 }, { text: 'Quero', categoryKey: 'acoes', order: 10 }, { text: 'Não quero', categoryKey: 'acoes', order: 11 }, { text: 'Feliz', categoryKey: 'sentimentos', order: 21 }, { text: 'Triste', categoryKey: 'sentimentos', order: 22 }, { text: 'Casa', categoryKey: 'lugares', order: 30 }, { text: 'Escola', categoryKey: 'lugares', order: 31 }, { text: 'Comer', categoryKey: 'comida', order: 40 }, { text: 'Beber', categoryKey: 'comida', order: 41 }, { text: 'Sim', categoryKey: 'geral', order: 50 }, { text: 'Não', categoryKey: 'geral', order: 51 } ];
 
 export class MySubClassedDexie extends Dexie {
-  // ... (Tabelas)
+  profiles!: Table<Profile>;
+  categories!: Table<Category>;
+  symbols!: Table<Symbol>;
+  userSettings!: Table<UserSettings>;
+  coins!: Table<Coin>;
+  dailyGoals!: Table<DailyGoal>;
+  achievements!: Table<Achievement>;
+  rewards!: Table<Reward>;
+  security!: Table<Security>;
+  usageEvents!: Table<UsageEvent>;
 
   constructor() {
     super('MeuMundoEmSimbolosDB');
-    this.version(12).stores({
+    // Definição de Schema ÚNICA e FINAL.
+    this.version(1).stores({
       profiles: '++id, name',
       categories: '++id, profileId, &[profileId+key]',
       symbols: '++id, profileId, text, categoryKey, order',
-      userSettings: '++id, &profileId',
+      userSettings: '++id, &profileId, onboardingCompleted',
       coins: '&id',
       dailyGoals: '&id',
       achievements: '&id',
       rewards: '&id',
       security: '&id',
-      usageEvents: '++id, type, itemId, timestamp',
+      usageEvents: '++id'
     });
   }
 
-  async populateInitialData() { /* ... */ }
+  async populateInitialData() {
+    await this.transaction('rw', [this.achievements, this.dailyGoals, this.coins, this.security, this.rewards], async () => {
+      if ((await this.coins.count()) === 0) await this.coins.put({ id: 1, total: 100 });
+      if ((await this.security.count()) === 0) await this.security.put({ id: 1, pin: '1234' });
+      if ((await this.achievements.count()) === 0) await this.achievements.bulkAdd(defaultAchievements as any);
+      if ((await this.dailyGoals.count()) === 0) {
+        const today = new Date().toISOString().split('T')[0];
+        await this.dailyGoals.bulkAdd(defaultGoals.map(g => ({ ...g, lastUpdated: today })) as any);
+      }
+      if ((await this.rewards.count()) === 0) await this.rewards.bulkAdd(defaultRewards as any);
+    });
+  }
 
   async populateForProfile(profileId: number) {
-    const defaultCategories = [ { key: 'pessoas', name: 'Pessoas', color: 'sky' }, { key: 'acoes', name: 'Ações', color: 'rose' }, { key: 'sentimentos', name: 'Sentimentos', color: 'amber' }, { key: 'lugares', name: 'Lugares', color: 'emerald' }, { key: 'comida', name: 'Comida', color: 'orange' }, { key: 'geral', name: 'Geral', color: 'slate' } ];
-    const defaultSymbols = [ { text: 'Eu', categoryKey: 'pessoas', order: 1 }, { text: 'Você', categoryKey: 'pessoas', order: 2 }, { text: 'Mãe', categoryKey: 'pessoas', order: 3 }, { text: 'Pai', categoryKey: 'pessoas', order: 4 }, { text: 'Quero', categoryKey: 'acoes', order: 10 }, { text: 'Não quero', categoryKey: 'acoes', order: 11 }, { text: 'Feliz', categoryKey: 'sentimentos', order: 21 }, { text: 'Triste', categoryKey: 'sentimentos', order: 22 }, { text: 'Casa', categoryKey: 'lugares', order: 30 }, { text: 'Escola', categoryKey: 'lugares', order: 31 }, { text: 'Comer', categoryKey: 'comida', order: 40 }, { text: 'Beber', categoryKey: 'comida', order: 41 }, { text: 'Sim', categoryKey: 'geral', order: 50 }, { text: 'Não', categoryKey: 'geral', order: 51 } ];
-    
-    await this.transaction('rw', this.categories, this.symbols, this.userSettings, async () => {
-      // Garante a criação de configurações para o perfil
+    await this.transaction('rw', [this.categories, this.symbols, this.userSettings], async () => {
       const settingsCount = await this.userSettings.where({ profileId }).count();
       if (settingsCount === 0) {
-        await this.userSettings.add({ profileId, onboardingCompleted: false } as any);
+        await this.userSettings.add({ profileId, onboardingCompleted: false });
       }
-      // Garante a criação de categorias e símbolos padrão
       const catCount = await this.categories.where({ profileId }).count();
       if(catCount === 0) {
         const categoriesWithProfile = defaultCategories.map(c => ({...c, profileId}));
