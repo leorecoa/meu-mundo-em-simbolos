@@ -11,7 +11,7 @@ export const useAppInitializer = () => {
       await db.open();
 
       // Popula os dados iniciais de gamificação (só executa se o DB estiver vazio)
-      await db.populateInitialData();
+
 
       await minDisplayTime;
       setIsInitialized(true);
