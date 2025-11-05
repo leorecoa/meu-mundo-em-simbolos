@@ -156,6 +156,10 @@ export class MySubClassedDexie extends Dexie {
       theme: 'light',
       language: 'pt-BR',
     } as any);
+    
+    // Popular categorias e símbolos
+    const { seedDatabase } = await import('./seedDatabase');
+    await seedDatabase(profileId);
   }
 }
 

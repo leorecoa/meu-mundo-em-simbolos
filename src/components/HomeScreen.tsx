@@ -13,12 +13,12 @@ interface HomeScreenProps {
 }
 
 const categoryDetails: { [key: string]: { icon: React.ElementType, description: string, gradient: string } } = {
-  pessoas: { icon: Users, description: 'Pessoas importantes em sua vida.', gradient: 'from-lime-500 to-green-500' },
-  acoes: { icon: Smile, description: 'O que você quer fazer ou sente.', gradient: 'from-rose-500 to-red-500' },
-  sentimentos: { icon: Heart, description: 'Expresse seus sentimentos.', gradient: 'from-amber-500 to-orange-500' },
-  lugares: { icon: Home, description: 'Lugares que você frequenta.', gradient: 'from-sky-500 to-blue-500' },
-  comida: { icon: Utensils, description: 'O que você quer comer ou beber.', gradient: 'from-yellow-500 to-amber-500' },
-  geral: { icon: Gamepad2, description: 'Palavras e frases do dia a dia.', gradient: 'from-slate-500 to-gray-500' },
+  quero: { icon: Heart, description: 'O que você quer fazer.', gradient: 'from-sky-500 to-blue-500' },
+  sinto: { icon: Smile, description: 'Como você se sente.', gradient: 'from-emerald-500 to-green-500' },
+  preciso: { icon: Users, description: 'O que você precisa.', gradient: 'from-rose-500 to-red-500' },
+  comida: { icon: Utensils, description: 'Comidas e bebidas.', gradient: 'from-amber-500 to-orange-500' },
+  brincar: { icon: Gamepad2, description: 'Brincadeiras e diversão.', gradient: 'from-orange-500 to-amber-500' },
+  casa: { icon: Home, description: 'Lugares da casa.', gradient: 'from-slate-500 to-gray-500' },
 };
 
 export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToAnalytics, onNavigateToMyAT, onNavigateToSettings, onNavigateToRewards }: HomeScreenProps) => {

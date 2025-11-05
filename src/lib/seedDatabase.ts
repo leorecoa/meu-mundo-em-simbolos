@@ -15,12 +15,35 @@ export async function seedDatabase(profileId: number) {
     await db.transaction('rw', db.categories, db.symbols, async () => {
       for (const categoryKey in categoryData) {
         const category = categoryData[categoryKey];
+        
+        // Mapear cores corretas para cada categoria
+        const colorMap: { [key: string]: string } = {
+          'quero': 'sky',
+          'sinto': 'emerald', 
+          'preciso': 'rose',
+          'comida': 'amber',
+          'brincar': 'orange',
+          'casa': 'slate'
+        };
+        
+        // Adicionar categoria com cor correta
         await db.categories.add({
           profileId,
           key: categoryKey,
           name: category.title,
-          color: 'blue' // cor padrão
+          color: colorMap[categoryKey] || 'sky'
         });
+        
+        // Popular os símbolos de cada categoria
+        for (let i = 0; i < category.items.length; i++) {
+          const item = category.items[i];
+          await db.symbols.add({
+            profileId,
+            text: item.label,
+            categoryKey: categoryKey,
+            order: i
+          });
+        }
       }
     });
 

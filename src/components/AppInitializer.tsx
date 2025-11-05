@@ -10,8 +10,18 @@ export const useAppInitializer = () => {
       const minDisplayTime = new Promise(resolve => setTimeout(resolve, 2500));
       await db.open();
 
-      // Popula os dados iniciais de gamificação (só executa se o DB estiver vazio)
-
+      // Migrar perfis existentes sem dados
+      const profiles = await db.profiles.toArray();
+      for (const profile of profiles) {
+        if (profile.id) {
+          const categoryCount = await db.categories.where({ profileId: profile.id }).count();
+          if (categoryCount === 0) {
+            console.log(`Migrando perfil ${profile.name}...`);
+            const { seedDatabase } = await import('@/lib/seedDatabase');
+            await seedDatabase(profile.id);
+          }
+        }
+      }
 
       await minDisplayTime;
       setIsInitialized(true);
