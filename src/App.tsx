@@ -19,6 +19,7 @@ import { useAppInitializer } from '@/components/AppInitializer'; // CORRIGIDO
 const queryClient = new QueryClient();
 
 function AppContent() {
+  console.log('ID do Perfil Ativo:', activeProfileId);
   const { activeProfileId, setActiveProfileId } = useProfile();
   const { isInitialized, error } = useAppInitializer();
   const [showOnboarding, setShowOnboarding] = useState(false);
