@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
 // ... (outros imports)
 import { SymbolDisplay } from '@/components/ui/SymbolDisplay';
 import { PresentationScreen } from './PresentationScreen';
