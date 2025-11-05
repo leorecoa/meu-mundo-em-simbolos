@@ -29,8 +29,7 @@ const CategoryPage = () => {
 
 const PhraseBuilderPage = () => {
   const navigate = useNavigate();
-  const { symbolId } = useParams<{ symbolId?: string }>();
-  return <PhraseBuilder onBack={() => navigate('/')} initialSymbolId={symbolId ? Number(symbolId) : undefined} />;
+  return <PhraseBuilder onBack={() => navigate('/')} />;
 };
 
 const ProtectedPage = () => {

@@ -37,12 +37,17 @@ export interface UserSettings {
 export interface Coins {
   id: number;
   count: number;
+  total: number;
 }
 
 export interface DailyGoal {
   id: string;
+  name: string;
   taskName: string;
+  current: number;
+  target: number;
   completed: boolean;
+  reward: number;
   rewardCoins: number;
 }
 
@@ -50,6 +55,7 @@ export interface Achievement {
   id: string;
   name: string;
   description: string;
+  reward: number;
   unlocked: boolean;
   unlockedAt?: Date;
 }

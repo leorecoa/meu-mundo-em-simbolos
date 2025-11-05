@@ -19,7 +19,6 @@ import { useAppInitializer } from '@/components/AppInitializer'; // CORRIGIDO
 const queryClient = new QueryClient();
 
 function AppContent() {
-  console.log('ID do Perfil Ativo:', activeProfileId);
   const { activeProfileId, setActiveProfileId } = useProfile();
   const { isInitialized, error } = useAppInitializer();
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -47,7 +46,7 @@ function AppContent() {
   }
 
   if (!isInitialized) {
-    return <SplashScreen />;
+    return <SplashScreen onComplete={() => {}} />;
   }
 
   if (!activeProfileId) {
@@ -56,7 +55,7 @@ function AppContent() {
 
   return (
     <ThemeProvider>
-      <Suspense fallback={<SplashScreen/>}>
+      <Suspense fallback={<SplashScreen onComplete={() => {}} />}>
         <Index />
         {showOnboarding && <OnboardingGuide onComplete={handleOnboardingComplete} />}
       </Suspense>
@@ -66,7 +65,7 @@ function AppContent() {
 
 function App() {
   return (
-    <ErrorBoundary fallback={<div className='w-screen h-screen flex justify-center items-center'>Ocorreu um erro inesperado.</div>}>
+    <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <ProfileProvider>

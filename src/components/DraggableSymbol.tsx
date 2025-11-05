@@ -123,7 +123,11 @@ export const DraggableSymbol = ({ symbol, index, onRemove, onDragEnd }: Draggabl
       </Button>
       <div className="h-16 w-16 bg-gray-200 rounded-lg mb-2 flex items-center justify-center text-3xl">
         {symbol.image ? (
-          <img src={URL.createObjectURL(symbol.image)} alt={symbol.text} className="h-12 w-12 object-cover" />
+          <img 
+            src={typeof symbol.image === 'string' ? symbol.image : URL.createObjectURL(symbol.image)} 
+            alt={symbol.text} 
+            className="h-12 w-12 object-cover" 
+          />
         ) : (
           symbol.text.charAt(0)
         )}

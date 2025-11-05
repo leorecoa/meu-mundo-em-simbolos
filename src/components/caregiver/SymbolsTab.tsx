@@ -137,7 +137,7 @@ export const SymbolsTab = () => {
                 <div className="h-20 w-20 bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
                   {item.image ? (
                     <img 
-                      src={URL.createObjectURL(item.image)} 
+                      src={typeof item.image === 'string' ? item.image : URL.createObjectURL(item.image)} 
                       alt={item.text} 
                       className="h-16 w-16 object-cover rounded" 
                     />
