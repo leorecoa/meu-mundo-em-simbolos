@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 
-// Defina suas interfaces aqui (se já não estiverem)
+// ===== INTERFACES COMPLETAS =====
+
 export interface Profile {
   id?: number;
   name: string;
@@ -11,7 +12,7 @@ export interface Category {
   profileId: number;
   key: string;
   name: string;
-  // ...outros campos
+  color?: string; // ✅ ADICIONAR
 }
 
 export interface Symbol {
@@ -20,70 +21,135 @@ export interface Symbol {
   text: string;
   categoryKey: string;
   order: number;
-  // ...outros campos
+  image?: Blob | string; // ✅ ADICIONAR
 }
 
-// ...outras interfaces
+export interface UserSettings {
+  id?: number;
+  profileId: number;
+  onboardingCompleted: boolean;
+  voiceType?: string;
+  voiceSpeed?: number;
+  theme?: string;
+  language?: string;
+}
+
+export interface Coins {
+  id: number;
+  count: number;
+}
+
+export interface DailyGoal {
+  id: string;
+  taskName: string;
+  completed: boolean;
+  rewardCoins: number;
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  unlocked: boolean;
+  unlockedAt?: Date;
+}
+
+export interface Reward {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  type: 'theme' | 'symbol_pack' | 'feature';
+  purchased: boolean;
+}
+
+export interface Security {
+  id: number;
+  pin?: string;
+}
+
+export interface UsageEvent {
+  id?: number;
+  type: 'symbol_used' | 'phrase_created' | 'category_accessed';
+  itemId: string;
+  timestamp: number;
+}
+
+// ===== CLASSE DEXIE =====
 
 export class MySubClassedDexie extends Dexie {
-  // Declaração das tabelas para ter tipagem forte
   profiles!: Table<Profile>;
   categories!: Table<Category>;
   symbols!: Table<Symbol>;
-  // ...outras tabelas
+  userSettings!: Table<UserSettings>; // ✅ ADICIONAR
+  coins!: Table<Coins>; // ✅ ADICIONAR
+  dailyGoals!: Table<DailyGoal>; // ✅ ADICIONAR
+  achievements!: Table<Achievement>; // ✅ ADICIONAR
+  rewards!: Table<Reward>; // ✅ ADICIONAR
+  security!: Table<Security>; // ✅ ADICIONAR
+  usageEvents!: Table<UsageEvent>; // ✅ ADICIONAR
 
   constructor() {
     super('MeuMundoEmSimbolosDB');
 
-    // 1. Definição do Schema (código que você já tinha)
-    this.version(2).stores({
+    // Schema versão 11 (incrementar!)
+    this.version(11).stores({
       profiles: '++id, name',
       categories: '++id, profileId, &[profileId+key]',
       symbols: '++id, profileId, text, categoryKey, order',
-      userSettings: '++id, &profileId',
+      userSettings: '++id, &profileId, onboardingCompleted, voiceType, voiceSpeed, theme, language',
       coins: '&id',
       dailyGoals: '&id',
       achievements: '&id',
       rewards: '&id',
       security: '&id',
-      usageEvents: '++id'
+      usageEvents: '++id, type, itemId, timestamp',
     });
 
-    // ===================================================================
-    // NOVO CÓDIGO ADICIONADO AQUI
-    // Esta é a maneira correta de adicionar dados iniciais ao banco.
-    // O evento 'populate' só é executado UMA VEZ, quando o banco
-    // de dados é criado pela primeira vez no navegador do usuário.
-    // ===================================================================
+    // Populate inicial
     this.on('populate', async () => {
-      // Usamos uma transação para garantir que todos os dados sejam
-      // adicionados com sucesso, ou nenhum deles será.
-      await this.transaction('rw', this.profiles, this.categories, this.symbols, async () => {
+      await this.transaction('rw', this.profiles, this.categories, this.symbols, this.userSettings, async () => {
+        const defaultProfileId = await this.profiles.add({ name: 'Padrão' });
 
-        // Crie um perfil padrão
-        const defaultProfileId = await this.profiles.add({
-          name: 'Padrão'
-        });
-
-        // Adicione suas categorias iniciais
-        // (Substitua estes dados pelos seus)
         await this.categories.bulkAdd([
-          { profileId: defaultProfileId, key: 'pessoas', name: 'Pessoas' },
-          { profileId: defaultProfileId, key: 'comida', name: 'Comida' },
-          { profileId: defaultProfileId, key: 'lugares', name: 'Lugares' },
+          { profileId: defaultProfileId, key: 'pessoas', name: 'Pessoas', color: 'sky' },
+          { profileId: defaultProfileId, key: 'acoes', name: 'Ações', color: 'rose' },
+          { profileId: defaultProfileId, key: 'comida', name: 'Comida', color: 'amber' },
+          { profileId: defaultProfileId, key: 'sentimentos', name: 'Sentimentos', color: 'emerald' },
+          { profileId: defaultProfileId, key: 'lugares', name: 'Lugares', color: 'orange' },
+          { profileId: defaultProfileId, key: 'tempo', name: 'Tempo', color: 'slate' },
         ]);
 
-        // Adicione seus símbolos iniciais
-        // (Substitua estes dados pelos seus)
         await this.symbols.bulkAdd([
           { profileId: defaultProfileId, text: 'Eu', categoryKey: 'pessoas', order: 0 },
-          { profileId: defaultProfileId, text: 'Casa', categoryKey: 'lugares', order: 0 },
+          { profileId: defaultProfileId, text: 'Você', categoryKey: 'pessoas', order: 1 },
+          { profileId: defaultProfileId, text: 'Comer', categoryKey: 'acoes', order: 0 },
+          { profileId: defaultProfileId, text: 'Beber', categoryKey: 'acoes', order: 1 },
           { profileId: defaultProfileId, text: 'Água', categoryKey: 'comida', order: 0 },
         ]);
 
-        // Adicione aqui a população de outras tabelas se for necessário...
+        await this.userSettings.add({
+          profileId: defaultProfileId,
+          onboardingCompleted: false,
+          voiceType: 'feminina',
+          voiceSpeed: 1,
+          theme: 'light',
+          language: 'pt-BR',
+        } as any);
       });
     });
+  }
+
+  // Método helper para popular um novo perfil
+  async populateForProfile(profileId: number) {
+    await this.userSettings.add({
+      profileId,
+      onboardingCompleted: false,
+      voiceType: 'feminina',
+      voiceSpeed: 1,
+      theme: 'light',
+      language: 'pt-BR',
+    } as any);
   }
 }
 
