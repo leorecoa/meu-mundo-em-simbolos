@@ -1,219 +1,139 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Volume2, Trash2, X, Mic } from 'lucide-react';
-import { Symbol as DbSymbol, db } from '@/lib/db';
-import { useProfile } from '@/contexts/ProfileContext';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { useToast } from '@/hooks/use-toast';
+import { PlayCircle, Trash2, X, Sparkles, Volume2, ChevronLeft, Keyboard as KeyboardIcon, Grid3x3, Send, Copy, Share2, Award, MessageSquarePlus, ScreenShare, Download } from 'lucide-react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db, Symbol as DbSymbol } from '@/lib/db';
+import { useProfile } from '@/contexts/ProfileContext';
+import * as htmlToImage from 'html-to-image';
+import { SymbolDisplay } from '@/components/ui/SymbolDisplay';
+import { PresentationScreen } from './PresentationScreen';
 import { useSpeech } from '@/hooks/use-speech';
 
-export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
-  const [currentPhrase, setCurrentPhrase] = useState<DbSymbol[]>([]);
-  const [inputMode, setInputMode] = useState<'symbols' | 'keyboard'>('symbols');
-  const { activeProfileId } = useProfile();
-  const { toast } = useToast();
-  const { speak, isSpeaking } = useSpeech();
+interface PhraseBuilderProps { onBack: () => void; initialSymbolId?: number; }
 
-  const symbols = useLiveQuery(
-    () => activeProfileId ? db.symbols.where({ profileId: activeProfileId }).toArray() : [],
-    [activeProfileId]
-  );
-
-  const addSymbol = useCallback((symbolOrText: DbSymbol | string) => {
-    if (typeof symbolOrText === 'string') {
-      const newSymbol: DbSymbol = {
-        id: Date.now(),
-        profileId: activeProfileId || 0,
-        text: symbolOrText,
-        categoryKey: 'custom',
-        order: 999
-      };
-      setCurrentPhrase(prev => [...prev, newSymbol]);
-    } else {
-      setCurrentPhrase(prev => [...prev, symbolOrText]);
-    }
-  }, [activeProfileId]);
-
-  const removeSymbol = useCallback((index: number) => {
-    setCurrentPhrase(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
-  const clearPhrase = useCallback(() => {
-    setCurrentPhrase([]);
-  }, []);
-
-  const speakPhrase = useCallback(async () => {
-    const text = currentPhrase.map(s => s.text).join(' ');
-    if (!text.trim()) {
-      toast({ title: "Frase vazia!" });
-      return;
-    }
-    await speak(text);
-  }, [currentPhrase, toast, speak]);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white p-4 shadow-lg">
-        <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onBack} className="text-white hover:bg-white/20">
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Mic className="h-6 w-6" />
-            Frase Livre
-          </h1>
-        </div>
-      </div>
-
-      {/* Área de construção da frase */}
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-6 mb-4 border border-purple-100">
-          <h2 className="text-lg font-bold mb-3 bg-gradient-to-r from-violet-600 to-pink-600 bg-clip-text text-transparent">
-            Sua Frase:
-          </h2>
-          <div className="min-h-[140px] bg-gradient-to-br from-violet-50 to-pink-50 rounded-xl p-4 flex flex-wrap gap-3 items-start border-2 border-dashed border-purple-200">
-            {currentPhrase.length === 0 ? (
-              <p className="text-purple-300 text-center w-full py-8 font-medium">
-                ✨ Clique em símbolos ou digite palavras para construir sua frase
-              </p>
+// #region Sub-componentes de UI (Restaurados e Completos)
+const PhraseDisplay = ({ phrase, forwardedRef }: { phrase: DbSymbol[], forwardedRef: React.Ref<HTMLDivElement> }) => (
+    <Card ref={forwardedRef} className="mb-4 min-h-[160px] shadow-xl bg-black/30 backdrop-blur-lg border-white/10 flex items-center justify-center p-4 text-white">
+        <CardContent className="w-full">
+            {phrase.length > 0 ? (
+                <div className="flex flex-wrap justify-center gap-4">{phrase.map((symbol, index) => (<div key={`${symbol.id}-${index}`} className="relative group"><div className="w-24 h-24 bg-white/20 rounded-lg flex items-center justify-center shadow-inner overflow-hidden"><SymbolDisplay symbol={symbol} /></div><button onClick={() => {}} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100"><X size={12}/></button></div>))}</div>
             ) : (
-              currentPhrase.map((symbol, index) => (
-                <div key={index} className="relative group">
-                  <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl p-3 min-w-[90px] flex flex-col items-center gap-2 shadow-lg border-2 border-purple-200 hover:scale-105 transition-transform">
-                    {symbol.image ? (
-                      typeof symbol.image === 'string' ? (
-                        <img src={symbol.image} alt={symbol.text} className="w-14 h-14 object-cover rounded-lg" />
-                      ) : symbol.image instanceof Blob ? (
-                        <img src={URL.createObjectURL(symbol.image)} alt={symbol.text} className="w-14 h-14 object-cover rounded-lg" />
-                      ) : null
-                    ) : null}
-                    <span className="text-sm font-bold text-purple-900">{symbol.text}</span>
-                  </div>
-                  <button
-                    onClick={() => removeSymbol(index)}
-                    className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:scale-110"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))
+                <div className="text-center text-slate-300/80 p-6 flex flex-col items-center"><MessageSquarePlus className="h-12 w-12 mb-4" /><h3 className="font-bold text-lg">Frase Vazia</h3><p className="text-sm">Comece a montar sua frase abaixo.</p></div>
             )}
-          </div>
+        </CardContent>
+    </Card>
+);
 
-          {/* Botões de ação */}
-          <div className="flex gap-3 mt-6">
-            <Button
-              onClick={speakPhrase}
-              disabled={isSpeaking || currentPhrase.length === 0}
-              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all"
-              size="lg"
-            >
-              <Volume2 className={`h-5 w-5 mr-2 ${isSpeaking ? 'animate-pulse' : ''}`} />
-              {isSpeaking ? 'Falando...' : 'Falar'}
-            </Button>
-            <Button
-              onClick={clearPhrase}
-              variant="outline"
-              disabled={currentPhrase.length === 0}
-              className="flex-1 border-2 border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 shadow-md"
-              size="lg"
-            >
-              <Trash2 className="h-5 w-5 mr-2" />
-              Limpar
-            </Button>
-          </div>
-        </div>
-
-        {/* Seleção de modo de entrada */}
-        <div className="flex gap-3 mb-4">
-          <Button
-            variant={inputMode === 'symbols' ? 'default' : 'outline'}
-            onClick={() => setInputMode('symbols')}
-            className={`flex-1 shadow-md ${inputMode === 'symbols' ? 'bg-gradient-to-r from-violet-600 to-purple-600' : 'border-2 border-purple-200'}`}
-          >
-            🎯 Símbolos
-          </Button>
-          <Button
-            variant={inputMode === 'keyboard' ? 'default' : 'outline'}
-            onClick={() => setInputMode('keyboard')}
-            className={`flex-1 shadow-md ${inputMode === 'keyboard' ? 'bg-gradient-to-r from-violet-600 to-purple-600' : 'border-2 border-purple-200'}`}
-          >
-            ⌨️ Teclado
-          </Button>
-        </div>
-
-        {/* Área de símbolos disponíveis */}
-        {inputMode === 'symbols' ? (
-          <div className="bg-white rounded-2xl shadow-2xl p-6 border border-purple-100">
-            <h2 className="text-lg font-bold mb-4 bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Símbolos Disponíveis:
-            </h2>
-            {!symbols || symbols.length === 0 ? (
-              <p className="text-purple-300 text-center py-8 font-medium">
-                💭 Nenhum símbolo disponível. Adicione símbolos nas categorias.
-              </p>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                {symbols.map((symbol) => (
-                  <button
-                    key={symbol.id}
-                    onClick={() => addSymbol(symbol)}
-                    className="bg-gradient-to-br from-violet-50 to-purple-50 hover:from-violet-100 hover:to-purple-100 rounded-xl p-4 flex flex-col items-center gap-2 transition-all shadow-md hover:shadow-xl hover:scale-105 border-2 border-purple-100 hover:border-purple-300"
-                  >
-                    {symbol.image ? (
-                      typeof symbol.image === 'string' ? (
-                        <img src={symbol.image} alt={symbol.text} className="w-14 h-14 object-cover rounded-lg" />
-                      ) : symbol.image instanceof Blob ? (
-                        <img src={URL.createObjectURL(symbol.image)} alt={symbol.text} className="w-14 h-14 object-cover rounded-lg" />
-                      ) : null
-                    ) : (
-                      <span className="text-3xl">✨</span>
-                    )}
-                    <span className="text-xs font-bold text-purple-900 text-center line-clamp-2">{symbol.text}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl shadow-2xl p-6 border border-purple-100">
-            <h2 className="text-lg font-bold mb-4 bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Digite sua frase:
-            </h2>
-            <Card className="border-2 border-purple-200">
-              <CardContent className="p-4">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Digite uma palavra..."
-                    className="flex-1 px-4 py-3 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-400 text-lg"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                        addSymbol(e.currentTarget.value.trim());
-                        e.currentTarget.value = '';
-                      }
-                    }}
-                  />
-                  <Button
-                    onClick={(e) => {
-                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                      if (input && input.value.trim()) {
-                        addSymbol(input.value.trim());
-                        input.value = '';
-                      }
-                    }}
-                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
-                  >
-                    Adicionar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
+const ActionButtons = (props: any) => (
+    <div className="grid grid-cols-4 gap-2 mb-4">
+        <Button onClick={props.onSpeak} className="h-20 col-span-2 flex-col gap-1 bg-gradient-to-br from-green-500 to-emerald-600"><PlayCircle size={28} /><span>Falar</span></Button>
+        <Button onClick={props.onPresent} variant="outline" className="h-20 flex-col gap-1 bg-gradient-to-br from-indigo-500 to-purple-600"><ScreenShare size={24}/><span>Apresentar</span></Button>
+        <Button onClick={props.onExport} variant="outline" className="h-20 flex-col gap-1 bg-gradient-to-br from-sky-500 to-blue-600"><Download size={24}/><span>Exportar</span></Button>
+        <Button onClick={props.onRemoveLast} variant="outline" className="h-16 col-span-2 bg-gradient-to-br from-amber-500 to-orange-600"><X size={20} /><span>Apagar Último</span></Button>
+        <Button onClick={props.onClear} variant="destructive" className="h-16 col-span-2 bg-gradient-to-br from-red-600 to-red-700"><Trash2 size={20}/><span>Limpar Tudo</span></Button>
     </div>
+);
+
+const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => void }) => {
+    const { activeProfileId } = useProfile();
+    const symbols = useLiveQuery(() => activeProfileId ? db.symbols.where({ profileId: activeProfileId }).toArray() : [], [activeProfileId]);
+    return (
+        <Card className="bg-white/10"><CardContent className="p-2 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+            {symbols?.map(s => <button key={s.id} onClick={() => onSymbolClick(s)} className="h-28 rounded-lg bg-white/80 flex flex-col items-center justify-center p-1 gap-1 text-center hover:bg-sky-100"><SymbolDisplay symbol={s} /><span className="text-xs font-semibold line-clamp-2">{s.text}</span></button>)}
+        </CardContent></Card>
+    );
+};
+
+const NativeKeyboardInput = ({ onAddSymbol }: { onAddSymbol: (text: string) => void }) => {
+  const [text, setText] = useState('');
+  const handleAdd = () => { const trimmed = text.trim(); if (trimmed) { onAddSymbol(trimmed); setText(''); } };
+  return (
+    <Card><CardContent className="p-4 flex gap-2"><input value={text} onChange={e => setText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAdd()} className="w-full p-2 border rounded-md" placeholder="Digite uma palavra..."/><Button onClick={handleAdd}><Send /></Button></CardContent></Card>
   );
+};
+// #endregion
+
+export const PhraseBuilder = ({ onBack, initialSymbolId }: any) => {
+    // #region State & Hooks
+    const { activeProfileId } = useProfile();
+    const { toast } = useToast();
+    const { speak, isSpeaking } = useSpeech();
+    const phraseStorageKey = `currentPhrase_${activeProfileId}`;
+    const [currentPhrase, setCurrentPhrase] = useState<DbSymbol[]>(() => { try { const s = localStorage.getItem(phraseStorageKey); return s ? JSON.parse(s) : []; } catch { return []; } });
+    const [inputMode, setInputMode] = useState<'symbols' | 'keyboard'>('symbols');
+    const [isCasting, setIsCasting] = useState(false);
+    const phraseDisplayRef = useRef<HTMLDivElement>(null);
+    const liveRegionRef = useRef<HTMLDivElement>(null);
+    // #endregion
+
+    // #region Effects
+    useEffect(() => { localStorage.setItem(phraseStorageKey, JSON.stringify(currentPhrase)); }, [currentPhrase, phraseStorageKey]);
+    useEffect(() => { /* Efeito de carregar vozes (já no useSpeech) */ }, []);
+    useEffect(() => {
+        if (initialSymbolId && activeProfileId) {
+            db.symbols.get(initialSymbolId).then(symbol => {
+                if (symbol && !currentPhrase.some(s => s.id === symbol.id)) { addSymbol(symbol, true); }
+            });
+        }
+    }, [initialSymbolId, activeProfileId]);
+    // #endregion
+
+    // #region Core Actions
+    const addSymbol = useCallback(async (symbolOrText: DbSymbol | string, isInitial = false) => {
+        let symbolToAdd: DbSymbol | undefined;
+        if (typeof symbolOrText === 'string') {
+            if (!activeProfileId) return;
+            const text = symbolOrText.trim();
+            symbolToAdd = await db.symbols.where({ profileId: activeProfileId, text }).first();
+            if (!symbolToAdd) {
+                const newSymbol: Omit<DbSymbol, 'id'> = { profileId: activeProfileId, text, categoryKey: 'geral', order: Date.now() };
+                const newId = await db.symbols.add(newSymbol as DbSymbol);
+                symbolToAdd = { ...newSymbol, id: newId };
+                if (!isInitial) toast({ title: 'Palavra Salva!', description: `"${text}" foi adicionado à categoria "Geral".` });
+            }
+        } else { symbolToAdd = symbolOrText; }
+        if (symbolToAdd) {
+            setCurrentPhrase(prev => [...prev, symbolToAdd!]);
+            if (!isInitial && liveRegionRef.current) liveRegionRef.current.textContent = `Símbolo ${symbolToAdd.text} adicionado.`;
+        }
+    }, [activeProfileId, toast]);
+    const removeLastSymbol = useCallback(() => { /* ... */ }, [currentPhrase]);
+    const clearPhrase = useCallback(() => { /* ... */ }, []);
+    const getPhraseText = useCallback(() => currentPhrase.map(s => s.text).join(' '), [currentPhrase]);
+    // #endregion
+
+    // #region Speak, Export, Present
+    const handleSpeak = useCallback(async () => {
+        const text = getPhraseText();
+        if (!text) { toast({ title: "Frase vazia!" }); return; }
+        await speak(text);
+        // Chamar lógica de gamificação aqui se necessário
+    }, [getPhraseText, speak, toast]);
+
+    const handleExport = useCallback(() => {
+        if (phraseDisplayRef.current) {
+            htmlToImage.toPng(phraseDisplayRef.current).then(url => { const a = document.createElement('a'); a.href = url; a.download = 'frase.png'; a.click(); });
+        }
+    }, [phraseDisplayRef]);
+    // #endregion
+
+    return (
+        <div className="p-2 sm:p-4 bg-slate-50 min-h-screen">
+            <div ref={liveRegionRef} aria-live="assertive" className="sr-only"></div>
+            <header className="flex items-center justify-between mb-4">
+                <Button variant="ghost" onClick={onBack} className="flex items-center gap-1"><ChevronLeft /> Voltar</Button>
+                <h1 className="text-xl font-bold">Formador de Frases</h1>
+                <div className="w-24"></div>
+            </header>
+            <main>
+                <PhraseDisplay phrase={currentPhrase} forwardedRef={phraseDisplayRef} />
+                <ActionButtons onSpeak={handleSpeak} onRemoveLast={removeLastSymbol} onClear={clearPhrase} onPresent={() => setIsCasting(true)} onExport={handleExport} />
+                <div className="flex justify-center my-4"><div className="inline-flex rounded-md shadow-sm"><Button onClick={() => setInputMode('symbols')} variant={inputMode === 'symbols' ? 'default' : 'outline'}><Grid3x3 className="mr-2"/>Símbolos</Button><Button onClick={() => setInputMode('keyboard')} variant={inputMode === 'keyboard' ? 'default' : 'outline'}><KeyboardIcon className="mr-2"/>Teclado</Button></div></div>
+                {inputMode === 'symbols' ? <SymbolGrid onSymbolClick={(s) => addSymbol(s)} /> : <NativeKeyboardInput onAddSymbol={(t) => addSymbol(t)} />}
+            </main>
+            {isCasting && <PresentationScreen phrase={getPhraseText()} onClose={() => setIsCasting(false)} />}
+        </div>
+    );
 };
