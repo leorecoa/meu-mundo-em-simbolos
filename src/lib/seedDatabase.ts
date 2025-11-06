@@ -41,6 +41,7 @@ export async function seedDatabase(profileId: number) {
             profileId,
             text: item.label,
             categoryKey: categoryKey,
+            icon: item.icon,
             order: i
           });
         }

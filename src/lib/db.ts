@@ -3,7 +3,7 @@ import Dexie, { type Table } from 'dexie';
 // --- INTERFACES ---
 export interface Profile { id?: number; name: string; }
 export interface Category { id?: number; profileId: number; key: string; name: string; color: string; }
-export interface Symbol { id?: number; profileId: number; text: string; categoryKey: string; image?: Blob; order: number; }
+export interface Symbol { id?: number; profileId: number; text: string; categoryKey: string; icon?: string; image?: Blob; order: number; }
 export interface UserSettings {
   id?: number;
   profileId: number;

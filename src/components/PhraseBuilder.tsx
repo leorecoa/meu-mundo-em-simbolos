@@ -7,6 +7,8 @@ import { useProfile } from '@/contexts/ProfileContext';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useToast } from '@/hooks/use-toast';
 import { useSpeech } from '@/hooks/use-speech';
+import { quickPhrases } from '@/data/quickPhrases';
+import { DynamicIcon } from '@/components/IconMap';
 
 export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
   const [currentPhrase, setCurrentPhrase] = useState<DbSymbol[]>([]);
@@ -53,9 +55,9 @@ export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
   }, [currentPhrase, toast, speak]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white p-4 shadow-lg">
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white p-4 shadow-xl">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={onBack} className="text-white hover:bg-white/20">
             <ChevronLeft className="h-6 w-6" />
@@ -69,11 +71,11 @@ export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
 
       {/* Área de construção da frase */}
       <div className="max-w-4xl mx-auto p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-6 mb-4 border border-purple-100">
-          <h2 className="text-lg font-bold mb-3 bg-gradient-to-r from-violet-600 to-pink-600 bg-clip-text text-transparent">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 mb-4 border-2 border-purple-200/50 backdrop-blur-sm">
+          <h2 className="text-lg font-bold mb-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
             Sua Frase:
           </h2>
-          <div className="min-h-[140px] bg-gradient-to-br from-violet-50 to-pink-50 rounded-xl p-4 flex flex-wrap gap-3 items-start border-2 border-dashed border-purple-200">
+          <div className="min-h-[140px] bg-gradient-to-br from-indigo-50/50 via-purple-50/50 to-pink-50/50 rounded-xl p-4 flex flex-wrap gap-3 items-start border-2 border-dashed border-purple-300">
             {currentPhrase.length === 0 ? (
               <p className="text-purple-300 text-center w-full py-8 font-medium">
                 ✨ Clique em símbolos ou digite palavras para construir sua frase
@@ -82,13 +84,17 @@ export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
               currentPhrase.map((symbol, index) => (
                 <div key={index} className="relative group">
                   <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl p-3 min-w-[90px] flex flex-col items-center gap-2 shadow-lg border-2 border-purple-200 hover:scale-105 transition-transform">
-                    {symbol.image ? (
+                    {symbol.icon ? (
+                      <DynamicIcon name={symbol.icon} className="w-14 h-14 text-purple-600" />
+                    ) : symbol.image ? (
                       typeof symbol.image === 'string' ? (
                         <img src={symbol.image} alt={symbol.text} className="w-14 h-14 object-cover rounded-lg" />
                       ) : symbol.image instanceof Blob ? (
                         <img src={URL.createObjectURL(symbol.image)} alt={symbol.text} className="w-14 h-14 object-cover rounded-lg" />
                       ) : null
-                    ) : null}
+                    ) : (
+                      <span className="text-3xl">✨</span>
+                    )}
                     <span className="text-sm font-bold text-purple-900">{symbol.text}</span>
                   </div>
                   <button
@@ -126,19 +132,49 @@ export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
           </div>
         </div>
 
+        {/* Frases Prontas */}
+        <div className="bg-white rounded-2xl shadow-2xl p-6 mb-4 border border-purple-100">
+          <h2 className="text-lg font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            ⚡ Frases Prontas:
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {quickPhrases.map((phrase) => (
+              <Button
+                key={phrase.id}
+                onClick={() => {
+                  const words = phrase.text.split(' ');
+                  const phraseSymbols: DbSymbol[] = words.map((word, idx) => ({
+                    id: Date.now() + idx,
+                    profileId: activeProfileId || 0,
+                    text: word,
+                    categoryKey: phrase.category,
+                    icon: phrase.icon,
+                    order: idx
+                  }));
+                  setCurrentPhrase(phraseSymbols);
+                }}
+                className="bg-gradient-to-br from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-purple-900 border-2 border-purple-200 hover:border-purple-400 shadow-md hover:shadow-xl transition-all p-4 h-auto flex flex-col items-center gap-2"
+              >
+                <DynamicIcon name={phrase.icon} className="w-6 h-6" />
+                <span className="text-xs font-bold text-center leading-tight">{phrase.text}</span>
+              </Button>
+            ))}
+          </div>
+        </div>
+
         {/* Seleção de modo de entrada */}
         <div className="flex gap-3 mb-4">
           <Button
             variant={inputMode === 'symbols' ? 'default' : 'outline'}
             onClick={() => setInputMode('symbols')}
-            className={`flex-1 shadow-md ${inputMode === 'symbols' ? 'bg-gradient-to-r from-violet-600 to-purple-600' : 'border-2 border-purple-200'}`}
+            className={`flex-1 shadow-md ${inputMode === 'symbols' ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600' : 'border-2 border-purple-200'}`}
           >
             🎯 Símbolos
           </Button>
           <Button
             variant={inputMode === 'keyboard' ? 'default' : 'outline'}
             onClick={() => setInputMode('keyboard')}
-            className={`flex-1 shadow-md ${inputMode === 'keyboard' ? 'bg-gradient-to-r from-violet-600 to-purple-600' : 'border-2 border-purple-200'}`}
+            className={`flex-1 shadow-md ${inputMode === 'keyboard' ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600' : 'border-2 border-purple-200'}`}
           >
             ⌨️ Teclado
           </Button>
@@ -147,7 +183,7 @@ export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
         {/* Área de símbolos disponíveis */}
         {inputMode === 'symbols' ? (
           <div className="bg-white rounded-2xl shadow-2xl p-6 border border-purple-100">
-            <h2 className="text-lg font-bold mb-4 bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-lg font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               Símbolos Disponíveis:
             </h2>
             {!symbols || symbols.length === 0 ? (
@@ -162,7 +198,9 @@ export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
                     onClick={() => addSymbol(symbol)}
                     className="bg-gradient-to-br from-violet-50 to-purple-50 hover:from-violet-100 hover:to-purple-100 rounded-xl p-4 flex flex-col items-center gap-2 transition-all shadow-md hover:shadow-xl hover:scale-105 border-2 border-purple-100 hover:border-purple-300"
                   >
-                    {symbol.image ? (
+                    {symbol.icon ? (
+                      <DynamicIcon name={symbol.icon} className="w-14 h-14 text-purple-600" />
+                    ) : symbol.image ? (
                       typeof symbol.image === 'string' ? (
                         <img src={symbol.image} alt={symbol.text} className="w-14 h-14 object-cover rounded-lg" />
                       ) : symbol.image instanceof Blob ? (
@@ -179,7 +217,7 @@ export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
           </div>
         ) : (
           <div className="bg-white rounded-2xl shadow-2xl p-6 border border-purple-100">
-            <h2 className="text-lg font-bold mb-4 bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-lg font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               Digite sua frase:
             </h2>
             <Card className="border-2 border-purple-200">
@@ -204,7 +242,7 @@ export const PhraseBuilder = ({ onBack }: { onBack: () => void }) => {
                         input.value = '';
                       }
                     }}
-                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                    className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700"
                   >
                     Adicionar
                   </Button>
