@@ -12,13 +12,13 @@ interface HomeScreenProps {
   onNavigateToRewards: () => void;
 }
 
-const categoryDetails: { [key: string]: { icon: React.ElementType, description: string, gradient: string } } = {
-  quero: { icon: Heart, description: 'O que você quer fazer.', gradient: 'from-sky-500 to-blue-500' },
-  sinto: { icon: Smile, description: 'Como você se sente.', gradient: 'from-emerald-500 to-green-500' },
-  preciso: { icon: Users, description: 'O que você precisa.', gradient: 'from-rose-500 to-red-500' },
-  comida: { icon: Utensils, description: 'Comidas e bebidas.', gradient: 'from-amber-500 to-orange-500' },
-  brincar: { icon: Gamepad2, description: 'Brincadeiras e diversão.', gradient: 'from-orange-500 to-amber-500' },
-  casa: { icon: Home, description: 'Lugares da casa.', gradient: 'from-slate-500 to-gray-500' },
+const categoryDetails: { [key: string]: { icon: React.ElementType, description: string, gradient: string, shadow: string } } = {
+  quero: { icon: Heart, description: 'O que você quer fazer.', gradient: 'from-sky-400 via-cyan-500 to-blue-600', shadow: 'shadow-xl shadow-sky-200/50' },
+  sinto: { icon: Smile, description: 'Como você se sente.', gradient: 'from-emerald-400 via-teal-500 to-green-600', shadow: 'shadow-xl shadow-emerald-200/50' },
+  preciso: { icon: Users, description: 'O que você precisa.', gradient: 'from-rose-400 via-pink-500 to-red-500', shadow: 'shadow-xl shadow-rose-200/50' },
+  comida: { icon: Utensils, description: 'Comidas e bebidas.', gradient: 'from-amber-400 via-orange-500 to-yellow-600', shadow: 'shadow-xl shadow-amber-200/50' },
+  brincar: { icon: Gamepad2, description: 'Brincadeiras e diversão.', gradient: 'from-orange-400 via-amber-500 to-yellow-500', shadow: 'shadow-xl shadow-orange-200/50' },
+  casa: { icon: Home, description: 'Lugares da casa.', gradient: 'from-slate-400 via-gray-500 to-zinc-600', shadow: 'shadow-xl shadow-slate-200/50' },
 };
 
 export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToAnalytics, onNavigateToMyAT, onNavigateToSettings, onNavigateToRewards }: HomeScreenProps) => {
@@ -56,7 +56,7 @@ export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigat
           {Object.entries(categoryDetails).map(([key, value]) => (
             <Card 
               key={key} 
-              className={`h-32 bg-gradient-to-br ${value.gradient} text-white shadow-lg rounded-xl flex flex-col items-center justify-center p-2 cursor-pointer transition-transform hover:scale-105`}
+              className={`h-32 bg-gradient-to-br ${value.gradient} text-white ${value.shadow} rounded-xl flex flex-col items-center justify-center p-2 cursor-pointer transition-all hover:scale-105 hover:shadow-2xl`}
               onClick={() => onNavigateToCategory(key)}
             >
               <value.icon className="h-10 w-10" />

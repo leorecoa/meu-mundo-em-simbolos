@@ -15,14 +15,14 @@ interface CategoryScreenProps {
 }
 
 const SymbolDisplay = ({ symbol }: { symbol: DbSymbol }) => { /* ...código... */ return null; };
-const colorMap: { [key: string]: { bg: string, text: string, hover: string, imageOverlay: string } } = {
-  sky: { bg: 'bg-sky-500', text: 'text-white', hover: 'hover:bg-sky-600', imageOverlay: 'from-transparent to-sky-900/70' },
-  rose: { bg: 'bg-rose-500', text: 'text-white', hover: 'hover:bg-rose-600', imageOverlay: 'from-transparent to-rose-900/70' },
-  amber: { bg: 'bg-amber-500', text: 'text-white', hover: 'hover:bg-amber-600', imageOverlay: 'from-transparent to-amber-900/70' },
-  emerald: { bg: 'bg-emerald-500', text: 'text-white', hover: 'hover:bg-emerald-600', imageOverlay: 'from-transparent to-emerald-900/70' },
-  orange: { bg: 'bg-orange-500', text: 'text-white', hover: 'hover:bg-orange-600', imageOverlay: 'from-transparent to-orange-900/70' },
-  slate: { bg: 'bg-slate-500', text: 'text-white', hover: 'hover:bg-slate-600', imageOverlay: 'from-transparent to-slate-900/70' },
-  default: { bg: 'bg-gray-500', text: 'text-white', hover: 'hover:bg-gray-600', imageOverlay: 'from-transparent to-gray-900/70' }
+const colorMap: { [key: string]: { bg: string, text: string, hover: string, imageOverlay: string, shadow: string } } = {
+  sky: { bg: 'bg-gradient-to-br from-sky-400 to-blue-600', text: 'text-white', hover: 'hover:from-sky-500 hover:to-blue-700', imageOverlay: 'from-transparent to-sky-900/70', shadow: 'shadow-xl shadow-sky-200/50' },
+  rose: { bg: 'bg-gradient-to-br from-rose-400 to-red-500', text: 'text-white', hover: 'hover:from-rose-500 hover:to-red-600', imageOverlay: 'from-transparent to-rose-900/70', shadow: 'shadow-xl shadow-rose-200/50' },
+  amber: { bg: 'bg-gradient-to-br from-amber-400 to-yellow-600', text: 'text-white', hover: 'hover:from-amber-500 hover:to-yellow-700', imageOverlay: 'from-transparent to-amber-900/70', shadow: 'shadow-xl shadow-amber-200/50' },
+  emerald: { bg: 'bg-gradient-to-br from-emerald-400 to-green-600', text: 'text-white', hover: 'hover:from-emerald-500 hover:to-green-700', imageOverlay: 'from-transparent to-emerald-900/70', shadow: 'shadow-xl shadow-emerald-200/50' },
+  orange: { bg: 'bg-gradient-to-br from-orange-400 to-yellow-500', text: 'text-white', hover: 'hover:from-orange-500 hover:to-yellow-600', imageOverlay: 'from-transparent to-orange-900/70', shadow: 'shadow-xl shadow-orange-200/50' },
+  slate: { bg: 'bg-gradient-to-br from-slate-400 to-zinc-600', text: 'text-white', hover: 'hover:from-slate-500 hover:to-zinc-700', imageOverlay: 'from-transparent to-slate-900/70', shadow: 'shadow-xl shadow-slate-200/50' },
+  default: { bg: 'bg-gradient-to-br from-gray-400 to-gray-600', text: 'text-white', hover: 'hover:from-gray-500 hover:to-gray-700', imageOverlay: 'from-transparent to-gray-900/70', shadow: 'shadow-xl shadow-gray-200/50' }
 };
 
 // --- Componentes de Estado ---
@@ -79,7 +79,7 @@ export const CategoryScreen = ({ category, onBack, onNavigateToPhrase, onNavigat
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
               {data.symbols.map(symbol => {
                 const colors = getSymbolColor();
-                return (<Button key={symbol.id} onClick={() => handleSymbolClick(symbol)} variant="outline" className={`relative h-24 sm:h-28 font-bold shadow-lg p-0 ${colors.bg} ${colors.text} ${colors.hover}`}><SymbolDisplay symbol={symbol} />{symbol.image && <div className={`absolute inset-0 bg-gradient-to-t ${colors.imageOverlay}`}></div>}<span className="absolute bottom-1 right-2 text-xs">{symbol.image ? symbol.text : ''}</span></Button>)
+                return (<Button key={symbol.id} onClick={() => handleSymbolClick(symbol)} variant="outline" className={`relative h-24 sm:h-28 font-bold p-0 ${colors.bg} ${colors.text} ${colors.hover} ${colors.shadow} transition-all hover:scale-105`}><SymbolDisplay symbol={symbol} />{symbol.image && <div className={`absolute inset-0 bg-gradient-to-t ${colors.imageOverlay}`}></div>}<span className="absolute bottom-1 right-2 text-xs">{symbol.image ? symbol.text : ''}</span></Button>)
               })}
             </div>
           </CardContent>
