@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { db } from '@/lib/db';
+import { useState, useEffect, useCallback } from 'react';
+import { db, UserSettings } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,43 +14,27 @@ interface SettingsScreenProps { onBack: () => void; }
 export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
     const { toast } = useToast();
     const { activeProfileId } = useProfile();
-    const { voices } = useSpeech(); // Usar o hook de voz para a lista
+    const { voices } = useSpeech();
+    const [settings, setSettings] = useState<Partial<UserSettings>>({});
 
-    const [voiceName, setVoiceName] = useState('');
-    const [voiceSpeed, setVoiceSpeed] = useState(10); // Escala de 1 a 20
-    const [voicePitch, setVoicePitch] = useState(10); // Escala de 1 a 20
-    const [theme, setTheme] = useState('light');
-    const [currentPin, setCurrentPin] = useState('');
-    const [newPin, setNewPin] = useState('');
-
-    // Carregar dados
     useEffect(() => {
-        const loadData = async () => {
-            if (!activeProfileId) return;
-            const settings = await db.userSettings.where({ profileId: activeProfileId }).first();
-            if (settings) {
-                setVoiceName(settings.voiceType || '');
-                setVoiceSpeed(settings.voiceSpeed || 10);
-                setTheme(settings.theme || 'light');
-            }
-        };
-        loadData();
+        if (activeProfileId) {
+            db.userSettings.where({ profileId: activeProfileId }).first().then(s => {
+                if(s) setSettings(s);
+            });
+        }
     }, [activeProfileId]);
 
     const handleSave = async () => {
-        if (!activeProfileId) return;
-        const userSettings = await db.userSettings.where({ profileId: activeProfileId }).first();
-        if (userSettings) {
-            await db.userSettings.update(userSettings.id!, { 
-                voiceType: voiceName,
-                voiceSpeed: voiceSpeed,
-                theme: theme,
-            });
+        if (settings.id) {
+            await db.userSettings.update(settings.id, settings);
             toast({ title: 'Sucesso', description: 'Configurações salvas.' });
         }
     };
-    
-    // ... (handleSavePin)
+
+    const updateSetting = (key: keyof UserSettings, value: any) => {
+        setSettings(prev => ({...prev, [key]: value}));
+    }
 
     return (
         <div>
@@ -60,24 +44,20 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
                     <CardHeader><CardTitle>Ajustes de Voz</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div>
-                            <label>Voz Preferida</label>
-                            <Select onValueChange={setVoiceName} value={voiceName}>
+                            <label>Voz</label>
+                            <Select onValueChange={(v) => updateSetting('voiceType', v)} value={settings.voiceType || ''}>
                                 <SelectTrigger><SelectValue placeholder="Padrão do Sistema" /></SelectTrigger>
-                                <SelectContent>{voices.filter(v => v.lang.startsWith('pt')).map(v => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}</SelectContent>
+                                <SelectContent>{voices.map(v => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}</SelectContent>
                             </Select>
                         </div>
                         <div>
-                            <label>Velocidade ({voiceSpeed / 10}x)</label>
-                            <input type="range" min="1" max="20" value={voiceSpeed} onChange={e => setVoiceSpeed(Number(e.target.value))} className="w-full" />
-                        </div>
-                         <div>
-                            <label>Tom (Padrão: 1.0)</label>
-                            <input type="range" min="1" max="20" value={voicePitch} onChange={e => setVoicePitch(Number(e.target.value))} className="w-full" />
+                            <label>Velocidade ({((settings.voiceSpeed || 10) / 10).toFixed(1)}x)</label>
+                            <input type="range" min="1" max="20" value={settings.voiceSpeed || 10} onChange={e => updateSetting('voiceSpeed', Number(e.target.value))} className="w-full" />
                         </div>
                     </CardContent>
                 </Card>
-                {/* ... (outras cards de Tema e PIN) ... */}
-                <Button onClick={handleSave} className="w-full">Salvar Todas as Alterações</Button>
+                {/* Adicionar Card de Tema aqui se necessário */}
+                <Button onClick={handleSave} className="w-full">Salvar Alterações</Button>
             </div>
         </div>
     );

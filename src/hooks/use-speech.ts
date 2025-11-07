@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { db } from '@/lib/db';
 import { useProfile } from '@/contexts/ProfileContext';
 
@@ -15,28 +15,27 @@ export function useSpeech() {
   }, []);
 
   const speak = useCallback(async (text: string) => {
-    if (!text.trim()) return;
-
-    // Cancelar fala anterior
-    window.speechSynthesis.cancel();
+    if (!text.trim() || isSpeaking) return;
 
     const settings = activeProfileId ? await db.userSettings.where({ profileId: activeProfileId }).first() : null;
     const utterance = new SpeechSynthesisUtterance(text);
 
     utterance.lang = settings?.language || 'pt-BR';
-    utterance.rate = (settings?.voiceSpeed || 10) / 10;
+    utterance.rate = (settings?.voiceSpeed || 10) / 10; // Escala de 0.1 a 2.0
+    // utterance.pitch = (settings?.voicePitch || 10) / 10;
 
-    const availableVoices = voices.filter(v => v.lang === utterance.lang);
+    const availableVoices = voices.filter(v => v.lang.startsWith(utterance.lang.split('-')[0]));
     let voiceToUse: SpeechSynthesisVoice | undefined;
 
+    // Prioridade 1: Voz exata salva pelo usuário
     if (settings?.voiceType) {
       voiceToUse = availableVoices.find(v => v.name === settings.voiceType);
     }
-
+    // Prioridade 2: Vozes de alta qualidade (Google/Microsoft) para o idioma
     if (!voiceToUse) {
       voiceToUse = availableVoices.find(v => v.name.includes('Google')) || availableVoices.find(v => v.name.includes('Microsoft'));
     }
-
+    // Prioridade 3: Primeira voz disponível para o idioma
     if (!voiceToUse) {
       voiceToUse = availableVoices[0];
     }
@@ -49,12 +48,9 @@ export function useSpeech() {
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
 
+    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
-  }, [voices, activeProfileId]);
+  }, [voices, activeProfileId, isSpeaking]);
 
-  const getFilteredVoices = useCallback((languageCode: string) => {
-    return voices.filter(v => v.lang.startsWith(languageCode));
-  }, [voices]);
-
-  return { speak, isSpeaking, voices, getFilteredVoices };
+  return { speak, isSpeaking, voices };
 }
