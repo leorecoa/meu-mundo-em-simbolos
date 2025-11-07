@@ -27,6 +27,14 @@ export interface UsageEvent {
   categoryKey?: string;
   timestamp: number;
 }
+export interface PhraseHistory {
+  id?: number;
+  profileId: number;
+  phrase: string;
+  symbolIds: string;
+  timestamp: number;
+  category?: string;
+}
 
 // --- DADOS INICIAIS ---
 const defaultAchievements: Achievement[] = [
@@ -59,10 +67,11 @@ export class MySubClassedDexie extends Dexie {
     rewards!: Table<Reward>;
     security!: Table<Security>;
     usageEvents!: Table<UsageEvent>;
+    phraseHistory!: Table<PhraseHistory>;
 
     constructor() {
         super('MeuMundoEmSimbolosDB');
-        this.version(12).stores({
+        this.version(13).stores({
             profiles: '++id, name',
             categories: '++id, profileId, key, &[profileId+key]',
             symbols: '++id, profileId, categoryKey, text, order',
@@ -72,7 +81,8 @@ export class MySubClassedDexie extends Dexie {
             achievements: '&id, unlocked',
             rewards: '&id, purchased, type',
             security: '&id',
-            usageEvents: '++id, profileId, type, timestamp'
+            usageEvents: '++id, profileId, type, timestamp',
+            phraseHistory: '++id, profileId, timestamp'
         });
     }
 

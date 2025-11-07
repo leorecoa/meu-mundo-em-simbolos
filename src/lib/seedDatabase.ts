@@ -23,7 +23,10 @@ export async function seedDatabase(profileId: number) {
           'preciso': 'rose',
           'comida': 'amber',
           'brincar': 'orange',
-          'casa': 'slate'
+          'casa': 'slate',
+          'escola': 'blue',
+          'familia': 'pink',
+          'animais': 'green'
         };
         
         // Adicionar categoria com cor correta

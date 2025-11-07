@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 import { useTheme } from '@/hooks/useTheme';
 import { getAppSettings, applyVolumeSettings, applyFontSizeSettings, applyAccessibilitySettings } from '@/lib/appSettings';
 import { useSpeech } from '@/hooks/use-speech';
@@ -232,54 +234,75 @@ const AccessibilityButtons = ({ currentTheme }: { currentTheme: any }) => {
 };
 
 // Componente para seleção de idioma
+const VoiceSpeedSlider = ({ currentTheme }: { currentTheme: any }) => {
+  const { toast } = useToast();
+  const { activeProfileId } = useProfile();
+  const [voiceSpeed, setVoiceSpeed] = useState<number>(10);
+
+  useEffect(() => {
+    const loadSpeed = async () => {
+      if (activeProfileId) {
+        const settings = await db.userSettings.where({ profileId: activeProfileId }).first();
+        setVoiceSpeed(settings?.voiceSpeed || 10);
+      }
+    };
+    loadSpeed();
+  }, [activeProfileId]);
+
+  const handleSpeedChange = async (value: number[]) => {
+    const speed = value[0];
+    setVoiceSpeed(speed);
+    
+    if (activeProfileId) {
+      await db.userSettings.where({ profileId: activeProfileId }).modify({ voiceSpeed: speed });
+      
+      toast({
+        title: "Velocidade de voz alterada",
+        description: `Velocidade definida para ${(speed / 10).toFixed(1)}x`,
+        duration: 2000,
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Label className={currentTheme.textColor}>Velocidade da voz</Label>
+        <span className={`text-sm font-medium ${currentTheme.textColor}`}>{(voiceSpeed / 10).toFixed(1)}x</span>
+      </div>
+      <Slider
+        value={[voiceSpeed]}
+        onValueChange={handleSpeedChange}
+        min={5}
+        max={20}
+        step={1}
+        className="w-full"
+      />
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>0.5x (Lento)</span>
+        <span>1.0x (Normal)</span>
+        <span>2.0x (Rápido)</span>
+      </div>
+    </div>
+  );
+};
+
 const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
   const { toast } = useToast();
-  const { getAvailableLanguages, speak } = useSpeech();
-  const [languages, setLanguages] = useState<{code: string, name: string, localName?: string}[]>([]);
+  const { speak } = useSpeech();
+  const [languages] = useState(commonLanguages);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('pt-BR');
   
   useEffect(() => {
-    try {
-      // Obter idiomas disponíveis do sistema
-      const systemLanguages = getAvailableLanguages();
-      
-      // Combinar com idiomas comuns
-      const allLanguages = [...commonLanguages];
-      
-      // Adicionar idiomas do sistema que não estão na lista comum
-      systemLanguages.forEach(sysLang => {
-        if (!allLanguages.some(lang => lang.code === sysLang.code)) {
-          allLanguages.push({
-            code: sysLang.code,
-            name: sysLang.name || sysLang.code
-          });
-        }
-      });
-      
-      // Ordenar idiomas: primeiro português, depois os outros em ordem alfabética
-      allLanguages.sort((a, b) => {
-        if (a.code.startsWith('pt')) return -1;
-        if (b.code.startsWith('pt')) return 1;
-        return a.name.localeCompare(b.name);
-      });
-      
-      setLanguages(allLanguages);
-      
-      // Obter idioma atual das configurações
-      const loadSettings = async () => {
-        const activeProfileId = localStorage.getItem('activeProfileId');
-        if (activeProfileId) {
-          const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
-          setSelectedLanguage(settings?.language || 'pt-BR');
-        }
-      };
-      loadSettings();
-    } catch (error) {
-      console.error('Erro ao carregar idiomas:', error);
-      // Garantir que pelo menos os idiomas comuns estejam disponíveis
-      setLanguages([...commonLanguages]);
-    }
-  }, [getAvailableLanguages]);
+    const loadSettings = async () => {
+      const activeProfileId = localStorage.getItem('activeProfileId');
+      if (activeProfileId) {
+        const settings = await db.userSettings.where({ profileId: parseInt(activeProfileId) }).first();
+        setSelectedLanguage(settings?.language || 'pt-BR');
+      }
+    };
+    loadSettings();
+  }, []);
   
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
@@ -325,7 +348,7 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
                             selectedLanguage.startsWith('fr') ? 'Bonjour, ceci est un test vocal.' :
                             'Test 1, 2, 3.';
             
-            speak(testText, { lang: selectedLanguage });
+            speak(testText);
             
             toast({
               title: "Teste de voz",
@@ -514,14 +537,18 @@ export const Settings = ({ onBack }: SettingsProps) => {
           </div>
         </Card>
 
-        {/* Idioma */}
+        {/* Idioma e Velocidade da Voz */}
         <Card className={`${currentTheme.cardBg || 'bg-white'} p-6`}>
           <div className="flex items-center mb-4">
             <Globe className={`h-6 w-6 ${currentTheme.textColor || 'text-blue-800'} mr-3`} />
-            <h2 className={`text-xl font-semibold ${currentTheme.textColor || 'text-blue-800'}`}>Idioma da voz</h2>
+            <h2 className={`text-xl font-semibold ${currentTheme.textColor || 'text-blue-800'}`}>Idioma e Voz</h2>
           </div>
-          <div className="space-y-3">
-            <LanguageSelector currentTheme={currentTheme} />
+          <div className="space-y-6">
+            <VoiceSpeedSlider currentTheme={currentTheme} />
+            <div className="border-t pt-4">
+              <h3 className={`text-lg font-medium mb-3 ${currentTheme.textColor || 'text-blue-800'}`}>Idioma da voz</h3>
+              <LanguageSelector currentTheme={currentTheme} />
+            </div>
           </div>
         </Card>
 

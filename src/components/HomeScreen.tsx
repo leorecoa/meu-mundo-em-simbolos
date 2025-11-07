@@ -1,4 +1,4 @@
-import { Heart, Users, Smile, Gamepad2, Settings, LineChart, Home, Activity, Trophy, Utensils } from 'lucide-react';
+import { Heart, Users, Smile, Gamepad2, Settings, LineChart, Home, Activity, Trophy, Utensils, GraduationCap, Dog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useTheme } from '@/hooks/use-theme';
@@ -19,6 +19,9 @@ const categoryDetails: { [key: string]: { icon: React.ElementType, description: 
   comida: { icon: Utensils, description: 'Comidas e bebidas.', gradient: 'from-amber-400 via-orange-500 to-yellow-600', shadow: 'shadow-xl shadow-amber-200/50' },
   brincar: { icon: Gamepad2, description: 'Brincadeiras e diversão.', gradient: 'from-orange-400 via-amber-500 to-yellow-500', shadow: 'shadow-xl shadow-orange-200/50' },
   casa: { icon: Home, description: 'Lugares da casa.', gradient: 'from-slate-400 via-gray-500 to-zinc-600', shadow: 'shadow-xl shadow-slate-200/50' },
+  escola: { icon: GraduationCap, description: 'Materiais e rotina escolar.', gradient: 'from-blue-400 via-indigo-500 to-blue-600', shadow: 'shadow-xl shadow-blue-200/50' },
+  familia: { icon: Heart, description: 'Membros da família.', gradient: 'from-pink-400 via-rose-500 to-red-600', shadow: 'shadow-xl shadow-pink-200/50' },
+  animais: { icon: Dog, description: 'Animais e pets.', gradient: 'from-green-400 via-lime-500 to-emerald-600', shadow: 'shadow-xl shadow-green-200/50' },
 };
 
 export const HomeScreen = ({ onNavigateToCategory, onNavigateToPhrase, onNavigateToAnalytics, onNavigateToMyAT, onNavigateToSettings, onNavigateToRewards }: HomeScreenProps) => {
