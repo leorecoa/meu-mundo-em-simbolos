@@ -128,5 +128,51 @@ export const categoryData: CategoryData = {
       { id: 'janela', label: 'JANELA', icon: 'Home' },
       { id: 'luz_casa', label: 'LUZ', icon: 'Lamp' }
     ]
+  },
+
+  // ESCOLA
+  escola: {
+    title: 'ESCOLA',
+    items: [
+      { id: 'lapis', label: 'LÁPIS', icon: 'Pencil' },
+      { id: 'caderno', label: 'CADERNO', icon: 'Book' },
+      { id: 'professor', label: 'PROFESSOR', icon: 'UserCheck' },
+      { id: 'colega', label: 'COLEGA', icon: 'Users' },
+      { id: 'recreio', label: 'RECREIO', icon: 'Gamepad2' },
+      { id: 'estudar', label: 'ESTUDAR', icon: 'BookOpen' },
+      { id: 'livro_escola', label: 'LIVRO', icon: 'Book' },
+      { id: 'mochila', label: 'MOCHILA', icon: 'Backpack' }
+    ]
+  },
+
+  // FAMÍLIA
+  familia: {
+    title: 'FAMÍLIA',
+    items: [
+      { id: 'mamae', label: 'MAMÃE', icon: 'Heart' },
+      { id: 'papai', label: 'PAPAI', icon: 'Heart' },
+      { id: 'irmao', label: 'IRMÃO', icon: 'Users' },
+      { id: 'irma', label: 'IRMÃ', icon: 'Users' },
+      { id: 'avo', label: 'AVÔ', icon: 'HeartHug' },
+      { id: 'avoa', label: 'AVÓ', icon: 'HeartHug' },
+      { id: 'primo', label: 'PRIMO', icon: 'Users' },
+      { id: 'tio', label: 'TIO', icon: 'Users' },
+      { id: 'tia', label: 'TIA', icon: 'Users' }
+    ]
+  },
+
+  // ANIMAIS
+  animais: {
+    title: 'ANIMAIS',
+    items: [
+      { id: 'cachorro', label: 'CACHORRO', icon: 'Dog' },
+      { id: 'gato', label: 'GATO', icon: 'Cat' },
+      { id: 'passaro', label: 'PÁSSARO', icon: 'Bird' },
+      { id: 'peixe', label: 'PEIXE', icon: 'Fish' },
+      { id: 'coelho', label: 'COELHO', icon: 'Rabbit' },
+      { id: 'cavalo', label: 'CAVALO', icon: 'Horse' },
+      { id: 'vaca', label: 'VACA', icon: 'Beef' },
+      { id: 'galinha', label: 'GALINHA', icon: 'Bird' }
+    ]
   }
 };

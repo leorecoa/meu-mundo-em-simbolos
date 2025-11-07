@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { PlayCircle, Trash2, X, ScreenShare, Download, ChevronLeft, Keyboard as KeyboardIcon, Grid3x3, Send, MessageSquarePlus } from 'lucide-react';
+import { PlayCircle, Trash2, X, ScreenShare, Download, ChevronLeft, Send, MessageSquarePlus, Save, History } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Symbol as DbSymbol } from '@/lib/db';
 import { useProfile } from '@/contexts/ProfileContext';
 import * as htmlToImage from 'html-to-image';
 import { SymbolDisplay } from '@/components/ui/SymbolDisplay';
 import { PresentationScreen } from './PresentationScreen';
+import { PhraseHistory } from './PhraseHistory';
 import { useSpeech } from '@/hooks/use-speech';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -27,23 +28,47 @@ const PhraseDisplay = ({ phrase, forwardedRef, onRemoveSymbol, theme }: { phrase
 );
 
 const ActionButtons = (props: any) => (
-    <div className="grid grid-cols-4 gap-2 mb-4">
-        <Button onClick={props.onSpeak} className="h-20 col-span-2 flex-col gap-1 bg-green-500 text-white"><PlayCircle size={28} /><span>Falar</span></Button>
-        <Button onClick={props.onPresent} variant="outline" className="h-20 flex-col gap-1 bg-indigo-500 text-white"><ScreenShare size={24}/><span>Apresentar</span></Button>
-        <Button onClick={props.onExport} variant="outline" className="h-20 flex-col gap-1 bg-sky-500 text-white"><Download size={24}/><span>Exportar</span></Button>
-        <Button onClick={props.onRemoveLast} variant="outline" className="h-16 col-span-2 bg-amber-500 text-white"><X size={20} /><span>Apagar Último</span></Button>
-        <Button onClick={props.onClear} variant="destructive" className="h-16 col-span-2"><Trash2 size={20}/><span>Limpar Tudo</span></Button>
+    <div className="space-y-2 mb-4">
+        <div className="grid grid-cols-4 gap-2">
+            <Button onClick={props.onSpeak} className="h-20 col-span-2 flex-col gap-1 bg-green-500 text-white"><PlayCircle size={28} /><span>Falar</span></Button>
+            <Button onClick={props.onSave} className="h-20 flex-col gap-1 bg-purple-500 text-white"><Save size={24}/><span>Salvar</span></Button>
+            <Button onClick={props.onHistory} className="h-20 flex-col gap-1 bg-indigo-500 text-white"><History size={24}/><span>Histórico</span></Button>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+            <Button onClick={props.onPresent} variant="outline" className="h-16 flex-col gap-1 bg-sky-500 text-white"><ScreenShare size={20}/><span>Apresentar</span></Button>
+            <Button onClick={props.onExport} variant="outline" className="h-16 flex-col gap-1 bg-cyan-500 text-white"><Download size={20}/><span>Exportar</span></Button>
+            <Button onClick={props.onRemoveLast} variant="outline" className="h-16 bg-amber-500 text-white"><X size={18} /><span>Apagar</span></Button>
+            <Button onClick={props.onClear} variant="destructive" className="h-16"><Trash2 size={18}/><span>Limpar</span></Button>
+        </div>
     </div>
 );
 
 const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => void }) => {
     const { activeProfileId } = useProfile();
     const { currentTheme } = useTheme();
+    const [visibleCount, setVisibleCount] = useState(24);
     const symbols = useLiveQuery(() => activeProfileId ? db.symbols.where({ profileId: activeProfileId }).toArray() : [], [activeProfileId]);
+    const visibleSymbols = symbols?.slice(0, visibleCount) || [];
+    const hasMore = (symbols?.length || 0) > visibleCount;
+    
     return (
-        <Card className={currentTheme.cardBg}><CardContent className="p-2 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            {symbols?.map(s => <button key={s.id} onClick={() => onSymbolClick(s)} className={`h-28 rounded-lg ${currentTheme.buttonBg} flex flex-col items-center justify-center p-1 gap-1 text-center ${currentTheme.buttonHover}`}><SymbolDisplay symbol={s} /><span className={`text-xs font-semibold line-clamp-2 ${currentTheme.textColor}`}>{s.text}</span></button>)}
-        </CardContent></Card>
+        <Card className={currentTheme.cardBg}>
+            <CardContent className="p-2 space-y-2">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                    {visibleSymbols.map(s => (
+                        <button key={s.id} onClick={() => onSymbolClick(s)} className={`h-28 rounded-lg ${currentTheme.buttonBg} flex flex-col items-center justify-center p-1 gap-1 text-center ${currentTheme.buttonHover}`}>
+                            <SymbolDisplay symbol={s} />
+                            <span className={`text-xs font-semibold line-clamp-2 ${currentTheme.textColor}`}>{s.text}</span>
+                        </button>
+                    ))}
+                </div>
+                {hasMore && (
+                    <Button onClick={() => setVisibleCount(prev => prev + 24)} className="w-full" variant="outline">
+                        Carregar Mais Símbolos
+                    </Button>
+                )}
+            </CardContent>
+        </Card>
     );
 };
 
@@ -64,6 +89,7 @@ export const PhraseBuilder = ({ onBack, initialSymbolId }: any) => {
     const [currentPhrase, setCurrentPhrase] = useState<DbSymbol[]>(() => { try { const s = localStorage.getItem(phraseStorageKey); return s ? JSON.parse(s) : []; } catch { return []; } });
     const [inputMode, setInputMode] = useState<'symbols' | 'keyboard'>('symbols');
     const [isCasting, setIsCasting] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
     const phraseDisplayRef = useRef<HTMLDivElement>(null);
     const liveRegionRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +137,28 @@ export const PhraseBuilder = ({ onBack, initialSymbolId }: any) => {
         }
     }, [phraseDisplayRef]);
 
+    const handleSavePhrase = useCallback(async () => {
+        if (!activeProfileId || currentPhrase.length === 0) {
+            toast({ title: 'Frase vazia!' });
+            return;
+        }
+        await db.phraseHistory.add({
+            profileId: activeProfileId,
+            phrase: getPhraseText(),
+            symbolIds: JSON.stringify(currentPhrase.map(s => s.id)),
+            timestamp: Date.now()
+        });
+        toast({ title: 'Frase salva no histórico!' });
+    }, [activeProfileId, currentPhrase, getPhraseText, toast]);
+
+    const handleLoadPhrase = useCallback((phrase: DbSymbol[]) => {
+        setCurrentPhrase(phrase);
+    }, []);
+
+    if (showHistory) {
+        return <PhraseHistory onBack={() => setShowHistory(false)} onLoadPhrase={handleLoadPhrase} />;
+    }
+
     return (
         <div className={`p-2 sm:p-4 min-h-screen ${currentTheme.bgColor}`}>
             <div ref={liveRegionRef} aria-live="assertive" className="sr-only"></div>
@@ -121,7 +169,7 @@ export const PhraseBuilder = ({ onBack, initialSymbolId }: any) => {
             </header>
             <main>
                 <PhraseDisplay phrase={currentPhrase} forwardedRef={phraseDisplayRef} onRemoveSymbol={removeSymbol} theme={currentTheme} />
-                <ActionButtons onSpeak={handleSpeak} onRemoveLast={removeLastSymbol} onClear={clearPhrase} onPresent={() => setIsCasting(true)} onExport={handleExport} />
+                <ActionButtons onSpeak={handleSpeak} onSave={handleSavePhrase} onHistory={() => setShowHistory(true)} onRemoveLast={removeLastSymbol} onClear={clearPhrase} onPresent={() => setIsCasting(true)} onExport={handleExport} />
                 <div className="flex justify-center my-4"><div className="inline-flex rounded-md shadow-sm"><Button onClick={() => setInputMode('symbols')} className={`px-3 py-2 ${inputMode === 'symbols' ? currentTheme.buttonBg : 'bg-white/50' }`}>Símbolos</Button><Button onClick={() => setInputMode('keyboard')} className={`px-3 py-2 ${inputMode === 'keyboard' ? currentTheme.buttonBg : 'bg-white/50' }`}>Teclado</Button></div></div>
                 {inputMode === 'symbols' ? <SymbolGrid onSymbolClick={(s) => addSymbol(s)} /> : <NativeKeyboardInput onAddSymbol={(t) => addSymbol(t)} />}
             </main>

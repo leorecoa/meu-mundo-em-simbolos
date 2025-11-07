@@ -22,6 +22,9 @@ const colorMap: { [key: string]: { bg: string, text: string, hover: string, imag
   emerald: { bg: 'bg-gradient-to-br from-emerald-400 to-green-600', text: 'text-white', hover: 'hover:from-emerald-500 hover:to-green-700', imageOverlay: 'from-transparent to-emerald-900/70', shadow: 'shadow-xl shadow-emerald-200/50' },
   orange: { bg: 'bg-gradient-to-br from-orange-400 to-yellow-500', text: 'text-white', hover: 'hover:from-orange-500 hover:to-yellow-600', imageOverlay: 'from-transparent to-orange-900/70', shadow: 'shadow-xl shadow-orange-200/50' },
   slate: { bg: 'bg-gradient-to-br from-slate-400 to-zinc-600', text: 'text-white', hover: 'hover:from-slate-500 hover:to-zinc-700', imageOverlay: 'from-transparent to-slate-900/70', shadow: 'shadow-xl shadow-slate-200/50' },
+  blue: { bg: 'bg-gradient-to-br from-blue-400 to-indigo-600', text: 'text-white', hover: 'hover:from-blue-500 hover:to-indigo-700', imageOverlay: 'from-transparent to-blue-900/70', shadow: 'shadow-xl shadow-blue-200/50' },
+  pink: { bg: 'bg-gradient-to-br from-pink-400 to-rose-600', text: 'text-white', hover: 'hover:from-pink-500 hover:to-rose-700', imageOverlay: 'from-transparent to-pink-900/70', shadow: 'shadow-xl shadow-pink-200/50' },
+  green: { bg: 'bg-gradient-to-br from-green-400 to-lime-600', text: 'text-white', hover: 'hover:from-green-500 hover:to-lime-700', imageOverlay: 'from-transparent to-green-900/70', shadow: 'shadow-xl shadow-green-200/50' },
   default: { bg: 'bg-gradient-to-br from-gray-400 to-gray-600', text: 'text-white', hover: 'hover:from-gray-500 hover:to-gray-700', imageOverlay: 'from-transparent to-gray-900/70', shadow: 'shadow-xl shadow-gray-200/50' }
 };
 
