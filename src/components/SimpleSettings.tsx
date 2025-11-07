@@ -192,39 +192,11 @@ const AccessibilityButtons = ({ currentTheme }: { currentTheme: any }) => {
 // Componente para seleção de idioma
 const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
   const { toast } = useToast();
-  const { getAvailableLanguages, speak } = useSpeech();
-  const [languages, setLanguages] = useState<{code: string, name: string, localName?: string}[]>([]);
+  const { speak } = useSpeech();
+  const [languages] = useState(commonLanguages);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('pt-BR');
   
   useEffect(() => {
-    // Obter idiomas disponíveis do sistema
-    const systemLanguages = getAvailableLanguages ? getAvailableLanguages() : [];
-    
-    // Combinar com idiomas comuns
-    const allLanguages = [...commonLanguages];
-    
-    // Adicionar idiomas do sistema que não estão na lista comum
-    if (systemLanguages && systemLanguages.length > 0) {
-      systemLanguages.forEach(sysLang => {
-        if (!allLanguages.some(lang => lang.code === sysLang.code)) {
-          allLanguages.push({
-            code: sysLang.code,
-            name: sysLang.name || sysLang.code
-          });
-        }
-      });
-    }
-    
-    // Ordenar idiomas: primeiro português, depois os outros em ordem alfabética
-    allLanguages.sort((a, b) => {
-      if (a.code.startsWith('pt')) return -1;
-      if (b.code.startsWith('pt')) return 1;
-      return a.name.localeCompare(b.name);
-    });
-    
-    setLanguages(allLanguages);
-    
-    // Obter idioma atual das configurações
     const loadSettings = async () => {
       const activeProfileId = localStorage.getItem('activeProfileId');
       if (activeProfileId) {
@@ -233,7 +205,7 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
       }
     };
     loadSettings();
-  }, [getAvailableLanguages]);
+  }, []);
   
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
@@ -264,9 +236,7 @@ const LanguageSelector = ({ currentTheme }: { currentTheme: any }) => {
                           selectedLanguage.startsWith('fr') ? 'Bonjour, ceci est un test vocal.' :
                           'Test 1, 2, 3.';
           
-          if (speak) {
-            speak(testText, { lang: selectedLanguage });
-          }
+          speak(testText);
           
           toast({
             title: "Teste de voz",
