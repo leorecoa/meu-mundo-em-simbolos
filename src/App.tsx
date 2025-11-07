@@ -14,7 +14,7 @@ import Index from './pages/Index';
 
 import { ProfileProvider, useProfile } from './contexts/ProfileContext';
 import { ThemeProvider } from './hooks/useTheme';
-import { useAppInitializer } from '@/components/AppInitializer'; // CORRIGIDO
+import { useAppInitializer } from '@/components/AppInitializer';
 
 const queryClient = new QueryClient();
 
@@ -42,28 +42,21 @@ function AppContent() {
   };
 
   if (error) {
-    return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-red-800 text-white p-4">
-        <h1 className="text-2xl font-bold mb-4">Erro ao carregar aplicação</h1>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-white text-red-800 rounded">
-          Tentar novamente
-        </button>
-      </div>
-    );
+    return <div className="h-screen w-full flex items-center justify-center bg-red-800 text-white">{error}</div>;
   }
 
   if (!isInitialized) {
-    return <SplashScreen onComplete={() => {}} />;
+    return <SplashScreen />;
   }
 
   if (!activeProfileId) {
     return <ProfileScreen onProfileSelect={setActiveProfileId} />;
   }
 
+  // O ThemeProvider DEVE estar aqui para que Index e OnboardingGuide tenham acesso ao tema
   return (
     <ThemeProvider>
-      <Suspense fallback={<SplashScreen onComplete={() => {}} />}>
+      <Suspense fallback={<SplashScreen/>}>
         <Index />
         {showOnboarding && <OnboardingGuide onComplete={handleOnboardingComplete} />}
       </Suspense>
@@ -73,7 +66,7 @@ function AppContent() {
 
 function App() {
   return (
-    <ErrorBoundary>
+    <ErrorBoundary fallback={<div className='w-screen h-screen flex justify-center items-center'>Ocorreu um erro inesperado.</div>}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <ProfileProvider>
