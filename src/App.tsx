@@ -66,7 +66,7 @@ function AppContent() {
 
 function App() {
   return (
-    <ErrorBoundary fallback={<div className='w-screen h-screen flex justify-center items-center'>Ocorreu um erro inesperado.</div>}>
+    <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <ProfileProvider>

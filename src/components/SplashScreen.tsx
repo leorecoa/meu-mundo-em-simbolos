@@ -2,15 +2,17 @@ import { useEffect } from 'react';
 import { AnimatedInfinitySymbol } from './AnimatedInfinitySymbol';
 
 interface SplashScreenProps {
-  onComplete: () => void;
+  onComplete?: () => void;
 }
 
-export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
+export const SplashScreen = ({ onComplete }: SplashScreenProps = {}) => {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onComplete();
-    }, 3500);
-    return () => clearTimeout(timer);
+    if (onComplete) {
+      const timer = setTimeout(() => {
+        onComplete();
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
   }, [onComplete]);
 
   return (
