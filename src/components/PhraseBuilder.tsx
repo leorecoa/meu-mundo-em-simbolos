@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { PlayCircle, Trash2, X, ScreenShare, Download, ChevronLeft, Send, MessageSquarePlus, Save, History } from 'lucide-react';
+import { PlayCircle, Trash2, X, ScreenShare, Download, ChevronLeft, Send, MessageSquarePlus, Save, History, Heart, Users, Smile, Gamepad2, Home, GraduationCap, Dog, Utensils } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Symbol as DbSymbol } from '@/lib/db';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -43,11 +43,17 @@ const ActionButtons = (props: any) => (
     </div>
 );
 
-const SymbolGrid = ({ onSymbolClick }: { onSymbolClick: (symbol: DbSymbol) => void }) => {
+const SymbolGrid = ({ onSymbolClick, categoryFilter }: { onSymbolClick: (symbol: DbSymbol) => void; categoryFilter: string | null }) => {
     const { activeProfileId } = useProfile();
     const { currentTheme } = useTheme();
     const [visibleCount, setVisibleCount] = useState(24);
-    const symbols = useLiveQuery(() => activeProfileId ? db.symbols.where({ profileId: activeProfileId }).toArray() : [], [activeProfileId]);
+    const symbols = useLiveQuery(() => {
+        if (!activeProfileId) return [];
+        if (categoryFilter) {
+            return db.symbols.where({ profileId: activeProfileId, categoryKey: categoryFilter }).toArray();
+        }
+        return db.symbols.where({ profileId: activeProfileId }).toArray();
+    }, [activeProfileId, categoryFilter]);
     const visibleSymbols = symbols?.slice(0, visibleCount) || [];
     const hasMore = (symbols?.length || 0) > visibleCount;
     
@@ -90,6 +96,7 @@ export const PhraseBuilder = ({ onBack, initialSymbolId }: any) => {
     const [inputMode, setInputMode] = useState<'symbols' | 'keyboard'>('symbols');
     const [isCasting, setIsCasting] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const phraseDisplayRef = useRef<HTMLDivElement>(null);
     const liveRegionRef = useRef<HTMLDivElement>(null);
 
@@ -171,7 +178,61 @@ export const PhraseBuilder = ({ onBack, initialSymbolId }: any) => {
                 <PhraseDisplay phrase={currentPhrase} forwardedRef={phraseDisplayRef} onRemoveSymbol={removeSymbol} theme={currentTheme} />
                 <ActionButtons onSpeak={handleSpeak} onSave={handleSavePhrase} onHistory={() => setShowHistory(true)} onRemoveLast={removeLastSymbol} onClear={clearPhrase} onPresent={() => setIsCasting(true)} onExport={handleExport} />
                 <div className="flex justify-center my-4"><div className="inline-flex rounded-md shadow-sm"><Button onClick={() => setInputMode('symbols')} className={`px-3 py-2 ${inputMode === 'symbols' ? currentTheme.buttonBg : 'bg-white/50' }`}>Símbolos</Button><Button onClick={() => setInputMode('keyboard')} className={`px-3 py-2 ${inputMode === 'keyboard' ? currentTheme.buttonBg : 'bg-white/50' }`}>Teclado</Button></div></div>
-                {inputMode === 'symbols' ? <SymbolGrid onSymbolClick={(s) => addSymbol(s)} /> : <NativeKeyboardInput onAddSymbol={(t) => addSymbol(t)} />}
+                
+                {inputMode === 'symbols' && (
+                    <Card className="mb-4">
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <h3 className="font-bold text-lg">Categorias:</h3>
+                                {selectedCategory && (
+                                    <Button onClick={() => setSelectedCategory(null)} size="sm" variant="outline">
+                                        Limpar Filtro
+                                    </Button>
+                                )}
+                            </div>
+                            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                <Button onClick={() => setSelectedCategory('quero')} className={`h-20 flex-col gap-1 ${selectedCategory === 'quero' ? 'bg-gradient-to-br from-sky-400 to-blue-600 text-white' : 'bg-sky-50 text-sky-700 hover:bg-sky-100'}`}>
+                                    <Heart className="h-5 w-5" />
+                                    <span className="text-xs font-bold">QUERO</span>
+                                </Button>
+                                <Button onClick={() => setSelectedCategory('sinto')} className={`h-20 flex-col gap-1 ${selectedCategory === 'sinto' ? 'bg-gradient-to-br from-emerald-400 to-green-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
+                                    <Smile className="h-5 w-5" />
+                                    <span className="text-xs font-bold">SINTO</span>
+                                </Button>
+                                <Button onClick={() => setSelectedCategory('preciso')} className={`h-20 flex-col gap-1 ${selectedCategory === 'preciso' ? 'bg-gradient-to-br from-rose-400 to-red-600 text-white' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'}`}>
+                                    <Users className="h-5 w-5" />
+                                    <span className="text-xs font-bold">PRECISO</span>
+                                </Button>
+                                <Button onClick={() => setSelectedCategory('comida')} className={`h-20 flex-col gap-1 ${selectedCategory === 'comida' ? 'bg-gradient-to-br from-amber-400 to-yellow-600 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}>
+                                    <Utensils className="h-5 w-5" />
+                                    <span className="text-xs font-bold">COMIDA</span>
+                                </Button>
+                                <Button onClick={() => setSelectedCategory('brincar')} className={`h-20 flex-col gap-1 ${selectedCategory === 'brincar' ? 'bg-gradient-to-br from-orange-400 to-yellow-500 text-white' : 'bg-orange-50 text-orange-700 hover:bg-orange-100'}`}>
+                                    <Gamepad2 className="h-5 w-5" />
+                                    <span className="text-xs font-bold">BRINCAR</span>
+                                </Button>
+                                <Button onClick={() => setSelectedCategory('casa')} className={`h-20 flex-col gap-1 ${selectedCategory === 'casa' ? 'bg-gradient-to-br from-slate-400 to-zinc-600 text-white' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}>
+                                    <Home className="h-5 w-5" />
+                                    <span className="text-xs font-bold">CASA</span>
+                                </Button>
+                                <Button onClick={() => setSelectedCategory('escola')} className={`h-20 flex-col gap-1 ${selectedCategory === 'escola' ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}>
+                                    <GraduationCap className="h-5 w-5" />
+                                    <span className="text-xs font-bold">ESCOLA</span>
+                                </Button>
+                                <Button onClick={() => setSelectedCategory('familia')} className={`h-20 flex-col gap-1 ${selectedCategory === 'familia' ? 'bg-gradient-to-br from-pink-400 to-red-600 text-white' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'}`}>
+                                    <Heart className="h-5 w-5" />
+                                    <span className="text-xs font-bold">FAMÍLIA</span>
+                                </Button>
+                                <Button onClick={() => setSelectedCategory('animais')} className={`h-20 flex-col gap-1 ${selectedCategory === 'animais' ? 'bg-gradient-to-br from-green-400 to-emerald-600 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}>
+                                    <Dog className="h-5 w-5" />
+                                    <span className="text-xs font-bold">ANIMAIS</span>
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+                
+                {inputMode === 'symbols' ? <SymbolGrid onSymbolClick={(s) => addSymbol(s)} categoryFilter={selectedCategory} /> : <NativeKeyboardInput onAddSymbol={(t) => addSymbol(t)} />}
             </main>
             {isCasting && <PresentationScreen phrase={getPhraseText()} onClose={() => setIsCasting(false)} />}
         </div>
